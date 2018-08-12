@@ -5,10 +5,60 @@
 # See documentation in:
 # https://doc.scrapy.org/en/latest/topics/items.html
 
+# Import scrapy
 import scrapy
 
-
-class GmaScrapeItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+class NREGAItem(scrapy.Item):
+    
+    # Table fields
+    block_name = scrapy.Field()
+    
+    total_fto = scrapy.Field()
+         
+    first_sign = scrapy.Field()
+    
+    first_sign_pending = scrapy.Field() 
+    
+    second_sign = scrapy.Field() 
+    
+    second_sign_pending = scrapy.Field() 
+    
+    fto_sent_bank = scrapy.Field() 
+    
+    transact_sent_bank = scrapy.Field() 
+    
+    fto_processed_bank = scrapy.Field()
+    
+    transact_processed_bank = scrapy.Field()
+    
+    fto_partial_bank = scrapy.Field()
+    
+    transact_partial_bank = scrapy.Field()
+    
+    fto_pending_bank = scrapy.Field()
+    
+    transact_pending_bank = scrapy.Field()
+    
+    transact_processed_bank_resp = scrapy.Field()
+    
+    invalid_accounts_bank_resp = scrapy.Field() 
+    
+    transact_rejected_bank_resp = scrapy.Field() 
+    
+    transact_total_bank_resp = scrapy.Field()
+    
+    # Housekeeping fields
+    url = scrapy.Field()
+    
+    spider = scrapy.Field() 
+    
+    server = scrapy.Field() 
+    
+    date = scrapy.Field() 
+    
+    
+    
+    
+    
+   
+    
