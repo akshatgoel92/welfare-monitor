@@ -14,14 +14,11 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.loader.processors import MapCompose, Join
 from scrapy.loader import ItemLoader
 from scrapy.http import Request
-from nrega.items import NREGAItem
+from gma_scrape.items import NREGAItem
 
 class FtoSpider(CrawlSpider):
     '''Input: MNREGA FTO URL 
-      Output: Scraped FTO summary statistics
-    '''
-    
-    #urls = table.xpath('*//a//@href').extract()
+      Output: Scraped FTO summary statistics'''
     
     # Spider name
     name = 'fto_spider'
@@ -34,17 +31,18 @@ class FtoSpider(CrawlSpider):
     meta = '&dstyp=B&source=national&Digest=tuhEXy+HR52YT8lJYijdtw'
     
     start_urls = [basic + inputs + meta]
-    		        					
+     		        					
     def parse(self, response):
     	
     	# Create an item object	
     	item = NREGAItem()
     
-    	# Get data and store it in a table
+    	# Get table
     	tables = response.xpath('//table')
     	
-    	table = tables[4] 
-    	
+    	table = tables[4]
+    	    	
+    	# Get the data from the table
     	table_data = [table.xpath('*/td[' + str(col) + ']//text()').extract() for col in range(21)]
     	
     	table_data = [MapCompose(lambda s: s.replace("\r\n", ''), str.strip)(col) for col in table_data]
@@ -107,4 +105,26 @@ class FtoSpider(CrawlSpider):
     	
     		yield(item)
     		
+    	# Now follow the URLs
+    	urls = table.xpath('*//a//@href').extract()
+    	
+    	for url in urls:
+    		
+    		yield(response.follow(url, self.parse_fto_list))
+    
+    def parse_fto_summary(self, response):
+    	
+    	
+    	    	    		
+    def parse_fto_list(self, response):
+    	
+    	# Print the URL
+    	print(response.url)
+    	
+    	# Store table
+    	table = response.xpath('//table') [-1]
+    	   
+    	return(None)
+    	
+	    		
     		
