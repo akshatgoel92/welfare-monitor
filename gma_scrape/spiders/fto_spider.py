@@ -31,18 +31,20 @@ class FtoSpider(CrawlSpider):
     meta = '&dstyp=B&source=national&Digest=tuhEXy+HR52YT8lJYijdtw'
     
     start_urls = [basic + inputs + meta]
-     		        					
-    def parse(self, response):
-    	
-    	# Create an item object	
-    	item = NREGAItem()
     
+    # Get table
+    def get_table(self, response):
+    	
     	# Get table
     	tables = response.xpath('//table')
     	
-    	table = tables[4]
-    	    	
-    	# Get the data from the table
+    	table = tables[-1]
+    	
+    	return(table)
+    
+    # Get the data from the table
+    def get_summary_data(table):
+    	
     	table_data = [table.xpath('*/td[' + str(col) + ']//text()').extract() for col in range(21)]
     	
     	table_data = [MapCompose(lambda s: s.replace("\r\n", ''), str.strip)(col) for col in table_data]
@@ -55,7 +57,27 @@ class FtoSpider(CrawlSpider):
     	
     	table_data = table_data.iloc[1:-1,1:-1]
     	
-    	# Populate item for each row
+    	return(table_data)
+    
+    # Parse the response	        					
+    def parse(self, response):
+    	
+    	table = self.get_table(response)
+    
+    	yield(self.parse_fto_summary(table, response))
+    	
+    	for url in table.xpath('*//a//@href').extract():
+    		
+    		yield(response.follow(url, self.parse_fto_list))
+    		
+    		
+    # Parse the FTO summary table
+    def parse_fto_summary(self, table, response):
+    	
+    	table_data = get_summary_data(table)
+    		
+    	item = NREGAItem()
+        	
     	for row in table_data.index:
     		
     		item['block_name'] = table_data.loc[row ,1]
@@ -94,7 +116,6 @@ class FtoSpider(CrawlSpider):
     
     		item['transact_total_bank_resp'] = table_data.loc[row, 18]
     	
-    		# Housekeeping fields
     		item['url'] = self.basic
     		
     		item['spider'] = self.name
@@ -104,26 +125,15 @@ class FtoSpider(CrawlSpider):
     		item['date'] = str(datetime.datetime.now()) 
     	
     		yield(item)
-    		
-    	# Now follow the URLs
-    	urls = table.xpath('*//a//@href').extract()
-    	
-    	for url in urls:
-    		
-    		yield(response.follow(url, self.parse_fto_list))
     
-    def parse_fto_summary(self, response):
-    	
-    	
-    	    	    		
+    # Get FTO numbers		    		
     def parse_fto_list(self, response):
-    	
-    	# Print the URL
-    	print(response.url)
-    	
-    	# Store table
+    	    	
     	table = response.xpath('//table') [-1]
-    	   
+    	
+    	table_data = 
+    	
+    	# Get FTO numbers
     	return(None)
     	
 	    		
