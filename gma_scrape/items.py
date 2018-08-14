@@ -54,11 +54,14 @@ class NREGAItem(scrapy.Item):
     
     server = scrapy.Field() 
     
-    date = scrapy.Field() 
+    date = scrapy.Field()
     
     
-    
-    
-    
-   
-    
+class FTO_number():
+	
+	# These are scraped FTO numbers
+	block_name = scrapy.Field()
+	
+	fto_number = scrapy.Field()
+	
+	
