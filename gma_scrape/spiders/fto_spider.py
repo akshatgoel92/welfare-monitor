@@ -4,10 +4,12 @@
 import scrapy
 import datetime
 import socket
+import re
 import pandas as pd
 import numpy as np
 
 # Import sub-modules
+from itertools import chain
 from scrapy import Spider
 from scrapy.contrib.spiders import CrawlSpider
 from scrapy.linkextractors import LinkExtractor
@@ -15,7 +17,9 @@ from scrapy.loader.processors import MapCompose, Join
 from scrapy.loader import ItemLoader
 from scrapy.http import Request
 from gma_scrape.items import NREGAItem
+from gma_scrape.items import FTONo
 
+# Spider class
 class FtoSpider(CrawlSpider):
     '''Input: MNREGA FTO URL 
       Output: Scraped FTO summary statistics'''
@@ -32,18 +36,33 @@ class FtoSpider(CrawlSpider):
     
     start_urls = [basic + inputs + meta]
     
+        # Parse the response	        					
+    def parse(self, response):
+    	
+    	# Get table
+    	table = self.get_table(response)
+    	
+    	# Scrape table data
+    	yield(self.parse_fto_summary(response))
+    	
+    	# Get URLs in table
+    	for url in table.xpath('*//a//@href').extract():
+    		
+    		# Get FTO numbers in URLs
+    		yield(response.follow(url, self.parse_fto_list))   
+    
     # Get table
     def get_table(self, response):
     	
     	# Get table
     	tables = response.xpath('//table')
     	
-    	table = tables[-1]
+    	table = tables[4]
     	
     	return(table)
     
     # Get the data from the table
-    def get_summary_data(table):
+    def get_summary_data(self, table):
     	
     	table_data = [table.xpath('*/td[' + str(col) + ']//text()').extract() for col in range(21)]
     	
@@ -59,22 +78,10 @@ class FtoSpider(CrawlSpider):
     	
     	return(table_data)
     
-    # Parse the response	        					
-    def parse(self, response):
-    	
-    	table = self.get_table(response)
-    
-    	yield(self.parse_fto_summary(table, response))
-    	
-    	for url in table.xpath('*//a//@href').extract():
-    		
-    		yield(response.follow(url, self.parse_fto_list))
-    		
-    		
     # Parse the FTO summary table
-    def parse_fto_summary(self, table, response):
+    def parse_fto_summary(self, response):
     	
-    	table_data = get_summary_data(table)
+    	table_data = self.get_summary_data(table)
     		
     	item = NREGAItem()
         	
@@ -126,15 +133,61 @@ class FtoSpider(CrawlSpider):
     	
     		yield(item)
     
+    def get_fto_data(self, response):
+    	
+    	fto_pattern = re.compile('(\d{2})(\d{2})(\d{3})_(\d*)\D{0,4}FTO')
+    	    	
+    	fto_nos = response.xpath('*//a/text()').extract()
+    	
+    	fto_nos = [fto_no for fto_no in fto_nos if 'FTO' in fto_no]
+    	
+    	fto_scraped = pd.DataFrame([ ])
+    	
+    	if len(fto_nos) > 0:
+    	
+    		fto_info = pd.DataFrame([chain.from_iterable(re.findall(fto_pattern, fto_no)) for fto_no in fto_nos])
+    		
+    		fto_nos = pd.DataFrame(fto_nos)
+    		
+    		fto_nos.columns = ['0']
+    	
+    		fto_info.columns = ['1', '2', '3', '4'] 
+    		
+    		fto_scraped = pd.concat([fto_nos, fto_info], axis = 1)
+    		
+    	return(fto_scraped)   	
+    	
     # Get FTO numbers		    		
     def parse_fto_list(self, response):
-    	    	
-    	table = response.xpath('//table') [-1]
     	
-    	table_data = 
+    	item = FTONo()
     	
-    	# Get FTO numbers
-    	return(None)
+    	fto_scraped = self.get_fto_data(response)
     	
-	    		
+    	fto_stage = response.xpath('//*[@id="ctl00_ContentPlaceHolder1_lblHeader"]//text()').extract()
+    	
+    	if len(fto_scraped) > 0:
+    	
+    		for row in fto_scraped.index:	
     		
+    			item['fto_no'] = fto_scraped.loc[row, '0']
+    		
+    			item['state_code'] = fto_scraped.loc[row, '1']
+    		
+    			item['district_code'] = fto_scraped.loc[row, '2']
+    		
+    			item['block_code'] = fto_scraped.loc[row, '3']
+    		
+    			item['process_date'] = fto_scraped.loc[row, '4']
+    		
+    			item['url'] = self.basic
+    		
+    			item['spider'] = self.name
+    
+    			item['server'] = socket.gethostname()
+    
+    			item['date'] = str(datetime.datetime.now())
+    			
+    			item['fto_stage'] = fto_stage
+    		
+    			yield(item)
