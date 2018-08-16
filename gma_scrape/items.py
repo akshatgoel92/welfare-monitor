@@ -57,11 +57,29 @@ class NREGAItem(scrapy.Item):
     date = scrapy.Field()
     
     
-class FTO_number():
+class FTONo(scrapy.Item):
 	
 	# These are scraped FTO numbers
-	block_name = scrapy.Field()
+	fto_no = scrapy.Field()
 	
-	fto_number = scrapy.Field()
+	fto_stage = scrapy.Field()
+	
+	state_code = scrapy.Field()
+	
+	district_code = scrapy.Field()
+	
+	block_code = scrapy.Field()
+	
+	process_date = scrapy.Field()
+	
+	# Housekeeping fields
+	url = scrapy.Field()
+	
+	spider = scrapy.Field()
+	
+	server = scrapy.Field()
+	
+	date = scrapy.Field()
+	
 	
 	
