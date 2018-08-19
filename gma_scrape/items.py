@@ -80,6 +80,51 @@ class FTONo(scrapy.Item):
 	server = scrapy.Field()
 	
 	date = scrapy.Field()
+
+	
+class FtoItem(scrapy.Item):
+    
+    # Data fields
+    block_name = scrapy.Field()
+    
+    jcn = scrapy.Field()
+    
+    transact_ref_no = scrapy.Field()
+    
+    transact_date = scrapy.Field()
+    
+    app_name = scrapy.Field()
+    
+    prmry_acc_holder_name = scrapy.Field()
+    
+    wage_list_no = scrapy.Field()
+    
+    acc_no = scrapy.Field()
+    
+    bank_code = scrapy.Field()
+    
+    ifsc_code = scrapy.Field()
+    
+    credit_amt_due = scrapy.Field()
+    
+    credit_amt_actual = scrapy.Field()
+    
+    status = scrapy.Field()
+    
+    processed_date = scrapy.Field()
+    
+    utr_no = scrapy.Field()
+    
+    rejection_reason = scrapy.Field()
+    
+    # Housekeeping fields
+    server = scrapy.Field()
+    
+    fto_no = scrapy.Field()
+    
+    scrape_date = scrapy.Field()
+    
+    time_taken = scrapy.Field()
 	
 	
 	
