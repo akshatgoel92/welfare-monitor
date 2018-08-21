@@ -10,6 +10,7 @@
 from scrapy.contrib.exporter import CsvItemExporter
 from gma_scrape.items import NREGAItem
 from gma_scrape.items import FTONo
+from gma_scrape.items import FTOItem
 
 # FTO number pipe-line   	
 class FTOSummaryPipeline(object):
@@ -58,6 +59,26 @@ class FTONoPipeline(object):
    		if isinstance(item, FTONo):
    			
    			self.exporter.export_item(item)
+   		
+   		return(item)
+ 		
+class FTOContentPipeline(object):
+   		
+	def process_item(self, item, spider):
+   		
+   		if isinstance(item, FTOItem):
+   			
+   			self.file = open(item['fto_no'] + '.csv', 'w+b')
+   			
+   			self.exporter = CsvItemExporter(self.file)
+   			
+   			self.exporter.start_exporting()
+   			
+   			self.exporter.export_item(item)
+   			
+   			self.exporter.finish_exporting()
+   			
+   			self.file.close()
    		
    		return(item)
 	
