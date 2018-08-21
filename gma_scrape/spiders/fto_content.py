@@ -36,9 +36,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
+from datetime import date, timedelta
 
 # Item class
-from gma_scrape.items import FtoItem
+from gma_scrape.items import FTOItem
 
 
 # FTO Scraping class
@@ -51,7 +52,21 @@ class FtoContentSpider(scrapy.Spider):
     
     path_to_chrome_driver = "/Users/Akshat/Documents/code/software/chromedriver"
     
-    fto_nos = pd.read_csv("/Users/Akshat/Desktop/fto_numbers.csv")['fto_no'].values.tolist()
+    window = 7
+    
+    stage = 'FTO Pending at First Signatory'
+    
+    end_date = np.datetime64(date.today())
+    
+    start_date = np.datetime64(end_date - window)
+    
+    parser = lambda x: pd.datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
+    
+    fto_nos = pd.read_csv("/Users/Akshat/Desktop/fto_numbers.csv", parse_dates=['process_date'], date_parser = parser)
+    
+    fto_target = (fto_nos['process_date'] > start_date) & (fto_nos['process_date'] < end_date) & (fto_nos['fto_stage'] == stage)
+    
+    fto_nos = fto_nos.loc[fto_target]['fto_no'].values.tolist()
     
     start_urls = []
     
@@ -67,22 +82,17 @@ class FtoContentSpider(scrapy.Spider):
     	url = basic + "fto_no=" + fto_no + "&fin_year=" + fin_year + "&state_code=" + state_code
     	
     	start_urls.append(url)
-    	   
-    # Initialize
-    def __init__(self):
-    	
-    	self.driver = webdriver.Chrome(self.path_to_chrome_driver)
     
     # Get Scrapy selector object for the file
     def get_source(self, response):
     	
-    	driver = self.driver
+    	driver = webdriver.Chrome(self.path_to_chrome_driver)
     	
     	driver.get(response.url)
     	
     	time.sleep(4)
     	 
-    	fto_drop_down = Select(self.driver.find_element_by_css_selector("#ctl00_ContentPlaceHolder1_Ddfto"))
+    	fto_drop_down = Select(driver.find_element_by_css_selector("#ctl00_ContentPlaceHolder1_Ddfto"))
     	
     	time.sleep(3)
     	
@@ -90,7 +100,7 @@ class FtoContentSpider(scrapy.Spider):
     	
     	time.sleep(4)
     	
-    	page_source = self.driver.page_source
+    	page_source = driver.page_source
     	
     	page_source = Selector(text = page_source)
     	
@@ -99,7 +109,7 @@ class FtoContentSpider(scrapy.Spider):
     # Get the response and parse it 	
     def parse(self, response):
     	 
-    	item = FtoItem()
+    	item = FTOItem()
     	
     	source = self.get_source(response)
     	

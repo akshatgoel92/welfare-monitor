@@ -17,6 +17,7 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.loader.processors import MapCompose, Join
 from scrapy.loader import ItemLoader
 from scrapy.http import Request
+from dateutil.parser import parse
 from gma_scrape.items import NREGAItem
 from gma_scrape.items import FTONo
 
@@ -54,7 +55,7 @@ class FtoSpider(CrawlSpider):
     # Parse the response	        					
     def parse(self, response):
     
-    	tables = response.xpath('//table')[-1]
+    	table = response.xpath('//table')[-1]
     	
     	urls = table.xpath('*//a//@href').extract()
     	
@@ -134,7 +135,7 @@ class FtoSpider(CrawlSpider):
     # Get FTO content
     def get_fto_data(self, response):
     	
-    	fto_pattern = re.compile('(\d{2})(\d{2})(\d{3})_(\d*)\D{0,4}FTO')
+    	fto_pattern = re.compile('(\d{2})(\d{2})(\d{3})_(\d{6})\D{0,4}FTO')
     	    	
     	fto_nos = response.xpath('*//a/text()').extract()
     	
@@ -163,7 +164,7 @@ class FtoSpider(CrawlSpider):
     	
     	fto_scraped = self.get_fto_data(response)
     	
-    	fto_stage = response.xpath('//*[@id="ctl00_ContentPlaceHolder1_lblHeader"]//text()').extract()
+    	fto_stage = response.xpath('//*[@id="ctl00_ContentPlaceHolder1_lblHeader"]//text()').extract_first().strip()
     	
     	if len(fto_scraped) > 0:
     	
@@ -177,7 +178,7 @@ class FtoSpider(CrawlSpider):
     		
     			item['block_code'] = fto_scraped.loc[row, '3']
     		
-    			item['process_date'] = fto_scraped.loc[row, '4']
+    			item['process_date'] = parse(fto_scraped.loc[row, '4'])
     		
     			item['url'] = self.basic
     		
