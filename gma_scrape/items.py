@@ -82,7 +82,7 @@ class FTONo(scrapy.Item):
 	date = scrapy.Field()
 
 	
-class FtoItem(scrapy.Item):
+class FTOItem(scrapy.Item):
     
     # Data fields
     block_name = scrapy.Field()
