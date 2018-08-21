@@ -66,7 +66,8 @@ ROBOTSTXT_OBEY = True
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'gma_scrape.pipelines.FTOSummaryPipeline': 300,
-    'gma_scrape.pipelines.FTONoPipeline': 800
+    'gma_scrape.pipelines.FTONoPipeline': 800,
+    'gma_scrape.pipelines.FTOContentPipeline': 1000
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
