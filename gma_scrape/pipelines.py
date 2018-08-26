@@ -5,8 +5,8 @@
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 
-
 # Import packages
+import os
 from scrapy.contrib.exporter import CsvItemExporter
 from gma_scrape.items import NREGAItem
 from gma_scrape.items import FTONo
@@ -17,17 +17,21 @@ class FTOSummaryPipeline(object):
 	
 	def open_spider(self, spider):
 		
-		self.file = open('fto_summary.csv', 'w+b')
+		if spider.name == 'fto_stats':
+	
+			self.file = open('fto_summary.csv', 'w+b')
 		
-		self.exporter = CsvItemExporter(self.file)
+			self.exporter = CsvItemExporter(self.file)
 		
-		self.exporter.start_exporting()
+			self.exporter.start_exporting()
 	
 	def close_spider(self, spider):
+	
+		if spider.name == 'fto_stats':
    		
-   		self.exporter.finish_exporting()
+   			self.exporter.finish_exporting()
    		
-   		self.file.close()
+   			self.file.close()
 
 	def process_item(self, item, spider):
    		
@@ -41,18 +45,22 @@ class FTOSummaryPipeline(object):
 class FTONoPipeline(object):
 	
 	def open_spider(self, spider):
+	
+		if spider.name == 'fto_stats':
 		
-		self.file = open('fto_numbers.csv', 'w+b')
+			self.file = open('fto_numbers.csv', 'w+b')
 		
-		self.exporter = CsvItemExporter(self.file)
+			self.exporter = CsvItemExporter(self.file)
 		
-		self.exporter.start_exporting()
+			self.exporter.start_exporting()
 	
 	def close_spider(self, spider):
    		
-   		self.exporter.finish_exporting()
+   		if spider.name == 'fto_stats':
    		
-   		self.file.close()
+   			self.exporter.finish_exporting()
+   		
+   			self.file.close()
    		
 	def process_item(self, item, spider):
    		
@@ -61,27 +69,36 @@ class FTONoPipeline(object):
    			self.exporter.export_item(item)
    		
    		return(item)
- 		
+   		
+# FTO Content Processor		
 class FTOContentPipeline(object):
-   		
+	
+	def open_spider(self, spider):
+	
+		if spider.name == 'fto_content':
+		
+			self.file = open('fto_content.csv', 'w+b')
+			
+			self.exporter = CsvItemExporter(self.file)
+			
+			self.exporter.start_exporting()
+		
+	def close_spider(self, spider):
+	
+		if spider_name == 'fto_content':
+		
+			self.exporter.finish_exporting()
+			
+			self.file.close()
+
 	def process_item(self, item, spider):
-   		
-   		if isinstance(item, FTOItem):
-   			
-   			self.file = open(item['fto_no'] + '.csv', 'w+b')
-   			
-   			self.exporter = CsvItemExporter(self.file)
-   			
-   			self.exporter.start_exporting()
-   			
-   			self.exporter.export_item(item)
-   			
-   			self.exporter.finish_exporting()
-   			
-   			self.file.close()
-   		
-   		return(item)
 	
-	
+		if isinstance(item, FTOItem):
+		
+			self.exporter.export_item(item)
+			
+		return(item)
+		
+
     	
 	
