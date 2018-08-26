@@ -8,9 +8,9 @@
 # Import packages
 import os
 from scrapy.contrib.exporter import CsvItemExporter
-from gma_scrape.items import NREGAItem
-from gma_scrape.items import FTONo
-from gma_scrape.items import FTOItem
+from nrega_scrape.items import NREGAItem
+from nrega_scrape.items import FTONo
+from nrega_scrape.items import FTOItem
 
 # FTO number pipe-line   	
 class FTOSummaryPipeline(object):

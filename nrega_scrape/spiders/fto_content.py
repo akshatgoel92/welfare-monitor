@@ -40,7 +40,7 @@ from selenium.webdriver.support.ui import Select
 from datetime import date, timedelta
 
 # Item class
-from gma_scrape.items import FTOItem
+from nrega_scrape.items import FTOItem
 
 # FTO Scraping class
 class FtoContentSpider(scrapy.Spider):

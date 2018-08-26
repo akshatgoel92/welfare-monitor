@@ -18,8 +18,8 @@ from scrapy.loader.processors import MapCompose, Join
 from scrapy.loader import ItemLoader
 from scrapy.http import Request
 from dateutil.parser import parse
-from gma_scrape.items import NREGAItem
-from gma_scrape.items import FTONo
+from nrega_scrape.items import NREGAItem
+from nrega_scrape.items import FTONo
 
 # Spider class
 class FtoSpider(CrawlSpider):
