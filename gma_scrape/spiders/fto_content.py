@@ -21,6 +21,7 @@ import datetime
 import time
 import socket
 import re
+import os
 import pandas as pd
 import numpy as np
 
@@ -41,7 +42,6 @@ from datetime import date, timedelta
 # Item class
 from gma_scrape.items import FTOItem
 
-
 # FTO Scraping class
 class FtoContentSpider(scrapy.Spider):
     
@@ -50,39 +50,50 @@ class FtoContentSpider(scrapy.Spider):
     
     start_time = time.time()
     
-    path_to_chrome_driver = "/Users/Akshat/Documents/code/software/chromedriver"
+    output_dir = os.path.abspath(".")
+    
+    print(output_dir)
+    
+    path_to_chrome_driver = os.path.abspath("./../software/chromedriver")
+    
+    print(path_to_chrome_driver)
     
     window = 7
     
     stage = 'FTO Pending at First Signatory'
-    
-    end_date = np.datetime64(date.today())
-    
-    start_date = np.datetime64(end_date - window)
-    
-    parser = lambda x: pd.datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
-    
-    fto_nos = pd.read_csv("/Users/Akshat/Desktop/fto_numbers.csv", parse_dates=['process_date'], date_parser = parser)
-    
-    fto_target = (fto_nos['process_date'] > start_date) & (fto_nos['process_date'] < end_date) & (fto_nos['fto_stage'] == stage)
-    
-    fto_nos = fto_nos.loc[fto_target]['fto_no'].values.tolist()
-    
+    	
     start_urls = []
     
-    for fto_no in fto_nos:
+    # Need to check if the FTO numbers are populated for the first time through the scrape
+    if os.path.isfile(output_dir+ '/fto_numbers.csv') and os.path.getsize(output_dir+'/fto_numbers.csv') > 0:
     	
-    	# Construct URL
-    	basic = "http://mnregaweb4.nic.in/netnrega/fto/fto_status_dtl.aspx?"
+    	end_date = np.datetime64(date.today())
     
-    	fin_year = "2018-2019"
-    
-    	state_code = "33"
+    	start_date = np.datetime64(end_date - window)
     	
-    	url = basic + "fto_no=" + fto_no + "&fin_year=" + fin_year + "&state_code=" + state_code
+    	parser = lambda x: pd.datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
     	
-    	start_urls.append(url)
+    	fto_nos = pd.read_csv(output_dir + "/fto_numbers.csv", parse_dates=['process_date'], date_parser = parser)
+    	
+    	fto_target = (fto_nos['process_date'] > start_date) & (fto_nos['process_date'] <= end_date) & (fto_nos['fto_stage'] == stage)
     
+    	fto_nos = fto_nos.loc[fto_target]['fto_no'].values.tolist()
+    	
+    	for fto_no in fto_nos:
+    	
+    		# Construct URL
+    		basic = "http://mnregaweb4.nic.in/netnrega/fto/fto_status_dtl.aspx?"
+    
+    		fin_year = "2018-2019"
+    
+    		state_code = "33"
+    	
+    		url = basic + "fto_no=" + fto_no + "&fin_year=" + fin_year + "&state_code=" + state_code
+    	
+    		start_urls.append(url)
+    	
+    print(start_urls)
+    			
     # Get Scrapy selector object for the file
     def get_source(self, response):
     	
@@ -161,5 +172,7 @@ class FtoContentSpider(scrapy.Spider):
     		item['scrape_date'] = str(datetime.datetime.now())
     		
     		item['time_taken'] = time.time() - self.start_time
+    		
+    		item['url'] = response.url
     			
     		yield(item)
