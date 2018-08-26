@@ -37,6 +37,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
+from selenium.webdriver.chrome.options import Options
 from datetime import date, timedelta
 
 # Item class
@@ -91,13 +92,15 @@ class FtoContentSpider(scrapy.Spider):
     		url = basic + "fto_no=" + fto_no + "&fin_year=" + fin_year + "&state_code=" + state_code
     	
     		start_urls.append(url)
-    	
-    print(start_urls)
     			
     # Get Scrapy selector object for the file
     def get_source(self, response):
     	
-    	driver = webdriver.Chrome(self.path_to_chrome_driver)
+    	options = Options()
+    	
+    	options.add_argument('--headless')
+    	
+    	driver = webdriver.Chrome(self.path_to_chrome_driver, chrome_options = options)
     	
     	driver.get(response.url)
     	
