@@ -125,6 +125,8 @@ class FTOItem(scrapy.Item):
     scrape_date = scrapy.Field()
     
     time_taken = scrapy.Field()
+    
+    url = scrapy.Field()
 	
 	
 	
