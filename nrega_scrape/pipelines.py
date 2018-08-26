@@ -85,7 +85,7 @@ class FTOContentPipeline(object):
 		
 	def close_spider(self, spider):
 	
-		if spider_name == 'fto_content':
+		if spider.name == 'fto_content':
 		
 			self.exporter.finish_exporting()
 			
