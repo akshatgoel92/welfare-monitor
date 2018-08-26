@@ -5,7 +5,7 @@ import scrapy
 import datetime
 import socket
 import re
-import sys
+import os
 import pandas as pd
 import numpy as np
 
