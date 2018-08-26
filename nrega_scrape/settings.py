@@ -9,10 +9,10 @@
 #     https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = 'gma_scrape'
+BOT_NAME = 'nrega_scrape'
 
-SPIDER_MODULES = ['gma_scrape.spiders']
-NEWSPIDER_MODULE = 'gma_scrape.spiders'
+SPIDER_MODULES = ['nrega_scrape.spiders']
+NEWSPIDER_MODULE = 'nrega_scrape.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
@@ -65,9 +65,9 @@ ROBOTSTXT_OBEY = True
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'gma_scrape.pipelines.FTOSummaryPipeline': 300,
-    'gma_scrape.pipelines.FTONoPipeline': 800,
-    'gma_scrape.pipelines.FTOContentPipeline': 1000
+    'nrega_scrape.pipelines.FTOSummaryPipeline': 300,
+    'nrega_scrape.pipelines.FTONoPipeline': 800,
+    'nrega_scrape.pipelines.FTOContentPipeline': 1000
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
