@@ -53,11 +53,7 @@ class FtoContentSpider(scrapy.Spider):
     
     output_dir = os.path.abspath(".")
     
-    print(output_dir)
-    
     path_to_chrome_driver = os.path.abspath("./../software/chromedriver")
-    
-    print(path_to_chrome_driver)
     
     window = 7
     
