@@ -28,3 +28,7 @@ __pycache__/
 *.rar
 *.tar
 *.zip
+
+# Secrets #
+#############
+secrets.json
