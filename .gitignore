@@ -31,4 +31,4 @@ __pycache__/
 
 # Secrets #
 #############
-secrets.json
+gma_secrets.json
