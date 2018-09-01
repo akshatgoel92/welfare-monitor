@@ -49,6 +49,8 @@ class FtoSpider(CrawlSpider):
     fin_year_url = '&fin_year=' + fin_year
     
     meta = '&dstyp=B&source=national&Digest=tuhEXy+HR52YT8lJYijdtw'
+
+    custom_settings = {'CLOSESPIDER_ERRORCOUNT': 1}
     
     start_urls = [basic + state + district +fin_year_url + meta]
     
