@@ -7,6 +7,7 @@
 
 # Import packages
 import os
+import sys
 import json 
 import pymysql
 
@@ -17,31 +18,27 @@ from nrega_scrape.items import FTOItem
 
 # Do this to ensure pymysql has same functionality as MySQLdb
 pymysql.install_as_MySQLdb()
-
-class MySQLStorePipeline(object):
 	
-	# Store AWS credentials
-	with open('./gma_secrets.json') as file:
-		
-		mysql = json.load(file)['mysql']
-		
-    	host = mysql['host']
-    
-    	user = mysql['username']
-    
-    	password = mysql['password']
-    
-    	db = mysql['db']
-
-
 # FTO number pipe-line   	
 class FTOSummaryPipeline(object):
 	
 	def __init__(self):
+	
+		with open('./gma_secrets.json') as file:
 		
-		self.connection = MySQLdb.connect(self.host, self. user, self.password, self.db)
+			self.mysql = json.load(file)['mysql']
+			
+			self.host = self.mysql['host']
+			
+			self.user = self.mysql['username']
+			
+			self.password = self.mysql['password']
+			
+			self.db = self.mysql['db']
+			
+		self.conn = pymysql.connect(self.host, self. user, self.password, self.db)
 		
-		self.cursor = self.connection.cursor()
+		self.cursor = self.conn.cursor()
 	
 	def process_item(self, item, spider):
    		
@@ -49,11 +46,15 @@ class FTOSummaryPipeline(object):
    			
    			try:
    				
-   				self.cursor.execute(
+   				self.cursor.execute(" " "INSERT INTO fto_summary (block_name, jcn) VALUES ( %s, %s) " " ",  
+   											  (item['block_name'].encode(' utf-8'), item['total_fto'].encode('utf-8')))
+   											  
+   				self.conn.commit()
    			
    			except Exception as e:
    				
-   				print("Error!")
+   				print(e)
+   				sys.exit()
    			
    		return(item)
    		   		
