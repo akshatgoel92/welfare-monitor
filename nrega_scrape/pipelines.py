@@ -14,7 +14,7 @@ from scrapy.contrib.exporter import CsvItemExporter
 from nrega_scrape.items import NREGAItem
 from nrega_scrape.items import FTONo
 from nrega_scrape.items import FTOItem
-from common.helpers import create_pool
+from common.helpers import sql_connect
 
 # MySQLdb functionality
 pymysql.install_as_MySQLdb()
@@ -25,59 +25,59 @@ class FTOSummaryPipeline(object):
 	
 	def __init__(self):
 		
-		self.pool = create_pool()
+		user, password, host, db = sql_connect().values()
 		
-	def close_spider(self, spider):
+		self.conn = pymysql.connect(host, user, password, db, charset="utf8", use_unicode=True)
+		
+		self.cursor = self.conn.cursor()
 	
-		self.pool.close()
-	
-	def _insert_record(self, tx, item):
+	def _insert_record(self, item):
 		
 		args = (
 		
-					item['block_name'],
+					item['block_name'].encode('utf-8'),
     
-    				item['total_fto'],
+    				item['total_fto'].encode('utf-8'),
          
-    				item['first_sign'],
+    				item['first_sign'].encode('utf-8'),
     
-    				item['first_sign_pending'],
+    				item['first_sign_pending'].encode('utf-8'),
     
-    				item['second_sign'],
+    				item['second_sign'].encode('utf-8'),
     
-    				item['second_sign_pending'],
+    				item['second_sign_pending'].encode('utf-8'),
     
-    				item['fto_sent_bank'],
+    				item['fto_sent_bank'].encode('utf-8'),
     
-    				item['transact_sent_bank'],
+    				item['transact_sent_bank'].encode('utf-8'),
     
-    				item['fto_processed_bank'],
+    				item['fto_processed_bank'].encode('utf-8'),
     
-    				item['transact_processed_bank'],
+    				item['transact_processed_bank'].encode('utf-8'),
     
-    				item['fto_partial_bank'],
+    				item['fto_partial_bank'].encode('utf-8'),
     
-    				item['transact_partial_bank'],
+    				item['transact_partial_bank'].encode('utf-8'),
     
-    				item['fto_pending_bank'],
+    				item['fto_pending_bank'].encode('utf-8'),
     
-    				item['transact_pending_bank'],
+    				item['transact_pending_bank'].encode('utf-8'),
     
-    				item['transact_processed_bank_resp'],
+    				item['transact_processed_bank_resp'].encode('utf-8'),
     
-    				item['invalid_accounts_bank_resp'],
+    				item['invalid_accounts_bank_resp'].encode('utf-8'),
     
-    				item['transact_rejected_bank_resp'],
+    				item['transact_rejected_bank_resp'].encode('utf-8'),
     
-    				item['transact_total_bank_resp'],
+    				item['transact_total_bank_resp'].encode('utf-8'),
     	
-    				item['url'],
+    				item['url'].encode('utf-8'),
     		
-    				item['spider'],
+    				item['spider'].encode('utf-8'),
     
-    				item['server'],
+    				item['server'].encode('utf-8'),
     
-    				item['date']
+    				item['date'].encode('utf-8')
     				
     				)
 		
@@ -87,13 +87,15 @@ class FTOSummaryPipeline(object):
 					 transact_processed_bank_resp, transact_rejected_bank_resp, transact_sent_bank, transact_total_bank_resp, url, date)
 					 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) """
 					 
-		tx.execute(sql, args)
+		self.cursor.execute(sql, args)
+		
+		self.conn.commit()
 		
 	def process_item(self, item, spider):
 	
 		if isinstance(item, NREGAItem):
 		
-			query = self.pool.runInteraction(self._insert_record, item)
+			self._insert_record(item)
 			
 		return(item)
    		   		
