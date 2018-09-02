@@ -33,7 +33,8 @@ def create_pool():
 	
 	db_pool = adbapi.ConnectionPool('pymysql', charset = 'utf8', 
 															use_unicode = True, user = u, 
-															password = p, host = h, db = db)
+															password = p, host = h, db = db,
+															cp_max = 1)
 	
 	return(db_pool)
 	
