@@ -20,25 +20,13 @@ def sql_connect():
 # Create a DB engine	
 def create_engine():
 	
-	u, p, h, db = sql_connect().values()
+	user, password, host, db = sql_connect().values()
 		
-	engine = create_engine("mysql+pymysql://" + u + ":" + p + "@" + h + "/" + db)
+	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
 	
 	return(engine)
 	
-# Create connection pool
-def create_pool():
 
-	u, p, h, db = sql_connect().values()
-	
-	db_pool = adbapi.ConnectionPool('pymysql', charset = 'utf8', 
-															use_unicode = True, user = u, 
-															password = p, host = h, db = db,
-															cp_max = 1)
-	
-	return(db_pool)
-	
-	
    
    
    
