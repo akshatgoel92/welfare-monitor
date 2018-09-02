@@ -5,6 +5,7 @@ import json
 # Import SQL modules
 import pymysql
 from sqlalchemy import *
+pymysql.install_as_MySQLdb()
 
 # Import item files
 from nrega_scrape.items import FTOItem
@@ -12,9 +13,12 @@ from nrega_scrape.items import NREGAItem
 from nrega_scrape.items import FTONo
 from common.helpers import sql_connect
 
-# Create data-base engine
-engine = sql_connect()
+# Store credentials for data-base access
+user, password, host, db = sql_connect().values()
 
+# Create engine
+engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
+	
 # Create meta-data object
 metadata = MetaData()
 
@@ -48,6 +52,7 @@ fto_numbers = Table('fto_numbers', metadata,
 							   	  Column('fto_no', String(100)), 
 							   	  Column('fto_stage', String(100)), 
 							   	  Column('state_code', String(100)),
+							   	  Column('district_code', String(100)),
 							   	  Column('block_code', String(100)),
 							   	  Column('process_date', String(100)),
 							   	  Column('url', String(100)),
