@@ -7,7 +7,6 @@
 
 # Import packages
 import os
-import sys
 import json 
 import pymysql
 
@@ -15,48 +14,116 @@ from scrapy.contrib.exporter import CsvItemExporter
 from nrega_scrape.items import NREGAItem
 from nrega_scrape.items import FTONo
 from nrega_scrape.items import FTOItem
+from common.helpers import create_pool
 
-# Do this to ensure pymysql has same functionality as MySQLdb
+# MySQLdb functionality
 pymysql.install_as_MySQLdb()
+'''
+ Table('fto_summary', metadata, 
+							   		Column('block_name', String(100)), 
+							   		Column('total_fto', Integer), 
+							   		Column('first_sign', Integer),
+							   		Column('first_sign_pending', Integer),
+							   		Column('second_sign', Integer),
+							   		Column('second_sign_pending', Integer),
+							   		Column('fto_sent_bank', Integer),
+							   		Column('transact_sent_bank', Integer),
+							   		Column('fto_processed_bank', Integer),
+							   		Column('transact_processed_bank', Integer),
+							   		Column('fto_partial_bank', Integer),
+							   		Column('transact_partial_bank', Integer),
+							   		Column('fto_pending_bank', Integer),
+							   		Column('transact_pending_bank', Integer),
+							   		Column('transact_processed_bank_resp', Integer), 
+							   		Column('invalid_accounts_bank_resp', Integer), 
+							   		Column('transact_rejected_bank_resp', Integer), 
+							   		Column('transact_total_bank_resp', Integer), 
+							   		Column('url', String(100)),
+							   		Column('spider', String(100)),
+							   		Column('server', String(100)),
+							   		Column('date', String(100)))'''
+
 	
 # FTO number pipe-line   	
 class FTOSummaryPipeline(object):
 	
 	def __init__(self):
-	
-		with open('./gma_secrets.json') as file:
 		
-			self.mysql = json.load(file)['mysql']
-			
-			self.host = self.mysql['host']
-			
-			self.user = self.mysql['username']
-			
-			self.password = self.mysql['password']
-			
-			self.db = self.mysql['db']
-			
-		self.conn = pymysql.connect(self.host, self. user, self.password, self.db)
+		self.pool = create_pool()
 		
-		self.cursor = self.conn.cursor()
+	def close_spider(self, spider):
 	
+		self.pool.close()
+		
+	def _insert_record(self, tx, item):
+	
+		fields = item.fields
+		
+		type = ["%s"]*len(fields)
+		
+		args = (
+		
+					item['block_name'],
+    
+    				item['total_fto'],
+         
+    				item['first_sign'],
+    
+    				item['first_sign_pending'],
+    
+    				item['second_sign'],
+    
+    				item['second_sign_pending'],
+    
+    				item['fto_sent_bank'],
+    
+    				item['transact_sent_bank'],
+    
+    				item['fto_processed_bank'],
+    
+    				item['transact_processed_bank'],
+    
+    				item['fto_partial_bank'],
+    
+    				item['transact_partial_bank'],
+    
+    				item['fto_pending_bank'],
+    
+    				item['transact_pending_bank'],
+    
+    				item['transact_processed_bank_resp'],
+    
+    				item['invalid_accounts_bank_resp'],
+    
+    				item['transact_rejected_bank_resp'],
+    
+    				item['transact_total_bank_resp'],
+    	
+    				item['url'],
+    		
+    				item['spider'],
+    
+    				item['server'],
+    
+    				item['date']
+    				
+    				)
+		
+		sql = """ INSERT INTO fto_summary (block_name, first_sign, first_sign_pending, fto_partial_bank, 
+					 fto_pending_bank, fto_processed_bank, fto_sent_bank, invalid_accounts_bank_resp, second_sign, 
+					 second_sign_pending, server, spider, total_fto, transact_partial_bank, transact_pending_bank, transact_processed_bank, 
+					 transact_processed_bank_resp, transact_rejected_bank_resp, transact_sent_bank, transact_total_bank_resp, url, date)
+					 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) """
+					 
+		tx.execute(sql, args)
+		
 	def process_item(self, item, spider):
-   		
-   		if isinstance(item, NREGAItem):
-   			
-   			try:
-   				
-   				self.cursor.execute(" " "INSERT INTO fto_summary (block_name, jcn) VALUES ( %s, %s) " " ",  
-   											  (item['block_name'].encode(' utf-8'), item['total_fto'].encode('utf-8')))
-   											  
-   				self.conn.commit()
-   			
-   			except Exception as e:
-   				
-   				print(e)
-   				sys.exit()
-   			
-   		return(item)
+	
+		if isinstance(item, NREGAItem):
+		
+			query = self.pool.runInteraction(self._insert_record, item)
+			
+		return(item)
    		   		
 # FTO number pipe-line   	
 class FTONoPipeline(object):
@@ -117,5 +184,5 @@ class FTOContentPipeline(object):
 		return(item)
 		
 
-    	
+
 	
