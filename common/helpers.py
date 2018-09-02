@@ -17,16 +17,6 @@ def sql_connect():
 		
 	return(sql_access)
 	
-# Create a DB engine	
-def create_engine():
-	
-	user, password, host, db = sql_connect().values()
-		
-	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
-	
-	return(engine)
-	
-
    
    
    
