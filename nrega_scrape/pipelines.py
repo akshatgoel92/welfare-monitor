@@ -18,30 +18,6 @@ from common.helpers import create_pool
 
 # MySQLdb functionality
 pymysql.install_as_MySQLdb()
-'''
- Table('fto_summary', metadata, 
-							   		Column('block_name', String(100)), 
-							   		Column('total_fto', Integer), 
-							   		Column('first_sign', Integer),
-							   		Column('first_sign_pending', Integer),
-							   		Column('second_sign', Integer),
-							   		Column('second_sign_pending', Integer),
-							   		Column('fto_sent_bank', Integer),
-							   		Column('transact_sent_bank', Integer),
-							   		Column('fto_processed_bank', Integer),
-							   		Column('transact_processed_bank', Integer),
-							   		Column('fto_partial_bank', Integer),
-							   		Column('transact_partial_bank', Integer),
-							   		Column('fto_pending_bank', Integer),
-							   		Column('transact_pending_bank', Integer),
-							   		Column('transact_processed_bank_resp', Integer), 
-							   		Column('invalid_accounts_bank_resp', Integer), 
-							   		Column('transact_rejected_bank_resp', Integer), 
-							   		Column('transact_total_bank_resp', Integer), 
-							   		Column('url', String(100)),
-							   		Column('spider', String(100)),
-							   		Column('server', String(100)),
-							   		Column('date', String(100)))'''
 
 	
 # FTO number pipe-line   	
@@ -54,12 +30,8 @@ class FTOSummaryPipeline(object):
 	def close_spider(self, spider):
 	
 		self.pool.close()
-		
-	def _insert_record(self, tx, item):
 	
-		fields = item.fields
-		
-		type = ["%s"]*len(fields)
+	def _insert_record(self, tx, item):
 		
 		args = (
 		
