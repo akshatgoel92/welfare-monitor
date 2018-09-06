@@ -1,6 +1,6 @@
 # ETL for Gates Mobile Access
 
-The extract-transform-load program for the Gates Mobile Access project lives in this repo. There are two components to the ETL: 
+This repository contains scripts for the Gates Mobile Access extract-transform-load. There are two components to the ETL: 1) NREGA and 2) Shaalakosh.
 
 # NREGA scrape
 
