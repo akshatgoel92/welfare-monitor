@@ -6,6 +6,7 @@ import datetime
 import socket
 import re
 import os
+import logging
 import pandas as pd
 import numpy as np
 
@@ -17,6 +18,7 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.loader.processors import MapCompose, Join
 from scrapy.loader import ItemLoader
 from scrapy.http import Request
+from scrapy.utils.log import configure_logging
 from dateutil.parser import parse
 from nrega_scrape.items import NREGAItem
 from nrega_scrape.items import FTONo
@@ -51,6 +53,10 @@ class FtoSpider(CrawlSpider):
     meta = '&dstyp=B&source=national&Digest=tuhEXy+HR52YT8lJYijdtw'
     
     start_urls = [basic + state + district +fin_year_url + meta]
+    
+    configure_logging(install_root_handler=False)
+    
+    logging.basicConfig(filename = 'log_stats.json', format='%(levelname)s: %(message)s', level = logging.CRITICAL)
     
     # Parse the response	        					
     def parse(self, response):
