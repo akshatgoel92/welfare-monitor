@@ -54,10 +54,6 @@ class FtoSpider(CrawlSpider):
     
     start_urls = [basic + state + district +fin_year_url + meta]
     
-    configure_logging(install_root_handler=False)
-    
-    logging.basicConfig(filename = 'log_stats.json', format='%(levelname)s: %(message)s', level = logging.CRITICAL)
-    
     # Parse the response	        					
     def parse(self, response):
     
