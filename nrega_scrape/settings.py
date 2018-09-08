@@ -62,6 +62,9 @@ ROBOTSTXT_OBEY = True
 #   'scrapy.extensions.closespider.CloseSpider': 100,
 #}
 
+# 
+
+
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
@@ -69,6 +72,17 @@ ITEM_PIPELINES = {
     'nrega_scrape.pipelines.FTONoPipeline': 800,
     'nrega_scrape.pipelines.FTOContentPipeline': 1000
 }
+
+
+LOG_ENABLED = True
+LOG_ENCODING = 'json'
+LOG_FORMATTER = 'scrapy.logformatter.LogFormatter'
+LOG_FORMAT = '%(asctime)s [%(name)s] %(levelname)s: %(message)s'
+LOG_DATEFORMAT = '%Y-%m-%d %H:%M:%S'
+LOG_STDOUT = False
+LOG_LEVEL = 'DEBUG'
+LOG_FILE = None
+LOG_SHORT_NAMES = False
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
