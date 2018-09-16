@@ -28,10 +28,9 @@ class FtoSpider(CrawlSpider):
     '''Input: MNREGA FTO URL 
       Output: Scraped FTO summary statistics'''
     
-    # Spider name
+    # Construct the target URL
     name = 'fto_stats'
-    
-    # Target URL         
+     
     basic = 'http://mnregaweb4.nic.in/netnrega/FTO/FTOReport.aspx?page=d&mode=B&flg=W&'
     
     state_name = 'CHHATTISGARH'

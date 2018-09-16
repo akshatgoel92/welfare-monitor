@@ -53,8 +53,6 @@ class FtoContentSpider(scrapy.Spider):
     
     output_dir = os.path.abspath(".")
     
-    print(output_dir)
-    
     path_to_chrome_driver = os.path.abspath("./../software/chromedriver")
     
     window = 7
@@ -165,7 +163,6 @@ class FtoContentSpider(scrapy.Spider):
     
     		item['rejection_reason'] = row.xpath('td[16]//text()').extract_first()
     		
-    		# Housekeeping fields
     		item['server'] = socket.gethostname()
     		
     		item['fto_no'] = re.findall('fto_no=(.*FTO_\d+)&fin_year', response.url)[0]
