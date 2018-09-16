@@ -82,7 +82,7 @@ LOG_FORMAT = '%(name)s, %(lineno)s, %(exc_info)s, %(asctime)s, %(filename)s, %(f
 LOG_DATEFORMAT = '%Y-%m-%d %H:%M:%S'
 LOG_STDOUT = False
 LOG_LEVEL = 'INFO'
-LOG_FILE =  './nrega_output/log.csv'
+LOG_FILE =  ''#'./nrega_output/log.csv'
 LOG_SHORT_NAMES = True
 
 CLOSESPIDER_ITEMCOUNT = 0
