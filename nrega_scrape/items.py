@@ -127,6 +127,3 @@ class FTOItem(scrapy.Item):
     time_taken = scrapy.Field()
     
     url = scrapy.Field()
-	
-	
-	

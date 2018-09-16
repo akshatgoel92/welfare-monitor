@@ -191,5 +191,8 @@ class FtoSpider(CrawlSpider):
     			item['date'] = str(datetime.datetime.now())
     			
     			item['fto_stage'] = fto_stage
+    			
+    			# Log
+    			self.logger.info(re.findall('FTO_(.*)', item['fto_no'])[0])
     		
     			yield(item)

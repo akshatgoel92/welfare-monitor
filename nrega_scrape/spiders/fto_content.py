@@ -53,6 +53,8 @@ class FtoContentSpider(scrapy.Spider):
     
     output_dir = os.path.abspath(".")
     
+    print(output_dir)
+    
     path_to_chrome_driver = os.path.abspath("./../software/chromedriver")
     
     window = 7
@@ -73,7 +75,7 @@ class FtoContentSpider(scrapy.Spider):
     	fto_nos = pd.read_csv(output_dir + "/fto_numbers.csv", parse_dates=['process_date'], date_parser = parser)
     	
     	fto_target = (fto_nos['process_date'] > start_date) & (fto_nos['process_date'] <= end_date) & (fto_nos['fto_stage'] == stage)
-    
+    	
     	fto_nos = fto_nos.loc[fto_target]['fto_no'].values.tolist()
     	
     	for fto_no in fto_nos:

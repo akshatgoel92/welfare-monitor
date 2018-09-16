@@ -11,10 +11,13 @@ import json
 import pymysql
 
 from scrapy.contrib.exporter import CsvItemExporter
+from scrapy import signals
+
 from nrega_scrape.items import NREGAItem
 from nrega_scrape.items import FTONo
 from nrega_scrape.items import FTOItem
 from common.helpers import sql_connect
+from common.helpers import send_file
 
 # MySQLdb functionality
 pymysql.install_as_MySQLdb()
@@ -98,8 +101,14 @@ class FTOSummaryPipeline(object):
 			self._insert_record(item)
 			
 		return(item)
-
-
+	
+	def close_spider(self, spider):
+	
+		with open('./backend/recipients.json') as recipients:
+			
+			error_recipients = json.load(recipients)
+			
+		send_file('./nrega_output/log.csv', 'Error log for NREGA Pull', error_recipients)	
 
 class FTONoPipeline(object):
 	
@@ -111,7 +120,6 @@ class FTONoPipeline(object):
 		
 		self.cursor = self.conn.cursor()
 		
-	
 	def _insert_record(self, item):
 		
 		args = (
@@ -152,6 +160,14 @@ class FTONoPipeline(object):
 			self._insert_record(item)
 			
 		return(item)
+	
+	def close_spider(self, spider):
+	
+		with open('./backend/recipients.json') as recipients:
+			
+			error_recipients = json.load(recipients)
+			
+		send_file('./nrega_output/log.csv', 'Error log for NREGA Pull', error_recipients)	
 		
 		
 class FTOContentPipeline(object):
@@ -213,7 +229,6 @@ class FTOContentPipeline(object):
 					  status, processed_date, utr_no, rejection_reason, server, scrape_date, time_taken, url)
 					  VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) """
 					  
-		
 	def process_item(self, item, spider):
 		
 		if isinstance(item, FTOItem):
@@ -221,7 +236,6 @@ class FTOContentPipeline(object):
 			self._insert_record(self, item)
 			
 		return(item)
-		
 			
 	
 
