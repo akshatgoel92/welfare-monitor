@@ -2,18 +2,16 @@
 import os
 import json 
 import pymysql
+pymysql.install_as_MySQLdb()
 
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
-
 from twisted.enterprise import adbapi
 from sqlalchemy import *
 
-# MySQLdb functionality
-pymysql.install_as_MySQLdb()
 
 # Connect to AWS RDB
 def sql_connect():
@@ -23,6 +21,18 @@ def sql_connect():
 		sql_access = json.load(secrets)['mysql']
 		
 	return(sql_access)
+
+
+# Return connection and cursor
+def db_conn():
+
+	user, password, host, db = sql_connect().values()
+		
+	conn = pymysql.connect(host, user, password, db, charset="utf8", use_unicode=True)
+		
+	cursor = conn.cursor()
+	
+	return(conn, cursor)
 	
 # Send an attachment via e-mail	
 def send_file(file, subject, recipients):

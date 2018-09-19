@@ -43,53 +43,46 @@ from datetime import date, timedelta
 # Item class
 from nrega_scrape.items import FTOItem
 
+# Helpers
+from common.helpers import *
+
 # FTO Scraping class
 class FtoContentSpider(scrapy.Spider):
     
-    # Globals
+    # Set globals
     name = "fto_content"
     
-    start_time = time.time()
+    basic = "http://mnregaweb4.nic.in/netnrega/fto/fto_status_dtl.aspx?"
     
+    fin_year = "2018-2019"
+    
+    state_code = "33"
+    
+    start_time = time.time()
+ 	   
     output_dir = os.path.abspath(".")
     
     path_to_chrome_driver = os.path.abspath("./../software/chromedriver")
-    
-    window = 7
-    
-    stage = 'FTO Pending at First Signatory'
     	
     start_urls = []
+
+    # Create a connection to the data-base
+    conn, cursor = db_conn()
     
-    # Need to check if the FTO numbers are populated for the first time through the scrape
-    if os.path.isfile(output_dir+ '/fto_numbers.csv') and os.path.getsize(output_dir+'/fto_numbers.csv') > 0:
-    	
-    	end_date = np.datetime64(date.today())
+    # FTO nos.
+    fto_nos_db = pd.read_sql("SELECT fto_no FROM fto_numbers LIMIT 10;", con = conn).values.tolist()
     
-    	start_date = np.datetime64(end_date - window)
+    # Get target FTO list
+    fto_nos =  [fto_no[0] for fto_no in fto_nos_db]
+
+    # Iterate through each FTO number and construct URL
+    for fto_no in fto_nos:
+	
+    	url = basic + "fto_no=" + fto_no + "&fin_year=" + fin_year + "&state_code=" + state_code
     	
-    	parser = lambda x: pd.datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
-    	
-    	fto_nos = pd.read_csv(output_dir + "/fto_numbers.csv", parse_dates=['process_date'], date_parser = parser)
-    	
-    	fto_target = (fto_nos['process_date'] > start_date) & (fto_nos['process_date'] <= end_date) & (fto_nos['fto_stage'] == stage)
-    	
-    	fto_nos = fto_nos.loc[fto_target]['fto_no'].values.tolist()
-    	
-    	for fto_no in fto_nos:
-    	
-    		# Construct URL
-    		basic = "http://mnregaweb4.nic.in/netnrega/fto/fto_status_dtl.aspx?"
-    
-    		fin_year = "2018-2019"
-    
-    		state_code = "33"
-    	
-    		url = basic + "fto_no=" + fto_no + "&fin_year=" + fin_year + "&state_code=" + state_code
-    	
-    		start_urls.append(url)
+    	start_urls.append(url)
     			
-    # Get Scrapy selector object for the file
+    # Get selector object for file
     def get_source(self, response):
     	
     	options = Options()

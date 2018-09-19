@@ -10,17 +10,15 @@ import os
 import json 
 import pymysql
 
-from scrapy.contrib.exporter import CsvItemExporter
 from scrapy import signals
+from scrapy.contrib.exporter import CsvItemExporter
+from scrapy.exceptions import DropItem
 
 from nrega_scrape.items import NREGAItem
 from nrega_scrape.items import FTONo
 from nrega_scrape.items import FTOItem
 from common.helpers import sql_connect
 from common.helpers import send_file
-
-# MySQLdb functionality
-pymysql.install_as_MySQLdb()
 
 	
 # FTO number pipe-line		
@@ -155,7 +153,7 @@ class FTONoPipeline(object):
 	
 	def close_spider(self, spider):
 	
-		with open('./backend/recipients.json') as recipients:
+		with open('./backend/mail/recipients.json') as recipients:
 			
 			error_recipients = json.load(recipients)
 			
@@ -198,6 +196,8 @@ class FTOContentPipeline(object):
 					
 					item['credit_amt_due'].encode('utf-8'),
 					
+					item['credit_amt_actual'].encode('utf-8'),
+					
 					item['status'].encode('utf-8'),
 					
 					item['processed_date'].encode('utf-8'),
@@ -208,9 +208,11 @@ class FTOContentPipeline(object):
 					
 					item['server'].encode('utf-8'),
 					
+					item['fto_no'].encode('utf-8'),
+					
 					item['scrape_date'].encode('utf-8'),
 					
-					item['time_taken'].encode('utf-8'),
+					item['time_taken'],
 					
 					item['url'].encode('utf-8')
 				
@@ -218,16 +220,26 @@ class FTOContentPipeline(object):
 					
 		sql = """ INSERT INTO fto_content (block_name, jcn, transact_ref_no, transact_date, app_name,
 					  prmry_acc_holder_name, wage_list_no, acc_no, bank_code, ifsc_code, credit_amt_due, 
-					  status, processed_date, utr_no, rejection_reason, server, scrape_date, time_taken, url)
-					  VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) """
-					  
+					  credit_amt_actual, status, processed_date, utr_no, rejection_reason, server, fto_no, scrape_date, 
+					  time_taken, url) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) """
+		
+		self.cursor.execute(sql, args)
+		
+		self.conn.commit()
+				
 	def process_item(self, item, spider):
 		
 		if isinstance(item, FTOItem):
 			
-			self._insert_record(self, item)
+			if item['block_name'] is None:
+				
+				raise DropItem("Missing block name in %s" % item)
 			
-		return(item)
+			else:
+				
+				self._insert_record(item)
+				
+				return(item)
 			
 	
 
