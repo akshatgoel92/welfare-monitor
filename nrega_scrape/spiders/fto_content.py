@@ -43,40 +43,46 @@ from datetime import date, timedelta
 # Item class
 from nrega_scrape.items import FTOItem
 
+# Helpers
+from common.helpers import *
+
 # FTO Scraping class
 class FtoContentSpider(scrapy.Spider):
     
     # Set globals
     name = "fto_content"
     
-    start_time = time.time()
+    basic = "http://mnregaweb4.nic.in/netnrega/fto/fto_status_dtl.aspx?"
     
+    fin_year = "2018-2019"
+    
+    state_code = "33"
+    
+    start_time = time.time()
+ 	   
     output_dir = os.path.abspath(".")
     
     path_to_chrome_driver = os.path.abspath("./../software/chromedriver")
-    
-    window = 7
-    
-    stage = 'FTO Pending at First Signatory'
     	
     start_urls = []
-    
 
-    # 	
+    # Create a connection to the data-base
+    conn, cursor = db_conn()
+    
+    # FTO nos.
+    fto_nos_db = pd.read_sql("SELECT fto_no FROM fto_numbers LIMIT 10;", con = conn).values.tolist()
+    
+    # Get target FTO list
+    fto_nos =  [fto_no[0] for fto_no in fto_nos_db]
+
+    # Iterate through each FTO number and construct URL
     for fto_no in fto_nos:
-    	
-    	# Construct URL
-    	basic = "http://mnregaweb4.nic.in/netnrega/fto/fto_status_dtl.aspx?"
-    
-    	fin_year = "2018-2019"
-    
-    	state_code = "33"
-    	
+	
     	url = basic + "fto_no=" + fto_no + "&fin_year=" + fin_year + "&state_code=" + state_code
     	
     	start_urls.append(url)
     			
-    # Get Scrapy selector object for the file
+    # Get selector object for file
     def get_source(self, response):
     	
     	options = Options()
