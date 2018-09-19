@@ -46,7 +46,7 @@ from nrega_scrape.items import FTOItem
 # FTO Scraping class
 class FtoContentSpider(scrapy.Spider):
     
-    # Set the globals
+    # Set globals
     name = "fto_content"
     
     start_time = time.time()
@@ -60,8 +60,9 @@ class FtoContentSpider(scrapy.Spider):
     stage = 'FTO Pending at First Signatory'
     	
     start_urls = []
-        
-    	
+    
+
+    # 	
     for fto_no in fto_nos:
     	
     	# Construct URL
