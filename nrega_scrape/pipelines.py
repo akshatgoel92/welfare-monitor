@@ -21,7 +21,7 @@ from common.helpers import sql_connect
 from common.helpers import send_file
 
 # MySQLdb functionality
-pymysql.install_as_MySQLdb()
+#pymysql.install_as_MySQLdb()
 
 	
 # FTO number pipe-line		
