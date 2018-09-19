@@ -46,7 +46,7 @@ from nrega_scrape.items import FTOItem
 # FTO Scraping class
 class FtoContentSpider(scrapy.Spider):
     
-    # Globals
+    # Set the globals
     name = "fto_content"
     
     start_time = time.time()
@@ -60,34 +60,20 @@ class FtoContentSpider(scrapy.Spider):
     stage = 'FTO Pending at First Signatory'
     	
     start_urls = []
+        
+    	
+    for fto_no in fto_nos:
+    	
+    	# Construct URL
+    	basic = "http://mnregaweb4.nic.in/netnrega/fto/fto_status_dtl.aspx?"
     
-    # Need to check if the FTO numbers are populated for the first time through the scrape
-    if os.path.isfile(output_dir+ '/fto_numbers.csv') and os.path.getsize(output_dir+'/fto_numbers.csv') > 0:
-    	
-    	end_date = np.datetime64(date.today())
+    	fin_year = "2018-2019"
     
-    	start_date = np.datetime64(end_date - window)
+    	state_code = "33"
     	
-    	parser = lambda x: pd.datetime.strptime(x, '%Y-%m-%d %H:%M:%S')
+    	url = basic + "fto_no=" + fto_no + "&fin_year=" + fin_year + "&state_code=" + state_code
     	
-    	fto_nos = pd.read_csv(output_dir + "/fto_numbers.csv", parse_dates=['process_date'], date_parser = parser)
-    	
-    	fto_target = (fto_nos['process_date'] > start_date) & (fto_nos['process_date'] <= end_date) & (fto_nos['fto_stage'] == stage)
-    	
-    	fto_nos = fto_nos.loc[fto_target]['fto_no'].values.tolist()
-    	
-    	for fto_no in fto_nos:
-    	
-    		# Construct URL
-    		basic = "http://mnregaweb4.nic.in/netnrega/fto/fto_status_dtl.aspx?"
-    
-    		fin_year = "2018-2019"
-    
-    		state_code = "33"
-    	
-    		url = basic + "fto_no=" + fto_no + "&fin_year=" + fin_year + "&state_code=" + state_code
-    	
-    		start_urls.append(url)
+    	start_urls.append(url)
     			
     # Get Scrapy selector object for the file
     def get_source(self, response):
