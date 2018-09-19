@@ -161,13 +161,13 @@ class FTONoPipeline(object):
 			
 		return(item)
 	
-	def close_spider(self, spider):
+	#def close_spider(self, spider):
 	
-		with open('./backend/recipients.json') as recipients:
+	#	with open('./backend/recipients.json') as recipients:
 			
-			error_recipients = json.load(recipients)
+	#		error_recipients = json.load(recipients)
 			
-		send_file('./nrega_output/log.csv', 'Error log for NREGA Pull', error_recipients)	
+	#	send_file('./nrega_output/log.csv', 'Error log for NREGA Pull', error_recipients)	
 		
 		
 class FTOContentPipeline(object):
