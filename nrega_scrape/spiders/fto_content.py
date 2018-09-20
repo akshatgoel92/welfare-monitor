@@ -64,7 +64,7 @@ class FtoContentSpider(scrapy.Spider):
     
     # path_to_chrome_driver = os.path.abspath("./../software/chromedriver")
     
-    path_to_chrome_driver = os.path.abspath("usr/bin/chromedriver")
+    path_to_chrome_driver = os.path.abspath("/home/ec2-user/chromedriver/")
     	
     start_urls = []
 
