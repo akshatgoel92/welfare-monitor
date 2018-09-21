@@ -1,6 +1,6 @@
 #!/bin/sh
 
-cd /Users/Akshat/Documents/Code/gma-scrape/
+cd /home/ec2-user/gma-scrape/
 
 scrapy crawl fto_stats
 
