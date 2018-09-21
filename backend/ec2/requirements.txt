@@ -13,4 +13,5 @@ scrapy=1.5.1=py36_0
 selenium=3.13.0=py36_0
 sqlalchemy=1.2.7=py36hb402a30_0
 twisted=17.5.0=py36_0
+python-crontab=2.3.4=py_0
 
