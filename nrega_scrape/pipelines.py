@@ -112,7 +112,7 @@ class FTONoPipeline(object):
     	self.insert_sql = "INSERT INTO fto_numbers (%s) VALUES (%s)"
     	self.dbpool = adbapi.ConnectionPool('pymysql', db = db_name, host = host, user = user, passwd = password, cursorclass = pymysql.cursors.DictCursor, charset = 'utf8', use_unicode = True, cp_max = 2)
 
-    def __del__(self):
+    def spider_closed(self):
         self.dbpool.close()
 
     def process_item(self, item, spider):
