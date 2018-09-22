@@ -28,6 +28,7 @@ from scrapy.selector import Selector
 from scrapy.loader.processors import MapCompose, Join
 from scrapy.loader import ItemLoader
 from scrapy.http import Request
+
 # Selenium sub-modules
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -70,7 +71,7 @@ class FtoContentSpider(scrapy.Spider):
     conn, cursor = db_conn()
     
     # FTO nos.
-    fto_nos = pd.read_sql("SELECT fto_no FROM fto_numbers LIMIT 10;", con = conn).values.tolist()
+    fto_nos = pd.read_sql("SELECT fto_no FROM fto_numbers LIMIT 4500;", con = conn).values.tolist()
     # Get target FTO list
     fto_nos = [fto_no[0] for fto_no in fto_nos]
 
