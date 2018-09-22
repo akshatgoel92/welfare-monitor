@@ -107,9 +107,8 @@ class FTONoPipeline(object):
 	
     def __init__(self):
     	
-    	
     	user, password, host, db_name = sql_connect().values()
-        self.insert_sql = "INSERT INTO fto_numbers"
+    	self.insert_sql = "INSERT INTO fto_numbers"
         self.db = adbapi.ConnectionPool('MySQLdb',
             db = db_name
             host= host,
