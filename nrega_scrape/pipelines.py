@@ -20,6 +20,9 @@ from nrega_scrape.items import FTOItem
 from common.helpers import sql_connect
 from common.helpers import send_file
 
+# Twisted
+from twisted.enterprise import adbapi
+
 	
 # FTO number pipe-line		
 class FTOSummaryPipeline(object):
@@ -102,62 +105,36 @@ class FTOSummaryPipeline(object):
 	
 class FTONoPipeline(object):
 	
-	def __init__(self):
-		
-		user, password, host, db = sql_connect().values()
-		
-		self.conn = pymysql.connect(host, user, password, db, charset = "utf8", use_unicode = True)
-		
-		self.cursor = self.conn.cursor()
-		
-	def _insert_record(self, item):
-		
-		args = (
-					
-					item['fto_no'].encode('utf-8'),
-					
-					item['state_code'].encode('utf-8'),
-					
-					item['district_code'].encode('utf-8'), 
-					
-					item['block_code'].encode('utf-8'), 
-					
-					item['process_date'],
-					
-					item['url'].encode('utf-8'),
-					
-					item['spider'].encode('utf-8'),
-					
-					item['server'].encode('utf-8'),
-					
-					item['date'].encode('utf-8'),
-					
-					item['fto_stage'].encode('utf-8')
-					
-					)
-					
-		sql = """INSERT INTO fto_numbers (fto_no, state_code, district_code, block_code, process_date,
-					 url, spider, server, date, fto_stage) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) """
-					 
-		self.cursor.execute(sql, args)
-		
-		self.conn.commit()
-		
-	def process_item(self, item, spider):
-		
-		if isinstance(item, FTONo):
-			
-			self._insert_record(item)
-			
-		return(item)
-	
-	def close_spider(self, spider):
-	
-		with open('./backend/mail/recipients.json') as recipients:
-			
-			error_recipients = json.load(recipients)
-			
-			send_file('./nrega_output/log.csv', 'Error log for NREGA Pull', error_recipients)	
+    def __init__(self):
+    	
+    	
+    	user, password, host, db_name = sql_connect().values()
+        self.insert_sql = "INSERT INTO fto_numbers"
+        self.db = adbapi.ConnectionPool('MySQLdb',
+            db = db_name
+            host= host,
+            user = user,
+            passwd = password,
+            cursorclass = MySQLdb.cursors.DictCursor,
+            charset = 'utf8',
+            use_unicode = True
+        )
+
+    def __del__(self):
+        self.dbpool.close()
+
+    def process_item(self, item, spider):
+    	if isinstance(item, FTONo):
+        	self.insert_data(item, self.insert_sql)
+        return item
+
+    def insert_data(self, item, insert):
+        keys = item.keys()
+        fields = u','.join(keys)
+        qm = u','.join([u'%s'] * len(keys))
+        sql = insert % (fields, qm)
+        data = [item[k] for k in keys]
+        return(self.dbpool.runOperation(sql, data)	
 		
 		
 class FTOContentPipeline(object):
