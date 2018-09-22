@@ -70,7 +70,7 @@ class FtoContentSpider(scrapy.Spider):
     conn, cursor = db_conn()
     
     # FTO nos.
-    fto_nos_nos = pd.read_sql("SELECT fto_no FROM fto_numbers LIMIT 10;", con = conn).values.tolist()
+    fto_nos = pd.read_sql("SELECT fto_no FROM fto_numbers LIMIT 10;", con = conn).values.tolist()
     # Get target FTO list
     fto_nos = [fto_no[0] for fto_no in fto_nos]
 
@@ -128,10 +128,10 @@ class FtoContentSpider(scrapy.Spider):
     	# Get the last table on page from the tables list - this is the table we need
     	table = tables[4]
     	
-    	# Stoer the rows
+    	# Store the rows
     	rows = table.xpath('*//tr')
     	
-    	# Iterature through each row
+    	# Iterate through each row
     	for row in rows:
     		
     		# Block name
