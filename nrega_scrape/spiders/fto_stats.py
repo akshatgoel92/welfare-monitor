@@ -209,16 +209,15 @@ class FtoSpider(CrawlSpider):
     			item['district_code'] = fto_scraped.loc[row, '2']
     			# Block code
     			item['block_code'] = fto_scraped.loc[row, '3']
-    			
     			# Process date
-    			item['process_date'] = parse(fto_scraped.loc[row, '4'])
+    			item['process_date'] = parse(fto_scraped.loc[row, '4'], dayfirst = True)
+    			
     			# URL for item
     			item['url'] = self.basic
     			# Spider name
     			item['spider'] = self.name
     			# Server
     			item['server'] = socket.gethostname()
-    			
     			# Date
     			item['date'] = str(datetime.datetime.now())
     			# FTO stage
