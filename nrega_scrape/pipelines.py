@@ -9,6 +9,7 @@
 import os
 import json 
 import pymysql
+pymysql.install_as_MySQLdb()
 
 from scrapy import signals
 from scrapy.contrib.exporter import CsvItemExporter
@@ -109,20 +110,16 @@ class FTONoPipeline(object):
     	
     	user, password, host, db_name = sql_connect().values()
     	self.insert_sql = "INSERT INTO fto_numbers"
-        self.db = adbapi.ConnectionPool('MySQLdb', db = db_name,
-										host= host,
-            							user = user,
-            							passwd = password,
-            							cursorclass = MySQLdb.cursors.DictCursor,
-            							charset = 'utf8', use_unicode = True)
+    	self.db = adbapi.ConnectionPool('pymysql', db = db_name, host = host, user = user, passwd = password, cursorclass = pymysql.cursors.DictCursor, charset = 'utf8', use_unicode = True, cp_max = 2)
 
     def __del__(self):
         self.dbpool.close()
 
     def process_item(self, item, spider):
     	if isinstance(item, FTONo):
-        	self.insert_data(item, self.insert_sql)
-        return item
+    	
+    		self.insert_data(item, self.insert_sql)
+    	return(item)
 
     def insert_data(self, item, insert):
         keys = item.keys()
@@ -130,7 +127,7 @@ class FTONoPipeline(object):
         qm = u','.join([u'%s'] * len(keys))
         sql = insert % (fields, qm)
         data = [item[k] for k in keys]
-        return(self.dbpool.runOperation(sql, data)	
+        return(self.dbpool.runOperation(sql, data))
 		
 		
 class FTOContentPipeline(object):
