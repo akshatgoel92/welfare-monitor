@@ -62,7 +62,9 @@ class FtoContentSpider(scrapy.Spider):
  	# Output directory
     output_dir = os.path.abspath(".")
     # Path to Chrome
-    path_to_chrome_driver = os.path.abspath("/home/ec2-user/chromedriver/")
+    path_to_chrome_driver = os.path.abspath('./../software/chromedriver')
+    # Path to Chrome
+    # path_to_chrome_driver = os.path.abspath("/home/ec2-user/chromedriver/")
     
     # List of URLs	
     start_urls = []
@@ -71,7 +73,7 @@ class FtoContentSpider(scrapy.Spider):
     conn, cursor = db_conn()
     
     # FTO nos.
-    fto_nos = pd.read_sql("SELECT fto_no FROM fto_numbers LIMIT 4500;", con = conn).values.tolist()
+    fto_nos = pd.read_sql("SELECT fto_no FROM fto_numbers LIMIT 10;", con = conn).values.tolist()
     # Get target FTO list
     fto_nos = [fto_no[0] for fto_no in fto_nos]
 
@@ -82,17 +84,18 @@ class FtoContentSpider(scrapy.Spider):
     	url = basic + "fto_no=" + fto_no + "&fin_year=" + fin_year + "&state_code=" + state_code
     	# Append each constructed URL to the list
     	start_urls.append(url)
+
+    	
+    # Create options object for Chrome driver
+    options = Options()
+    # Add the headless option to the options object
+    options.add_argument('--headless')
+    # Create a browser object
+    driver = webdriver.Chrome(path_to_chrome_driver, chrome_options = options)
     			
     # Get selector object for file
-    def get_source(self, response):
-    	
-    	# Create options object for Chrome driver
-    	options = Options()
-    	# Add the headless option to the options object
-    	options.add_argument('--headless')
-    	
-    	# Create a browser object
-    	driver = webdriver.Chrome(self.path_to_chrome_driver, chrome_options = options)
+    def get_source(self, response, driver):
+
     	# Navigate to the target URL
     	driver.get(response.url)
     	# Sleep for 4 seconds to wait for response URL
@@ -122,7 +125,7 @@ class FtoContentSpider(scrapy.Spider):
     	# Create FTO item
     	item = FTOItem()
     	# Store source code
-    	source = self.get_source(response)
+    	source = self.get_source(response, self.driver)
     	
     	# Store all tables on page
     	tables = source.xpath('//table')
