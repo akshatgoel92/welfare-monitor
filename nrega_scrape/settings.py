@@ -69,23 +69,24 @@ CONCURRENT_REQUESTS = 2
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'nrega_scrape.pipelines.FTOSummaryPipeline': 300,
-    'nrega_scrape.pipelines.FTONoPipeline': 800,
     'nrega_scrape.pipelines.FTOContentPipeline': 1000
 }
 
 
 # Log defaults
-LOG_ENABLED = True
+#LOG_ENABLED = True
 LOG_ENCODING = 'utf-8'
 LOG_FORMATTER = 'scrapy.logformatter.LogFormatter'
 #LOG_FORMAT = '%(name)s, %(lineno)s, %(exc_info)s, %(asctime)s, %(filename)s, %(funcName)s, %(levelno)s, %(message).30s'
 LOG_DATEFORMAT = '%Y-%m-%d %H:%M:%S'
 LOG_STDOUT = False
 LOG_LEVEL = 'DEBUG'
-#LOG_FILE =  ''#'./nrega_output/log.csv'
-#LOG_SHORT_NAMES = True
+#LOG_FILE =  './nrega_output/log.csv'
+LOG_SHORT_NAMES = True
 
 CLOSESPIDER_ITEMCOUNT = 0
+#CLOSESPIDER_TIMEOUT = 15
+
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
@@ -98,7 +99,7 @@ CLOSESPIDER_ITEMCOUNT = 0
 # each remote server
 #AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
 # Enable showing throttling stats for every response received:
-#AUTOTHROTTLE_DEBUG = False
+# AUTOTHROTTLE_DEBUG = True
 
 # Enable and configure HTTP caching (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings
