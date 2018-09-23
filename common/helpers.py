@@ -39,6 +39,21 @@ def db_conn():
 	# Return statement
 	return(conn, cursor)
 	
+# Insert a record into the SQL data-base
+def insert_data(item, insert):
+		
+	# Get the item keys for the field
+	keys = item.keys()
+	# Join them up to make a list like we need for SQL
+	fields = u','.join(keys)
+	# Create a list of %s for the SQL query
+	qm = u','.join([u'%s'] * len(keys))
+	# Construct the SQL command
+	sql = insert % (fields, qm)
+	# Get the data we're going to send to the data-base
+	data = [item[k] for k in keys]
+	# Return statement
+	return(sql, data)
 	
 # Send an attachment via e-mail	
 def send_file(file, subject, recipients):
