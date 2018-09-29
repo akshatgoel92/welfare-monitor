@@ -54,12 +54,13 @@ class FTOSummaryPipeline(object):
 			# Adjust the query accordingly
 			insert_sql = "INSERT INTO fto_numbers (%s) VALUES (%s)"
 		
-		# Get the inputs we need to execute the	query
-		sql, data = insert_data(item, insert_sql)
-		# Execute query
-		self.conn.cursor().execute(sql, data)
-		# Commit to DB
-		self.conn.commit()
+		if spider.name == "fto_stats":
+			# Get the inputs we need to execute the	query
+			sql, data = insert_data(item, insert_sql)
+			# Execute query
+			self.conn.cursor().execute(sql, data)
+			# Commit to DB
+			self.conn.commit()
 		# Return statement
 		return(item)
 	
