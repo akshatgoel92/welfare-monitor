@@ -50,28 +50,20 @@ class FtoContentSpider(scrapy.Spider):
     name = "fto_content"
     # Basic URL
     basic = "http://mnregaweb4.nic.in/netnrega/fto/fto_status_dtl.aspx?"
-    
     # Financial year
     fin_year = "2018-2019"
     # State code
     state_code = "33"
-    
     # Start time
     start_time = time.time()
- 	
  	# Output directory
     output_dir = os.path.abspath(".")
     # Path to Chrome
-    path_to_chrome_driver = os.path.abspath('./../software/chromedriver')
-    # Path to Chrome
-    # path_to_chrome_driver = os.path.abspath("/home/ec2-user/chromedriver/")
-    
+    path_to_chrome_driver = os.path.abspath("/home/ec2-user/chromedriver/")
     # List of URLs	
     start_urls = []
-    
     # Create a connection to the data-base
     conn, cursor = db_conn()
-    
     # FTO nos.
     fto_nos = pd.read_sql("SELECT fto_no FROM fto_numbers LIMIT 10;", con = conn).values.tolist()
     # Get target FTO list
@@ -84,7 +76,10 @@ class FtoContentSpider(scrapy.Spider):
     	url = basic + "fto_no=" + fto_no + "&fin_year=" + fin_year + "&state_code=" + state_code
     	# Append each constructed URL to the list
     	start_urls.append(url)
-
+	
+	# Close connections
+    conn.close()
+    cursor.close()
     	
     # Create options object for Chrome driver
     options = Options()
@@ -106,7 +101,7 @@ class FtoContentSpider(scrapy.Spider):
     	# Sleep for 3 seconds
     	time.sleep(3)
     	
-    	#	Select the FTO number from the drop down box
+    	# Select the FTO number from the drop down box
     	fto_drop_down.select_by_index(1)
     	# Store it as a scrapy selector object
     	time.sleep(4)
