@@ -78,22 +78,22 @@ def send_email(msg, subject, recipients):
 	smtp_port = 587
 	sender = 'akshat.goel@ifmr.ac.in'
 	text_subtype = 'html'
- 	
- 	# Compose message
- 	msg = MIMEText(msg, text_subtype)
- 	msg['Subject']= subject
- 	msg['From'] = sender
- 	msg['To'] = recipients
- 	
- 	# Connection
- 	conn = SMTP(smtp_server, smtp_port)
- 	conn.set_debuglevel(1)
- 	conn.ehlo()
- 	conn.starttls()
- 	conn.ehlo()
- 	conn.login(user, password)
- 	conn.sendmail(sender, recipients, msg.as_string())
- 	conn.close()
+	
+	# Compose message
+	msg = MIMEText(msg, text_subtype)
+	msg['Subject']= subject
+	msg['From'] = sender
+	msg['To'] = recipients
+	
+	# Connection
+	conn = SMTP(smtp_server, smtp_port)
+	conn.set_debuglevel(1)
+	conn.ehlo()
+	conn.starttls()
+	conn.ehlo()
+	conn.login(user, password)
+	conn.sendmail(sender, recipients, msg.as_string())
+	conn.close()
 
 # Upload file to Dropbox 	
 def dropbox_upload(file_from, file_to):
