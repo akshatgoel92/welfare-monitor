@@ -83,7 +83,7 @@ def send_email(msg, subject, recipients):
 	msg = MIMEText(msg, text_subtype)
 	msg['Subject']= subject
 	msg['From'] = sender
-	msg['To'] = recipients
+	msg['To'] = ', '.join(recipients)
 	
 	# Connection
 	conn = SMTP(smtp_server, smtp_port)
