@@ -24,7 +24,6 @@ from nrega_scrape.items import NREGAItem
 from nrega_scrape.items import FTONo
 from nrega_scrape.items import FTOItem
 from common.helpers import sql_connect
-from common.helpers import send_file
 from common.helpers import insert_data
 
 # Twisted adbapi library for connection pools to SQL data-base
