@@ -74,18 +74,18 @@ ITEM_PIPELINES = {
 
 
 # Log defaults
-LOG_ENABLED = True
+#LOG_ENABLED = True
 LOG_ENCODING = 'utf-8'
 LOG_FORMATTER = 'scrapy.logformatter.LogFormatter'
-LOG_FORMAT = '%(name)s, %(lineno)s, %(exc_info)s, %(asctime)s, %(filename)s, %(funcName)s, %(levelno)s, %(message).30s'
+#LOG_FORMAT = '%(name)s, %(lineno)s, %(exc_info)s, %(asctime)s, %(filename)s, %(funcName)s, %(levelno)s, %(message).30s'
 LOG_DATEFORMAT = '%Y-%m-%d %H:%M:%S'
 LOG_STDOUT = False
 LOG_LEVEL = 'DEBUG'
-LOG_FILE =  './nrega_output/log.csv'
+#LOG_FILE =  './nrega_output/log.csv'
 LOG_SHORT_NAMES = True
 
 CLOSESPIDER_ITEMCOUNT = 0
-CLOSESPIDER_TIMEOUT = 60
+# CLOSESPIDER_TIMEOUT = 60
 
 
 # Enable and configure the AutoThrottle extension (disabled by default)
