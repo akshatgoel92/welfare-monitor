@@ -37,7 +37,7 @@ def db_conn():
 	
 	# Store credentials
 	user = sql_access['username']
-	password = sql_acces['password']
+	password = sql_access['password']
 	host = sql_access['host']
 	db = sql_access['db']
 	
