@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import json
 
-from .common.helpers import *
+from helpers import *
 
 # Process the log
 def process_log():
