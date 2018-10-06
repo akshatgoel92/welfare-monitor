@@ -46,14 +46,23 @@ class FTOSummaryPipeline(object):
 		
 		# Check what instance type we have
 		if isinstance(item, NREGAItem):
+			
+			title_fields = ['block_name']
 			insert_sql = "INSERT INTO fto_summary (%s) VALUES (%s)"
 		
 		# Check what instance type we have
 		elif isinstance(item, FTONo):
-			# Adjust the query accordingly
+			
+			title_fields = ['fto_stage']
 			insert_sql = "INSERT INTO fto_numbers (%s) VALUES (%s)"
 		
 		if spider.name == "fto_stats":
+			
+			for field in item.keys():
+				item[field] = item[field].strip() if type(item[field]) == str else item[field]
+				if field in title_fields:
+					item[field] = item[field].title()
+			
 			# Get the inputs we need to execute the	query
 			sql, data = insert_data(item, insert_sql)
 			# Execute query
@@ -87,18 +96,26 @@ class FTOContentPipeline(object):
     										charset = 'utf8', 
     										use_unicode = True,
     										cp_max = 16)
+    	self.title_fields = ['block_name', 'app_name', 'prmry_acc_holder_name', 'status', 'rejection_reason']
 	
 	# Process item method
     def process_item(self, item, spider):
     
     	# Check if the current item is an FTO item instance
     	if isinstance(item, FTOItem):
-    		# Construct the SQL statement that we're going to execute
-    		insert_sql = "INSERT INTO fto_content (%s) VALUES (%s)"
-    		# If so get the SQL statement and data from the helper function
-    		sql, data = insert_data(item, insert_sql)
-    		# And then execute the SQL statement
-    		self.dbpool.runOperation(sql, data)
+    		if item['block_name'] is None:
+    			raise(DropItem("Block name missing"))
+    		else:
+    			for field in item.keys():
+    				item[field] = item[field].strip() if type(item[field]) ==str else item[field]
+    				if field in self.title_fields:
+    					item[field] = item[field].title()		
+    			# Insert into SQL
+    			insert_sql = "INSERT INTO fto_content (%s) VALUES (%s)"
+    			# If so get the SQL statement and data from the helper function
+    			sql, data = insert_data(item, insert_sql)
+    			# And then execute the SQL statement
+    			self.dbpool.runOperation(sql, data)
     	# Return the item
     	return(item)
 	
