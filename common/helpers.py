@@ -73,7 +73,7 @@ def send_email(msg, subject, recipients):
 	password = credentials['password']
 	region = credentials['region']
 	
-	# SMTP server details	
+	# SMTP server details
 	smtp_server = 'email-smtp.' + region + '.amazonaws.com'
 	smtp_port = 587
 	sender = 'akshat.goel@ifmr.ac.in'
@@ -105,9 +105,9 @@ def dropbox_upload(file_from, file_to):
     access_token = credentials['dropbox']['access_token']
     dbx = dropbox.Dropbox(access_token)
     
-    # Upload the file 
+    # Upload the file with option to over-write if it already exists
     with open(file_from, 'rb') as f:
-        dbx.files_upload(f.read(), file_to)
+        dbx.files_upload(f.read(), file_to, mode=dropbox.files.WriteMode.overwrite)
 
  	
  				
