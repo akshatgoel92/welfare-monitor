@@ -2,8 +2,7 @@
 import pandas as pd
 import numpy as np
 import json
-
-from helpers import *
+import helpers
 
 # Process the log
 def process_log():
@@ -13,8 +12,8 @@ def process_log():
 		recipients = json.load(r)
 	
 	# Upload log file and send notification
-	dropbox_upload('./nrega_output/log.csv', '/Logs/log.csv')
-	send_email('Done, check the log!', 'GMA NREGA Scrape: Error count', recipients)
+	helpers.dropbox_upload('./nrega_output/log.csv', '/Logs/log.csv')
+	helpers.send_email('Done, check the log!', 'GMA NREGA Scrape: Error count', recipients)
 
 if __name__ == '__main__':
 
