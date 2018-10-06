@@ -50,28 +50,23 @@ class FtoContentSpider(scrapy.Spider):
     name = "fto_content"
     # Basic URL
     basic = "http://mnregaweb4.nic.in/netnrega/fto/fto_status_dtl.aspx?"
-    
     # Financial year
     fin_year = "2018-2019"
     # State code
     state_code = "33"
-    
     # Start time
     start_time = time.time()
- 	
  	# Output directory
     output_dir = os.path.abspath(".")
     # Path to Chrome
+    # path_to_chrome_driver = os.path.abspath("./../software/chromedriver/")
     path_to_chrome_driver = os.path.abspath("/home/ec2-user/chromedriver/")
-    
     # List of URLs	
     start_urls = []
-    
     # Create a connection to the data-base
     conn, cursor = db_conn()
-    
     # FTO nos.
-    fto_nos = pd.read_sql("SELECT fto_no FROM fto_numbers LIMIT 4500;", con = conn).values.tolist()
+    fto_nos = pd.read_sql("SELECT fto_no FROM fto_numbers LIMIT 100;", con = conn).values.tolist()
     # Get target FTO list
     fto_nos = [fto_no[0] for fto_no in fto_nos]
 
@@ -82,17 +77,21 @@ class FtoContentSpider(scrapy.Spider):
     	url = basic + "fto_no=" + fto_no + "&fin_year=" + fin_year + "&state_code=" + state_code
     	# Append each constructed URL to the list
     	start_urls.append(url)
+	
+	# Close connections
+    conn.close()
+    cursor.close()
+    	
+    # Create options object for Chrome driver
+    options = Options()
+    # Add the headless option to the options object
+    options.add_argument('--headless')
+    # Create a browser object
+    driver = webdriver.Chrome(path_to_chrome_driver, chrome_options = options)
     			
     # Get selector object for file
-    def get_source(self, response):
-    	
-    	# Create options object for Chrome driver
-    	options = Options()
-    	# Add the headless option to the options object
-    	options.add_argument('--headless')
-    	
-    	# Create a browser object
-    	driver = webdriver.Chrome(self.path_to_chrome_driver, chrome_options = options)
+    def get_source(self, response, driver):
+
     	# Navigate to the target URL
     	driver.get(response.url)
     	# Sleep for 4 seconds to wait for response URL
@@ -103,7 +102,7 @@ class FtoContentSpider(scrapy.Spider):
     	# Sleep for 3 seconds
     	time.sleep(3)
     	
-    	#	Select the FTO number from the drop down box
+    	# Select the FTO number from the drop down box
     	fto_drop_down.select_by_index(1)
     	# Store it as a scrapy selector object
     	time.sleep(4)
@@ -122,7 +121,7 @@ class FtoContentSpider(scrapy.Spider):
     	# Create FTO item
     	item = FTOItem()
     	# Store source code
-    	source = self.get_source(response)
+    	source = self.get_source(response, self.driver)
     	
     	# Store all tables on page
     	tables = source.xpath('//table')

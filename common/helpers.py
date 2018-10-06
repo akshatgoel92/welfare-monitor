@@ -1,19 +1,20 @@
-# Python standard
+# Import packages
 import os
 import json
-
-# SQL interface 
+import sys
+import dropbox
 import pymysql
-pymysql.install_as_MySQLdb()
-
-# E-mail packages
 import smtplib
+
+from smtplib import SMTP
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
 from twisted.enterprise import adbapi
 from sqlalchemy import *
+
+pymysql.install_as_MySQLdb()
 
 
 # Connect to AWS RDB
@@ -30,54 +31,87 @@ def sql_connect():
 # Return connection and cursor
 def db_conn():
 	
+	with open('./gma_secrets.json') as secrets:
+		# This gets credentials
+		sql_access = json.load(secrets)['mysql']
+	
 	# Store credentials
-	user, password, host, db = sql_connect().values()
+	user = sql_access['username']
+	password = sql_access['password']
+	host = sql_access['host']
+	db = sql_access['db']
+	
 	# Create connection	
 	conn = pymysql.connect(host, user, password, db, charset="utf8", use_unicode=True)
-	# Create cursor	
 	cursor = conn.cursor()
+	
 	# Return statement
 	return(conn, cursor)
 	
-	
-# Send an attachment via e-mail	
-def send_file(file, subject, recipients):
-	
-	# Get credentials
+# Insert a record into the SQL data-base
+def insert_data(item, insert):
+		
+	# Construct the SQL command
+	keys = item.keys()
+	fields = u','.join(keys)
+	qm = u','.join([u'%s'] * len(keys))
+	sql = insert % (fields, qm)
+	# Get the data for the data-base
+	data = [item[k] for k in keys]
+	# Return
+	return(sql, data)
+
+# Send e-mail
+def send_email(msg, subject, recipients):
+
+	# Load credentials
 	with open('./gma_secrets.json') as secrets:
-		# E-mail ID and password
-		mail_access = json.load(secrets)['e-mail']
+		credentials = json.load(secrets)['smtp']
 	
-	# Create mime object
-	msg = MIMEMultipart()
-	# Store subject
-	msg['Subject'] = subject
-	# Store source
-	msg['From'] = 'python@python.com'
-	# Store target
+	# Store credentials	
+	user = credentials['user']
+	password = credentials['password']
+	region = credentials['region']
+	
+	# SMTP server details
+	smtp_server = 'email-smtp.' + region + '.amazonaws.com'
+	smtp_port = 587
+	sender = 'akshat.goel@ifmr.ac.in'
+	text_subtype = 'html'
+	
+	# Compose message
+	msg = MIMEText(msg, text_subtype)
+	msg['Subject']= subject
+	msg['From'] = sender
 	msg['To'] = ', '.join(recipients)
 	
-	# Store mime-base object
-	part = MIMEBase('application', "octet-stream")
-	# Set payload
-	part.set_payload(open(file, "rb").read())
-	# Set the encoder object
-	encoders.encode_base64(part)
-	# Add a header to the message
-	part.add_header('Content-Disposition', 'attachment; filename=' + file)
-	# Attach file
-	msg.attach(part)
+	# Connection
+	conn = SMTP(smtp_server, smtp_port)
+	conn.set_debuglevel(1)
+	conn.ehlo()
+	conn.starttls()
+	conn.ehlo()
+	conn.login(user, password)
+	conn.sendmail(sender, recipients, msg.as_string())
+	conn.close()
+
+# Upload file to Dropbox 	
+def dropbox_upload(file_from, file_to):
+    
+    with open('./gma_secrets.json') as data_file:
+        credentials = json.load(data_file)
 	
-	# Set up server
-	s = smtplib.SMTP('smtp.gmail.com' , 587)
-	# Start TLLS
-	s.starttls()
-	# Login to e-mail
-	s.login(mail_access['user_name'], mail_access['password'])
-	# Send e-mail
-	s.sendmail(mail_access['user_name'], recipients, msg.as_string())
-	# Quit
-	s.quit()
+	# Store credentials and create Dropbox object
+    access_token = credentials['dropbox']['access_token']
+    dbx = dropbox.Dropbox(access_token)
+    
+    # Upload the file with option to over-write if it already exists
+    with open(file_from, 'rb') as f:
+        dbx.files_upload(f.read(), file_to, mode=dropbox.files.WriteMode.overwrite)
+
+ 	
+ 				
+
 	
    
    

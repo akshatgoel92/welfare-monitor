@@ -3,4 +3,5 @@
 # Execute the ETL
 cd /home/ec2-user/gma-scrape/
 scrapy crawl fto_stats
-scrapy crawl fto_content 
+scrapy crawl fto_content
+python ./common/process_log.py

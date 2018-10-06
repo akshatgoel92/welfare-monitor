@@ -22,7 +22,7 @@ NEWSPIDER_MODULE = 'nrega_scrape.spiders'
 ROBOTSTXT_OBEY = True
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 2
+CONCURRENT_REQUESTS = 1
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://doc.scrapy.org/en/latest/topics/settings.html#download-delay
@@ -69,36 +69,48 @@ CONCURRENT_REQUESTS = 2
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'nrega_scrape.pipelines.FTOSummaryPipeline': 300,
-    'nrega_scrape.pipelines.FTONoPipeline': 800,
     'nrega_scrape.pipelines.FTOContentPipeline': 1000
 }
 
 
 # Log defaults
-LOG_ENABLED = True
+#LOG_ENABLED = True
 LOG_ENCODING = 'utf-8'
 LOG_FORMATTER = 'scrapy.logformatter.LogFormatter'
 #LOG_FORMAT = '%(name)s, %(lineno)s, %(exc_info)s, %(asctime)s, %(filename)s, %(funcName)s, %(levelno)s, %(message).30s'
 LOG_DATEFORMAT = '%Y-%m-%d %H:%M:%S'
 LOG_STDOUT = False
-LOG_LEVEL = 'DEBUG'
-#LOG_FILE =  ''#'./nrega_output/log.csv'
-#LOG_SHORT_NAMES = True
+LOG_LEVEL = 'INFO'
+#LOG_FILE =  './nrega_output/log.csv'
+LOG_SHORT_NAMES = True
 
 CLOSESPIDER_ITEMCOUNT = 0
+# CLOSESPIDER_TIMEOUT = 60
+
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
-#AUTOTHROTTLE_ENABLED = True
+AUTOTHROTTLE_ENABLED = True
 # The initial download delay
-#AUTOTHROTTLE_START_DELAY = 5
+AUTOTHROTTLE_START_DELAY = 5
 # The maximum download delay to be set in case of high latencies
-#AUTOTHROTTLE_MAX_DELAY = 60
+AUTOTHROTTLE_MAX_DELAY = 60
 # The average number of requests Scrapy should be sending in parallel to
 # each remote server
-#AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
+AUTOTHROTTLE_TARGET_CONCURRENCY = 0.5
 # Enable showing throttling stats for every response received:
-#AUTOTHROTTLE_DEBUG = False
+AUTOTHROTTLE_DEBUG = True
+
+
+MEMDEBUG_ENABLED = True        # enable memory debugging
+MEMDEBUG_NOTIFY = []           # send memory debugging report by mail at engine shutdown
+
+MEMUSAGE_CHECK_INTERVAL_SECONDS = 60.0
+MEMUSAGE_ENABLED = True
+MEMUSAGE_LIMIT_MB = 0
+MEMUSAGE_NOTIFY_MAIL = []
+MEMUSAGE_WARNING_MB = 1024
+
 
 # Enable and configure HTTP caching (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings
