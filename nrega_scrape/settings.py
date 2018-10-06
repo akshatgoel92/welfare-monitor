@@ -101,6 +101,17 @@ AUTOTHROTTLE_TARGET_CONCURRENCY = 0.5
 # Enable showing throttling stats for every response received:
 AUTOTHROTTLE_DEBUG = True
 
+
+MEMDEBUG_ENABLED = True        # enable memory debugging
+MEMDEBUG_NOTIFY = []           # send memory debugging report by mail at engine shutdown
+
+MEMUSAGE_CHECK_INTERVAL_SECONDS = 60.0
+MEMUSAGE_ENABLED = True
+MEMUSAGE_LIMIT_MB = 0
+MEMUSAGE_NOTIFY_MAIL = []
+MEMUSAGE_WARNING_MB = 1024
+
+
 # Enable and configure HTTP caching (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings
 #HTTPCACHE_ENABLED = True
