@@ -66,7 +66,7 @@ class FtoContentSpider(scrapy.Spider):
     # Create a connection to the data-base
     conn, cursor = db_conn()
     # FTO nos.
-    fto_nos = pd.read_sql("SELECT fto_no FROM fto_numbers LIMIT 10;", con = conn).values.tolist()
+    fto_nos = pd.read_sql("SELECT fto_no FROM fto_numbers LIMIT 1000;", con = conn).values.tolist()
     # Get target FTO list
     fto_nos = [fto_no[0] for fto_no in fto_nos]
 
