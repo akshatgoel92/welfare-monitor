@@ -96,26 +96,23 @@ class FTOContentPipeline(object):
     										charset = 'utf8', 
     										use_unicode = True,
     										cp_max = 16)
-    	self.title_fields = ['block_name', 'app_name', 'prmry_acc_holder_name', 'status', 'rejection_reason']
-	
+		self.tables = ['fto_content']
+		
 	# Process item method
     def process_item(self, item, spider):
     
     	# Check if the current item is an FTO item instance
     	if isinstance(item, FTOItem):
+    		title_fields = ['block_name', 'app_name', 'prmry_acc_holder_name', 
+    						'status', 'rejection_reason']
     		if item['block_name'] is None:
     			raise(DropItem("Block name missing"))
     		else:
-    			for field in item.keys():
-    				item[field] = item[field].strip() if type(item[field]) ==str else item[field]
-    				if field in self.title_fields:
-    					item[field] = item[field].title()		
-    			# Insert into SQL
-    			insert_sql = "INSERT INTO fto_content (%s) VALUES (%s)"
-    			# If so get the SQL statement and data from the helper function
-    			sql, data = insert_data(item, insert_sql)
-    			# And then execute the SQL statement
-    			self.dbpool.runOperation(sql, data)
+    			item = clean_item(item, self.title_fields)
+    			for table in self.tables:
+    				keys = get_keys(item, table)
+    				sql, data = insert_sql(item, keys, table)
+    				self.dbpool.runOperation(sql, data)
     	# Return the item
     	return(item)
 	
