@@ -27,7 +27,6 @@ def sql_connect():
 	# Return statement	
 	return(sql_access)
 
-
 # Return connection and cursor
 def db_conn():
 	
@@ -107,7 +106,7 @@ def dropbox_upload(file_from, file_to):
     
     # Upload the file with option to over-write if it already exists
     with open(file_from, 'rb') as f:
-        dbx.files_upload(f.read(), file_to, mode=dropbox.files.WriteMode.overwrite)
+        dbx.files_upload(f.read(), file_to, mode = dropbox.files.WriteMode.overwrite)
 
  	
  				

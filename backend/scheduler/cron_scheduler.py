@@ -2,10 +2,10 @@
 from crontab import CronTab 
 
 # Schedule job to run 730 am every weekday
-my_cron = CronTab()
+my_cron = CronTab('ec2-user')
 # Create a cron job    
-job = my_cron.new(command='./nrega_etl.sh')
+job = my_cron.new(command='scrapy crawl fto_content')
 # Set the job schedule
-job.setall('30 7 * 1-5 *')
+job.setall('41 09-18 * * *')
 # Write the job to the crontab 
 my_cron.write()
