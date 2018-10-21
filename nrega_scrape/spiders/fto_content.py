@@ -38,6 +38,10 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.chrome.options import Options
 from datetime import date, timedelta
 
+# Twisted errors
+from twisted.internet.error import DNSLookupError
+from twisted.internet.error import TimeoutError, TCPTimedOutError
+
 # Item class
 from nrega_scrape.items import FTOItem
 from common.helpers import *
@@ -120,66 +124,74 @@ class FtoContentSpider(scrapy.Spider):
     	 
     	# Create FTO item
     	item = FTOItem()
-    	# Store source code
-    	source = self.get_source(response, self.driver)
     	
-    	# Store all tables on page
-    	tables = source.xpath('//table')
-    	# Get the last table on page from the tables list - this is the table we need
-    	table = tables[4]
+    	try: 
+    		# Store source code
+    		source = self.get_source(response, self.driver)
+    		
+    		# Store all tables on page
+    		tables = source.xpath('//table')
+    		# Get the last table on page from the tables list - this is the table we need
+    		table = tables[4]
     	
-    	# Store the rows
-    	rows = table.xpath('*//tr')
+    		# Store the rows
+    		rows = table.xpath('*//tr')
     	
-    	# Iterate through each row
-    	for row in rows:
-    		
-    		# Block name
-    		item['block_name'] = row.xpath('td[1]//text()').extract_first() 
-    		# Job card number
-    		item['jcn'] = row.xpath('td[2]//text()').extract_first()
-    		# Transaction reference no.
-    		item['transact_ref_no'] = row.xpath('td[3]//text()').extract_first()
-    		# Transaction date
-    		item['transact_date'] = row.xpath('td[4]//text()').extract_first()
-    		
-    		# Application name
-    		item['app_name'] = row.xpath('td[5]//text()').extract_first()
-    		# Primary account holder name
-    		item['prmry_acc_holder_name'] = row.xpath('td[6]//text()').extract_first()
-    		# Wage list no.
-    		item['wage_list_no'] = row.xpath('td[7]//text()').extract_first()
-    		# Account no.
-    		item['acc_no'] = row.xpath('td[8]//text()').extract_first()
-    		
-    		# Bank code
-    		item['bank_code'] = row.xpath('td[9]//text()').extract_first()
-    		# IFSC code
-    		item['ifsc_code'] = row.xpath('td[10]//text()').extract_first()
-    		# Credit amount due
-    		item['credit_amt_due'] = row.xpath('td[11]//text()').extract_first()
-    		# Credit amount actual
-    		item['credit_amt_actual'] = row.xpath('td[12]//text()').extract_first()
-    		
-    		# Status
-    		item['status'] = row.xpath('td[13]//text()').extract_first()
-    		# Processed date of FTO
-    		item['processed_date'] = row.xpath('td[14]//text()').extract_first()
-    		# Universal transaction reference
-    		item['utr_no'] = row.xpath('td[15]//text()').extract_first()
-    		# Rejection reason
-    		item['rejection_reason'] = row.xpath('td[16]//text()').extract_first()
-    		
-    		# Server name
-    		item['server'] = socket.gethostname()
-    		# FTO no.
-    		item['fto_no'] = re.findall('fto_no=(.*FTO_\d+)&fin_year', response.url)[0]
-    		# Scrape date
-    		item['scrape_date'] = str(datetime.datetime.now())
-    		# Time taken
-    		item['time_taken'] = time.time() - self.start_time
-    		# URL 
-    		item['url'] = response.url
-    		
-    		# Yield the item to processing pipeline
-    		yield(item)
+    		# Iterate through each row
+    		for row in rows:
+    			
+    			# Block name
+    			item['block_name'] = row.xpath('td[1]//text()').extract_first() 
+    			# Job card number
+    			item['jcn'] = row.xpath('td[2]//text()').extract_first()
+    			# Transaction reference no.
+    			item['transact_ref_no'] = row.xpath('td[3]//text()').extract_first()
+    			# Transaction date
+    			item['transact_date'] = row.xpath('td[4]//text()').extract_first()
+    			
+    			# Application name
+    			item['app_name'] = row.xpath('td[5]//text()').extract_first()
+    			# Primary account holder name
+    			item['prmry_acc_holder_name'] = row.xpath('td[6]//text()').extract_first()
+    			# Wage list no.
+    			item['wage_list_no'] = row.xpath('td[7]//text()').extract_first()
+    			# Account no.
+    			item['acc_no'] = row.xpath('td[8]//text()').extract_first()
+    			
+    			# Bank code
+    			item['bank_code'] = row.xpath('td[9]//text()').extract_first()
+    			# IFSC code
+    			item['ifsc_code'] = row.xpath('td[10]//text()').extract_first()
+    			# Credit amount due
+    			item['credit_amt_due'] = row.xpath('td[11]//text()').extract_first()
+    			# Credit amount actual
+    			item['credit_amt_actual'] = row.xpath('td[12]//text()').extract_first()
+    			
+    			# Status
+    			item['status'] = row.xpath('td[13]//text()').extract_first()
+    			# Processed date of FTO
+    			item['processed_date'] = row.xpath('td[14]//text()').extract_first()
+    			# Universal transaction reference
+    			item['utr_no'] = row.xpath('td[15]//text()').extract_first()
+    			# Rejection reason
+    			item['rejection_reason'] = row.xpath('td[16]//text()').extract_first()
+    			
+    			# Server name
+    			item['server'] = socket.gethostname()
+    			# FTO no.
+    			item['fto_no'] = re.findall('fto_no=(.*FTO_\d+)&fin_year', response.url)[0]
+    			# Scrape date
+    			item['scrape_date'] = str(datetime.datetime.now())
+    			# Time taken
+    			item['time_taken'] = time.time() - self.start_time
+    			# URL 
+    			item['url'] = response.url
+    			
+    			self.logger.info(item['fto_no'])
+    			
+    			# Yield the item to processing pipeline
+    			yield(item)
+    			
+    		except Exception as e:
+    			self.logger.info(str(e) + ' ' + response.url )
+    			
