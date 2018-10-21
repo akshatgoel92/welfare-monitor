@@ -22,8 +22,8 @@ NEWSPIDER_MODULE = 'nrega_scrape.spiders'
 ROBOTSTXT_OBEY = True
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 8
-DOWNLOAD_TIMEOUT = 15
+CONCURRENT_REQUESTS = 1
+DOWNLOAD_TIMEOUT = 120
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://doc.scrapy.org/en/latest/topics/settings.html#download-delay
@@ -86,7 +86,7 @@ LOG_LEVEL = 'DEBUG'
 # LOG_SHORT_NAMES = True
 
 CLOSESPIDER_ITEMCOUNT = 0
-CLOSESPIDER_TIMEOUT = 180
+CLOSESPIDER_TIMEOUT = 0
 
 
 # Enable and configure the AutoThrottle extension (disabled by default)
