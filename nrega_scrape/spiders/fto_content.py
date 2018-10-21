@@ -192,6 +192,6 @@ class FtoContentSpider(scrapy.Spider):
     			# Yield the item to processing pipeline
     			yield(item)
     			
-    		except Exception as e:
-    			self.logger.info(str(e) + ' ' + response.url )
+    	except Exception as e:
+    		self.logger.info(str(e) + ' ' + response.url )
     			
