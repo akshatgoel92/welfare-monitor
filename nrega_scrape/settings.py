@@ -22,7 +22,8 @@ NEWSPIDER_MODULE = 'nrega_scrape.spiders'
 ROBOTSTXT_OBEY = True
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 1
+CONCURRENT_REQUESTS = 8
+DOWNLOAD_TIMEOUT = 15
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://doc.scrapy.org/en/latest/topics/settings.html#download-delay
@@ -33,7 +34,7 @@ CONCURRENT_REQUESTS = 1
 #CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
-#COOKIES_ENABLED = False
+COOKIES_ENABLED = False
 
 # Disable Telnet Console (enabled by default)
 #TELNETCONSOLE_ENABLED = False
@@ -110,6 +111,11 @@ MEMUSAGE_ENABLED = True
 MEMUSAGE_LIMIT_MB = 0
 MEMUSAGE_NOTIFY_MAIL = []
 MEMUSAGE_WARNING_MB = 1024
+
+RETRY_ENABLED = False
+#RETRY_TIMES = 2  # initial response + 2 retries = 3 requests
+#RETRY_HTTP_CODES = [500, 502, 503, 504, 522, 524, 408]
+#RETRY_PRIORITY_ADJUST = -1
 
 
 # Enable and configure HTTP caching (disabled by default)
