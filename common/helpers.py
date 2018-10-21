@@ -54,7 +54,7 @@ def clean_item(item, title_fields):
 		item[field] = item[field].strip() if type(item[field]) == str else item[field]
 		
 		# Convert whatever fields that we can into title-case
-		if field in self.title_fields:
+		if field in title_fields:
 			item[field] = item[field].title()
 	
 	# Return statement

@@ -25,6 +25,8 @@ from nrega_scrape.items import FTONo
 from nrega_scrape.items import FTOItem
 from common.helpers import sql_connect
 from common.helpers import insert_data
+from common.helpers import clean_item
+from common.helpers import get_keys 
 
 # Twisted adbapi library for connection pools to SQL data-base
 from twisted.enterprise import adbapi
@@ -96,7 +98,7 @@ class FTOContentPipeline(object):
     										charset = 'utf8', 
     										use_unicode = True,
     										cp_max = 16)
-		self.tables = ['fto_content']
+    	self.tables = ['fto_content']
 		
 	# Process item method
     def process_item(self, item, spider):
@@ -108,10 +110,10 @@ class FTOContentPipeline(object):
     		if item['block_name'] is None:
     			raise(DropItem("Block name missing"))
     		else:
-    			item = clean_item(item, self.title_fields)
+    			item = clean_item(item, title_fields)
     			for table in self.tables:
-    				keys = get_keys(item, table)
-    				sql, data = insert_sql(item, keys, table)
+    				keys = get_keys(table)
+    				sql, data = insert_data(item, keys, table)
     				self.dbpool.runOperation(sql, data)
     	# Return the item
     	return(item)
