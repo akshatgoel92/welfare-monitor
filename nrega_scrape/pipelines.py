@@ -23,6 +23,7 @@ from scrapy.exceptions import DropItem
 from nrega_scrape.items import NREGAItem
 from nrega_scrape.items import FTONo
 from nrega_scrape.items import FTOItem
+
 from common.helpers import sql_connect
 from common.helpers import insert_data
 from common.helpers import clean_item
@@ -45,32 +46,33 @@ class FTOSummaryPipeline(object):
 		
     # Item processing function
 	def process_item(self, item, spider):
-		
+			
 		# Check what instance type we have
 		if isinstance(item, NREGAItem):
-			
+			tables = ['fto_summary']
 			title_fields = ['block_name']
-			insert_sql = "INSERT INTO fto_summary (%s) VALUES (%s)"
-		
+			
 		# Check what instance type we have
 		elif isinstance(item, FTONo):
-			
+			tables = ['fto_numbers']
 			title_fields = ['fto_stage']
-			insert_sql = "INSERT INTO fto_numbers (%s) VALUES (%s)"
 		
 		if spider.name == "fto_stats":
 			
-			for field in item.keys():
-				item[field] = item[field].strip() if type(item[field]) == str else item[field]
-				if field in title_fields:
-					item[field] = item[field].title()
+			# Clean item
+			item = clean_item(item, title_fields)
+			# Process each table
+			for table in tables:
+				# Get the keys
+				keys = get_keys(table)
+				# Get the inputs we need to execute the query
+				sql, data = insert_data(item, keys, table)
 			
-			# Get the inputs we need to execute the	query
-			sql, data = insert_data(item, insert_sql)
 			# Execute query
 			self.conn.cursor().execute(sql, data)
 			# Commit to DB
 			self.conn.commit()
+		
 		# Return statement
 		return(item)
 	
@@ -107,8 +109,10 @@ class FTOContentPipeline(object):
     	if isinstance(item, FTOItem):
     		title_fields = ['block_name', 'app_name', 'prmry_acc_holder_name', 
     						'status', 'rejection_reason']
+    		
     		if item['block_name'] is None:
     			raise(DropItem("Block name missing"))
+    		
     		else:
     			item = clean_item(item, title_fields)
     			for table in self.tables:

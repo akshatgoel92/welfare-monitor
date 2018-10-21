@@ -59,8 +59,8 @@ class FtoContentSpider(scrapy.Spider):
  	# Output directory
     output_dir = os.path.abspath(".")
     # Path to Chrome
-    path_to_chrome_driver = os.path.abspath("./../software/chromedriver/")
-    # path_to_chrome_driver = os.path.abspath("/home/ec2-user/chromedriver/")
+    # path_to_chrome_driver = os.path.abspath("./../software/chromedriver/")
+    path_to_chrome_driver = os.path.abspath("/home/ec2-user/chromedriver/")
     # List of URLs	
     start_urls = []
     # Create a connection to the data-base

@@ -75,7 +75,7 @@ ITEM_PIPELINES = {
 
 # Log defaults
 LOG_ENABLED = True
-#LOG_ENCODING = 'utf-8'
+LOG_ENCODING = 'utf-8'
 LOG_FORMATTER = 'scrapy.logformatter.LogFormatter'
 LOG_FORMAT = '%(name)s, %(lineno)s, %(exc_info)s, %(asctime)s, %(filename)s, %(funcName)s, %(levelno)s, %(message).50s'
 LOG_DATEFORMAT = '%Y-%m-%d %H:%M:%S'
