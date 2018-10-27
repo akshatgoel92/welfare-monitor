@@ -23,7 +23,7 @@ ROBOTSTXT_OBEY = True
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 CONCURRENT_REQUESTS = 1
-DOWNLOAD_TIMEOUT = 15
+DOWNLOAD_TIMEOUT = 60
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://doc.scrapy.org/en/latest/topics/settings.html#download-delay
@@ -80,8 +80,8 @@ LOG_ENCODING = 'utf-8'
 LOG_FORMATTER = 'scrapy.logformatter.LogFormatter'
 LOG_FORMAT = '%(name)s, %(lineno)s, %(exc_info)s, %(asctime)s, %(filename)s, %(funcName)s, %(levelno)s, %(message).50s'
 LOG_DATEFORMAT = '%Y-%m-%d %H:%M:%S'
-LOG_STDOUT = True
-LOG_LEVEL = 'DEBUG'
+LOG_STDOUT = False
+LOG_LEVEL = 'INFO'
 LOG_FILE =  './nrega_output/log.csv'
 LOG_SHORT_NAMES = True
 
@@ -112,8 +112,8 @@ MEMUSAGE_LIMIT_MB = 0
 MEMUSAGE_NOTIFY_MAIL = []
 MEMUSAGE_WARNING_MB = 1024
 
-RETRY_ENABLED = False
-#RETRY_TIMES = 2  # initial response + 2 retries = 3 requests
+RETRY_ENABLED = True
+RETRY_TIMES = 1  # initial response + 2 retries = 3 requests
 #RETRY_HTTP_CODES = [500, 502, 503, 504, 522, 524, 408]
 #RETRY_PRIORITY_ADJUST = -1
 
