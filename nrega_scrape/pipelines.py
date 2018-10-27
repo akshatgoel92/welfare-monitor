@@ -41,7 +41,10 @@ class FTOSummaryPipeline(object):
 		# Get credentials to connect to the data-base
 		user, password, host, db = sql_connect().values()
 		# Create a connection to the data-base
-		self.conn = pymysql.connect(host, user, password, db, charset="utf8", 
+		self.conn = pymysql.connect(host, 
+									user,
+									password,
+									db, charset="utf8", 
 									use_unicode=True)
 		
     # Item processing function
@@ -65,8 +68,10 @@ class FTOSummaryPipeline(object):
 			for table in tables:
 				# Get the keys
 				keys = get_keys(table)
-				# Get the inputs we need to execute the query
-				sql, data = insert_data(item, keys, table)
+				# Get the inputs for the query
+				sql, data = insert_data(item,
+										keys, 
+										table)
 			
 			# Execute query
 			self.conn.cursor().execute(sql, data)
@@ -107,8 +112,11 @@ class FTOContentPipeline(object):
     
     	# Check if the current item is an FTO item instance
     	if isinstance(item, FTOItem):
-    		title_fields = ['block_name', 'app_name', 'prmry_acc_holder_name', 
-    						'status', 'rejection_reason']
+    		title_fields = ['block_name',
+    						'app_name', 
+    						'prmry_acc_holder_name', 
+    						'status', 
+    						'rejection_reason']
     		
     		if item['block_name'] is None:
     			raise(DropItem("Block name missing"))
@@ -117,7 +125,9 @@ class FTOContentPipeline(object):
     			item = clean_item(item, title_fields)
     			for table in self.tables:
     				keys = get_keys(table)
-    				sql, data = insert_data(item, keys, table)
+    				sql, data = insert_data(item,
+    										keys,
+    										table)
     				self.dbpool.runOperation(sql, data)
     	# Return the item
     	return(item)
