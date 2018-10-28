@@ -22,8 +22,12 @@ def create_db(engine):
 	metadata = MetaData()
 	
 	# FTO summary table			 
-	fto_summary = Table('fto_summary', metadata, 
-										Column('block_name', String(100)), 
+	fto_summary = Table('fto_summary', metadata,
+										Column('id', Integer, 
+													primary_key = True, 
+													autoincrement = True), 
+										Column('block_name', String(50), 
+												ForeignKey('blocks.block_name')), 
 										Column('total_fto', Integer), 
 										Column('first_sign', Integer),
 										Column('first_sign_pending', Integer),
@@ -40,64 +44,104 @@ def create_db(engine):
 										Column('transact_processed_bank_resp', Integer), 
 										Column('invalid_accounts_bank_resp', Integer), 
 										Column('transact_rejected_bank_resp', Integer), 
-										Column('transact_total_bank_resp', Integer), 
-										Column('url', String(100)),
-										Column('spider', String(100)),
-										Column('server', String(100)),
-										Column('date', String(100)))
+										Column('transact_total_bank_resp', Integer),
+										Column('scrape_date', String(50)), 
+										Column('scrape_time', String(50))) 
 
-# FTO numbers table
-	fto_numbers = Table('fto_numbers', metadata, 
-										Column('fto_no', String(100)), 
-										Column('fto_stage', String(100)), 
-										Column('state_code', String(100)),
-										Column('district_code', String(100)),
-										Column('block_code', String(100)),
-										Column('process_date', String(100)),
-										Column('url', String(100)),
-										Column('spider', String(100)),
-										Column('server', String(100)),
-										Column('date', String(100)))
-
-# FTO content table
-	fto_content = Table('fto_content', metadata, 
-										Column('block_name', String(100)), 
-										Column('jcn', String(100)), 
-										Column('transact_ref_no', String(100)),
-										Column('transact_date', String(100)),
-										Column('app_name', String(100)),
-										Column('prmry_acc_holder_name', String(100)),
-										Column('wage_list_no', String(100)),
-										Column('acc_no', String(100)),
-										Column('bank_code', String(100)),
-										Column('ifsc_code', String(100)),
-										Column('credit_amt_due', String(100)),
-										Column('credit_amt_actual', String(100)),
-										Column('status', String(100)),
-										Column('processed_date', String(100)),
-										Column('utr_no', String(100)), 
-										Column('rejection_reason', String(100)), 
-										Column('server', String(100)), 
-										Column('fto_no', String(100)), 
-										Column('scrape_date', String(100)),
-										Column('time_taken', String(100)),
-										Column('url', String(100)))
-
+	# FTO numbers table
+	fto_numbers = Table('fto_nos', metadata, 
+										Column('id', Integer, 
+												primary_key = True, 
+												autoincrement = True),
+										Column('fto_no', String(50)), 
+										Column('fto_stage', String(50)), 
+										Column('state_code', String(50)),
+										Column('district_code', String(50)),
+										Column('block_code', Integer),
+										Column('process_date', String(50)),
+										Column('scrape_date', Date), 
+										Column('scrape_time', Time))
+	# FTO stages look-up table
+	fto_stage = Table("fto_stages", metadata, 
+										Column("fto_stage_name", String(50), 
+												primary_key = True),
+										Column("fto_stage_code", SmallInteger, 
+												primary_key = True))
+	
+	# FTO scrape queue
+	fto_scrape_queue = Table('fto_queue', metadata, 
+										Column('fto_no', String(50),
+												primary_key = True),
+										Column('scrape_date', Date),
+										Column('scrape_time', Time),
+										Column('scrape_status', SmallInteger))
+	# Transactions table
+	transactions = Table('transactions', metadata, 
+										Column('block_name', String(50), 
+												ForeignKey("blocks.block_name")), 
+										Column('jcn', String(50)), 
+										Column('transact_ref_no', String(50), 
+												primary_key = True),
+										Column('transact_date', String(50)),
+										Column('app_name', String(50)),
+										Column('wage_list_no', String(50), 
+												ForeignKey("wage_lists.wage_list_no")),
+										Column('acc_no', String(50)),
+										Column('credit_amt_due', Integer),
+										Column('credit_amt_actual', Integer),
+										Column('status', String(50)),
+										Column('processed_date', String(50)),
+										Column('utr_no', String(50)), 
+										Column('rejection_reason', String(50)),
+										Column('fto_no', String(50)))
+	# FTO content table
+	wage_list = Table('wage_lists', metadata, 
+										Column('wage_list_no', String(50), 
+												primary_key = True), 
+										Column('block_name', String(50), 
+												ForeignKey("blocks.block_name")))
+	
+	# Accounts table
+	# Assumption: Primary account holder name and IFSC code is unique within a JCN and 
+	# account number
+	accounts = Table('accounts', metadata,
+										Column("id", Integer, 
+												primary_key = True, 
+												autoincrement = True), 
+										Column('jcn', String(50)), 
+										Column('acc_no', String(50)),
+										Column('ifsc_code', String(50), 
+												ForeignKey('banks.ifsc_code')),
+										Column('prmry_acc_holder_name', 
+												String(50)))
+	
+	# Banks table
+	banks = Table('banks', metadata, 
+										Column('ifsc_code', String(50), 
+												primary_key = True), 
+										Column('bank_code', String(30)))
+	
+	# Blocks table
+	blocks = Table('blocks', metadata, 
+										Column('block_name', String(50), 
+												primary_key = True), 
+										Column('block_code', SmallInteger))
+	
 	# Create the tables
 	metadata.create_all(engine)
-
-# Create a JSON file with keys	
+	
+# Create a JSON file with keys
 def send_keys_to_file(engine):
 	
 	# Get the table names and store them as a dictionary
 	inspector = reflection.Inspector.from_engine(engine)
+	# Store the table names
 	tables = dict.fromkeys(inspector.get_table_names(), '')
 	# Now for each table:
 	for table in tables:
-		
 		# First store the columns and then put them in the table dictionary 
-		tables[table] = [column['name'] for column in inspector.get_columns(table)]
-	
+		tables[table] = [column['name'] for column in inspector.get_columns(table)
+						if 'autoincrement' not in column.keys()]
 	# Dump the table dictionary to a JSON file 	
 	with open('./backend/db/table_keys.json', 'w') as file:
 		json.dump(tables, file, sort_keys=True, indent=4)
@@ -105,15 +149,11 @@ def send_keys_to_file(engine):
 # Execute
 if __name__ == '__main__':
 	
-	# Create engine for data-base access
+	# Get values
 	user, password, host, db = sql_connect().values()
+	# Get engine
 	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
-	
 	# Create data-base
 	create_db(engine)
 	# Send keys to file
-	send_keys_to_file()
-	
-	
-
-    	
+	send_keys_to_file(engine)
