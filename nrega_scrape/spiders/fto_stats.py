@@ -140,15 +140,10 @@ class FtoSpider(CrawlSpider):
     		item['transact_rejected_bank_resp'] = table_data.loc[row, 17]
     		# No. of transactions processed by bank
     		item['transact_total_bank_resp'] = table_data.loc[row, 18]
-    	
-    		# URL
-    		item['url'] = self.basic
-    		# Spider
-    		item['spider'] = self.name
-    		# Server
-    		item['server'] = socket.gethostname()
     		# Date
-    		item['date'] = str(datetime.datetime.now()) 
+    		item['scrape_date'] = datetime.datetime.now().date()
+    		# Time
+    		item['scrape_time'] = datetime.datetime.now().time()
     		
     		# Yield item to processing pipe-line
     		yield(item)
@@ -211,15 +206,12 @@ class FtoSpider(CrawlSpider):
     			item['block_code'] = fto_scraped.loc[row, '3']
     			# Process date
     			item['process_date'] = parse(fto_scraped.loc[row, '4'], dayfirst = True)
-    			
     			# URL for item
     			item['url'] = self.basic
-    			# Spider name
-    			item['spider'] = self.name
-    			# Server
-    			item['server'] = socket.gethostname()
     			# Date
-    			item['date'] = str(datetime.datetime.now())
+    			item['scrape_date'] = datetime.datetime.now().date()
+    			# Time
+    			item['scrape_time'] = datetime.datetime.now().time()
     			# FTO stage
     			item['fto_stage'] = fto_stage
     			
