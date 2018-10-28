@@ -57,7 +57,7 @@ class FTOSummaryPipeline(object):
 			
 		# Check what instance type we have
 		elif isinstance(item, FTONo):
-			tables = ['fto_numbers']
+			tables = ['fto_nos']
 			title_fields = ['fto_stage']
 		
 		if spider.name == "fto_stats":
@@ -105,7 +105,7 @@ class FTOContentPipeline(object):
     										charset = 'utf8', 
     										use_unicode = True,
     										cp_max = 16)
-    	self.tables = ['fto_content']
+    	self.tables = ['accounts', 'banks', 'fto_nos', 'transactions', 'wage_lists']
 		
 	# Process item method
     def process_item(self, item, spider):
