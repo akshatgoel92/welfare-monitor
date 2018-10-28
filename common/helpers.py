@@ -46,7 +46,8 @@ def db_conn():
 	
 	# Return statement
 	return(conn, cursor)
-
+	
+	
 def clean_item(item, title_fields):
 	
 	for field in item.keys():
@@ -130,14 +131,6 @@ def dropbox_upload(file_from, file_to):
     
     # Upload the file with option to over-write if it already exists
     with open(file_from, 'rb') as f:
-        dbx.files_upload(f.read(), file_to, mode = dropbox.files.WriteMode.overwrite)
-
- 	
- 				
-
-	
-   
-   
-   
-
-    	
+        dbx.files_upload(f.read(), 
+                         file_to, 
+                         mode = dropbox.files.WriteMode.overwrite)
