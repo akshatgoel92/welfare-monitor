@@ -48,13 +48,9 @@ class NREGAItem(scrapy.Item):
     transact_total_bank_resp = scrapy.Field()
     
     # Housekeeping fields
-    url = scrapy.Field()
+    scrape_date = scrapy.Field()
     
-    spider = scrapy.Field() 
-    
-    server = scrapy.Field() 
-    
-    date = scrapy.Field()
+    scrape_time = scrapy.Field()
     
     
 class FTONo(scrapy.Item):
@@ -75,11 +71,9 @@ class FTONo(scrapy.Item):
 	# Housekeeping fields
 	url = scrapy.Field()
 	
-	spider = scrapy.Field()
+	scrape_date = scrapy.Field()
 	
-	server = scrapy.Field()
-	
-	date = scrapy.Field()
+	scrape_time = scrapy.Field()
 
 	
 class FTOItem(scrapy.Item):
@@ -124,6 +118,4 @@ class FTOItem(scrapy.Item):
     
     scrape_date = scrapy.Field()
     
-    time_taken = scrapy.Field()
-    
-    url = scrapy.Field()
+    scrape_time = scrapy.Field()
