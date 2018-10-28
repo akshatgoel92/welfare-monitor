@@ -36,6 +36,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.chrome.options import Options
+
+# Date and time sub-modules 
 from datetime import date, timedelta
 
 # Twisted errors
@@ -62,21 +64,23 @@ class FtoContentSpider(scrapy.Spider):
     start_time = time.time()
  	# Output directory
     output_dir = os.path.abspath(".")
+    # Insert option to specify local mode
+    user = 'local'
     # Path to Chrome
-    # path_to_chrome_driver = os.path.abspath("./../software/chromedriver/")
-    path_to_chrome_driver = os.path.abspath("/home/ec2-user/chromedriver/")
+    if user == 'local':
+    	path_to_chrome_driver = os.path.abspath("./../software/chromedriver/")
+    elif user == 'ec2':
+    	path_to_chrome_driver = os.path.abspath("/home/ec2-user/chromedriver/")
     # List of URLs	
     start_urls = []
     # Create a connection to the data-base
     conn, cursor = db_conn()
     # FTO nos.
-    fto_nos = pd.read_sql("SELECT fto_no FROM fto_numbers LIMIT 1000;", con = conn).values.tolist()
+    fto_nos = pd.read_sql("SELECT fto_no FROM fto_nos LIMIT 1000;", con = conn).values.tolist()
     # Get target FTO list
     fto_nos = [fto_no[0] for fto_no in fto_nos]
-
-    # Iterate through each FTO number
+	# Iterate through each FTO number
     for fto_no in fto_nos:
-		
 		# Construct URL for each FTO no
     	url = basic + "fto_no=" + fto_no + "&fin_year=" + fin_year + "&state_code=" + state_code
     	# Append each constructed URL to the list
@@ -95,51 +99,41 @@ class FtoContentSpider(scrapy.Spider):
     			
     # Get selector object for file
     def get_source(self, response, driver):
-
     	# Navigate to the target URL
     	driver.get(response.url)
     	# Sleep for 4 seconds to wait for response URL
     	time.sleep(4)
-    	
     	# Create drop down object 
     	fto_drop_down = Select(driver.find_element_by_css_selector("#ctl00_ContentPlaceHolder1_Ddfto"))
     	# Sleep for 3 seconds
     	time.sleep(3)
-    	
     	# Select the FTO number from the drop down box
     	fto_drop_down.select_by_index(1)
     	# Store it as a scrapy selector object
     	time.sleep(4)
-    	
     	# Get the page source text
     	page_source = driver.page_source
     	# Store it as a selector object
     	page_source = Selector(text = page_source)
-    	
     	# Return page source
     	return(page_source)
     	
     # Get the response and parse it 	
     def parse(self, response):
-    	 
     	# Create FTO item
     	item = FTOItem()
-    	
+    	# Put this whole block in a try except clause
     	try: 
     		# Store source code
     		source = self.get_source(response, self.driver)
-    		
     		# Store all tables on page
     		tables = source.xpath('//table')
     		# Get the last table on page from the tables list - this is the table we need
     		table = tables[4]
-    	
     		# Store the rows
     		rows = table.xpath('*//tr')
-    	
     		# Iterate through each row
     		for row in rows:
-    			
     			# Block name
     			item['block_name'] = row.xpath('td[1]//text()').extract_first() 
     			# Job card number
@@ -148,7 +142,6 @@ class FtoContentSpider(scrapy.Spider):
     			item['transact_ref_no'] = row.xpath('td[3]//text()').extract_first()
     			# Transaction date
     			item['transact_date'] = row.xpath('td[4]//text()').extract_first()
-    			
     			# Application name
     			item['app_name'] = row.xpath('td[5]//text()').extract_first()
     			# Primary account holder name
@@ -157,7 +150,6 @@ class FtoContentSpider(scrapy.Spider):
     			item['wage_list_no'] = row.xpath('td[7]//text()').extract_first()
     			# Account no.
     			item['acc_no'] = row.xpath('td[8]//text()').extract_first()
-    			
     			# Bank code
     			item['bank_code'] = row.xpath('td[9]//text()').extract_first()
     			# IFSC code
@@ -166,7 +158,6 @@ class FtoContentSpider(scrapy.Spider):
     			item['credit_amt_due'] = row.xpath('td[11]//text()').extract_first()
     			# Credit amount actual
     			item['credit_amt_actual'] = row.xpath('td[12]//text()').extract_first()
-    			
     			# Status
     			item['status'] = row.xpath('td[13]//text()').extract_first()
     			# Processed date of FTO
@@ -175,23 +166,22 @@ class FtoContentSpider(scrapy.Spider):
     			item['utr_no'] = row.xpath('td[15]//text()').extract_first()
     			# Rejection reason
     			item['rejection_reason'] = row.xpath('td[16]//text()').extract_first()
-    			
     			# Server name
     			item['server'] = socket.gethostname()
     			# FTO no.
     			item['fto_no'] = re.findall('fto_no=(.*FTO_\d+)&fin_year', response.url)[0]
     			# Scrape date
-    			item['scrape_date'] = str(datetime.datetime.now())
+    			item['scrape_date'] = str(datetime.datetime.now().date())
+    			# Scrape time
+    			item['scrape_time'] = str(datetime.datetime.now().time())
     			# Time taken
     			item['time_taken'] = time.time() - self.start_time
     			# URL 
     			item['url'] = response.url
-    			
+				# Log the item
     			self.logger.info(item['fto_no'])
-    			
     			# Yield the item to processing pipeline
     			yield(item)
-    			
+    	# Except exception as e		
     	except Exception as e:
     		self.logger.info(str(e) + ' ' + response.url )
-    			
