@@ -1,4 +1,6 @@
-# Install conda and make it system Python 
+# Install conda and make it system Python
+# Make sure that end of anaconda installation you select yes when installer asks
+# whether to prepend to system Python
 wget http://repo.continuum.io/archive/Anaconda3-5.2.0-Linux-x86_64.sh
 bash Anaconda3-5.2.0-Linux-x86_64.sh
 source .bashrc
@@ -9,9 +11,8 @@ unzip chromedriver_linux64.zip
 sudo mv chromedriver /usr/bin/chromedriver
 
 # Get Google Chrome
-cd /usr/bin/
-curl https://intoli.com/install-google-chr
-sudo mv /usr/bin/google-chrome-stable /usr/bin/google-chrome
+curl https://intoli.com/install-google-chrome.sh | bash
+sudo mv google-chrome-stable google-chrome
 google-chrome --version && which google-chrome
 
 # Install git
