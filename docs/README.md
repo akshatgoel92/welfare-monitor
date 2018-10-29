@@ -46,6 +46,8 @@ This script is run from nrega_etl.sh as soon as fto_stats.py finishes. It filter
 
 This script is run from nrega_etl.sh as soon as fto_filter.py finishes. It visits the pages of the FTO numbers in the queue to actually scrape the content of each FTO and write them to the data-base. 
 
+```print("Hello World)
+```
 
 ## Helpers/Other scripts 
 
