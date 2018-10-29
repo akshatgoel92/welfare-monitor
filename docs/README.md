@@ -14,23 +14,45 @@ The SKY programme is a Chattisgarh Government initiative to expand access women'
 
 The NREGA payments process tracks each transaction that has to be made under NREGA. This information is digitized and stored in the FTO status tracking system. 
 
-## nrega_etl.sh 
+## Main scripts 
 
-Every morning at 730 am, the ETL shell script nrega_etl.sh is triggered by a cron job on an Amazon EC2 instance. The program flows as follows: 
+### nrega_etl.sh 
 
-* Visits the block level summary page for Raipur district and scrape the total no. of FTOs at each stage. This is used for data quality checks later. 
-* Clicks on each of the hyperlinks on the block level summary page, which lead it to a list of FTOs for that block and payment stage. This list of FTOs is scraped and placed on the DB. 
-* The list of FTOs is then filtered for FTOs that entered the payment processing system in the previous week and which have not been scraped    yet.
-* These FTOs are placed in the FTO queue table to be scraped. Once this is done, the the FTOs themselves are scraped.
+Every morning at 730 am, the ETL shell script nrega_etl.sh is triggered by a cron job on an Amazon EC2 instance. This shell script runs a Python program which runs the following scripts in the given order. 
 
-## fto_filter.py
+### fto_stats.py 
+
+This script is run from nrega_etl.sh as soon as the cron triggers the script. It takes the following steps: 
+
+* Visits the block level summary page for Raipur district 
+* Scrapes the total number of FTOs at each stage
+* Follows the links in each of the cell in the block-level summary page
+* Scrapes the list of FTO numbers for each block for each stage from the hyperlinked pages 
+* Writes the scraped list to DB 
+
+### fto_filter.py
+
+This script is run from nrega_etl.sh as soon as fto_stats.py finishes. It filters the scraped FTO numbers to get only those FTOs that are needed for the call in that week. It takes the following steps: 
+
+* FTOs are listed for each stage they have been through so we keep only FTO under the furthest stage
+* Removes any FTOs older than 7 days 
+* Queries the DB for the FTOs that have already been scraped 
+* Removes these from the list of FTOs to be scraped 
+* Queries the DB for FTOs for whom information has already been pushed
+* Removes any FTOs for whom information has already been pushed 
+* Writes to SQL DB table with list of FTOs to be scraped 
+
+### fto_content.py 
+
+This script is run from nrega_etl.sh as soon as fto_filter.py finishes. It visits the pages of the FTO numbers in the queue to actually scrape the content of each FTO and write them to the data-base. 
 
 
-## fto_stats.py 
+## Helpers/Other scripts 
 
-## fto_content.py 
+### items.py 
 
-## items.py 
+### pipelines.py 
 
-## pipelines.py 
+### helpers.py 
 
+### ./backend/db_schema.py 
