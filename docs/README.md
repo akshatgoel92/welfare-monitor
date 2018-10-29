@@ -16,11 +16,11 @@ The NREGA payments process tracks each transaction that has to be made under NRE
 
 ## Main scripts 
 
-### nrega_etl.sh 
+#### nrega_etl.sh 
 
 Every morning at 730 am, the ETL shell script nrega_etl.sh is triggered by a cron job on an Amazon EC2 instance. This shell script runs a Python program which runs the following scripts in the given order. 
 
-### fto_stats.py 
+#### fto_stats.py 
 
 This script is run from nrega_etl.sh as soon as the cron triggers the script. It takes the following steps: 
 
@@ -30,7 +30,7 @@ This script is run from nrega_etl.sh as soon as the cron triggers the script. It
 * Scrapes the list of FTO numbers for each block for each stage from the hyperlinked pages 
 * Writes the scraped list to DB 
 
-### fto_filter.py
+#### fto_filter.py
 
 This script is run from nrega_etl.sh as soon as fto_stats.py finishes. It filters the scraped FTO numbers to get only those FTOs that are needed for the call in that week. It takes the following steps: 
 
@@ -42,20 +42,14 @@ This script is run from nrega_etl.sh as soon as fto_stats.py finishes. It filter
 * Removes any FTOs for whom information has already been pushed 
 * Writes to SQL DB table with list of FTOs to be scraped 
 
-### fto_content.py 
+#### fto_content.py 
 
 This script is run from nrega_etl.sh as soon as fto_filter.py finishes. It visits the pages of the FTO numbers in the queue to actually scrape the content of each FTO and write them to the data-base. 
 
-```
-print("Hello World)
-```
+#### items.py 
 
-## Helpers/Other scripts 
+#### pipelines.py 
 
-### items.py 
+#### helpers.py 
 
-### pipelines.py 
-
-### helpers.py 
-
-### ./backend/db_schema.py 
+#### db_schema.py 
