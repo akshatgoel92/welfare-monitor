@@ -89,7 +89,22 @@ class FtoContentSpider(scrapy.Spider):
 	# Create driver object
 	driver = webdriver.Chrome(path_to_chrome_driver, chrome_options = options)
 
-	
+	def start_requests(self):
+
+		for url in self.start_urls:
+			yield(scrapy.Request(url, 
+								callback = self.parse, 
+								errback = self.error_handling, 
+								dont_filter = True))
+
+	# This takes as input a Twisted failure object
+	# It returns as output a representation of this object
+	# to the log file
+	# This ensures that all errors are logged in case we
+	# want to do anything with them later
+	def error_handling(self, failure):
+		self.logger.error(repr(failure))
+
 	# Get selector object for file
 	def get_source(self, response, driver):
 		
