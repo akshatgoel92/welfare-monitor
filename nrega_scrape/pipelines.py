@@ -47,7 +47,7 @@ class FTOSummaryPipeline(object):
 									db, charset="utf8", 
 									use_unicode=True)
 		
-    # Item processing function
+	# Item processing function
 	def process_item(self, item, spider):
 			
 		# Check what instance type we have
@@ -90,56 +90,55 @@ class FTOSummaryPipeline(object):
 		del self.conn
 		
 class FTOContentPipeline(object):
-    
-    def __init__(self):
-    	
-    	# Get the connection credentials
-    	user, password, host, db_name = sql_connect().values()
-    	# Create the data-base connection pool using credentials
-    	self.dbpool = adbapi.ConnectionPool('pymysql', 
-    										db = db_name, 
-    										host = host, 
-    										user = user, 
-    										passwd = password, 
-    										cursorclass = pymysql.cursors.DictCursor, 
-    										charset = 'utf8', 
-    										use_unicode = True,
-    										cp_max = 16)
-    	self.tables = ['accounts', 'banks', 'fto_nos', 'transactions', 'wage_lists']
+
+	def __init__(self):
 		
+		# Get the connection credentials
+		user, password, host, db_name = sql_connect().values()
+		# Create the data-base connection pool using credentials
+		self.dbpool = adbapi.ConnectionPool('pymysql', 
+											db = db_name, 
+											host = host, 
+											user = user, 
+											passwd = password, 
+											cursorclass = pymysql.cursors.DictCursor, 
+											charset = 'utf8', 
+											use_unicode = True,
+											cp_max = 16)
+		self.tables = ['accounts', 'banks', 'transactions', 'wage_lists']
+		self.unique_tables = ['banks', 'wage_lists']
+	
 	# Process item method
-    def process_item(self, item, spider):
-    
-    	# Check if the current item is an FTO item instance
-    	if isinstance(item, FTOItem):
-    		title_fields = ['block_name',
-    						'app_name', 
-    						'prmry_acc_holder_name', 
-    						'status', 
-    						'rejection_reason']
-    		
-    		if item['block_name'] is None:
-    			raise(DropItem("Block name missing"))
-    		
-    		else:
-    			item = clean_item(item, title_fields)
-    			for table in self.tables:
-    				keys = get_keys(table)
-    				sql, data = insert_data(item,
-    										keys,
-    										table)
-    				self.dbpool.runOperation(sql, data)
-    	# Return the item
-    	return(item)
+	def process_item(self, item, spider):
+
+		# Check if the current item is an FTO item instance
+		if isinstance(item, FTOItem):
+			title_fields = ['block_name',
+							'app_name', 
+							'prmry_acc_holder_name', 
+							'status', 
+							'rejection_reason']
+
+			if item['block_name'] is None:
+				raise(DropItem("Block name missing"))
+
+			else:
+				item = clean_item(item, title_fields)
+				for table in self.tables:
+					unique = 1 if table in self.unique_tables else 0
+					keys = get_keys(table)
+					sql, data = insert_data(item,
+											keys,
+											table, 
+											unique)
+					self.dbpool.runOperation(sql, data)
+		# Return the item
+		return(item)
 	
 	# Execute this function when the spider is closing
-    def close_spider(self, spider):
-    	# Shut down all the connections in the DB connection pool
-        self.dbpool.close()
-	
-
-			
-	
+	def close_spider(self, spider):
+		# Shut down all the connections in the DB connection pool
+		self.dbpool.close()
 
 
 	
