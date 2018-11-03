@@ -57,15 +57,12 @@ class FtoContentSpider(scrapy.Spider):
 	basic = "http://mnregaweb4.nic.in/netnrega/fto/fto_status_dtl.aspx?"
 	fin_year = "2018-2019"
 	state_code = "33"
-	start_time = time.time()
 	output_dir = os.path.abspath(".")
 	
+	# Set Path to Chrome driver
 	user = 'local'
 	path = "./../software/chromedriver/" if user == 'local' else "/home/ec2-user/chromedriver/"
 	path_to_chrome_driver = os.path.abspath(path)
-
-	# Store start URLs here	
-	start_urls = []
 
 	# Get the target FTO nos.
 	conn, cursor = db_conn()
@@ -76,30 +73,44 @@ class FtoContentSpider(scrapy.Spider):
 	# Store target FTO nos.
 	fto_nos = [fto_no[0] for fto_no in fto_nos]
 	
+	# Store start URLs here	
+	start_urls = []
+
 	# Construct URL for each FTO no
 	for fto_no in fto_nos:
 		url = basic + "fto_no=" + fto_no + "&fin_year=" + fin_year + "&state_code=" + state_code
 		start_urls.append(url)
 
 	# Create options object for Chrome driver
+	# Set option to run headless
 	options = Options()
 	options.add_argument('--headless')
 
 	# Create driver object
 	driver = webdriver.Chrome(path_to_chrome_driver, chrome_options = options)
 
+	
 	# Get selector object for file
 	def get_source(self, response, driver):
 		
+		# Get response URL
+		# Sleep for 4 seconds
 		driver.get(response.url)
 		time.sleep(4)
 
+		# Drop down selector object
+		# Sleep for 3 seconds
 		fto_drop_down = Select(driver.find_element_by_css_selector("#ctl00_ContentPlaceHolder1_Ddfto"))
 		time.sleep(3)
 
+		# Click the button
+		# Sleep for 4 seconds 
 		fto_drop_down.select_by_index(1)
 		time.sleep(4)
 
+		# Get the source code
+		# Return as a Selector object
+		# Return statement
 		page_source = driver.page_source
 		page_source = Selector(text = page_source)
 
@@ -108,15 +119,22 @@ class FtoContentSpider(scrapy.Spider):
 
 	def parse(self, response):
 		
+		# Create FTO content item
 		# Get the source code of the FTO page
 		item = FTOItem()
 		source = self.get_source(response, self.driver)
     	
+		# Get all the tables on the web-page
+		# Then select the correct one
 		tables = source.xpath('//table')
 		table = tables[4]
+
+		# Store the rows so we can iterature over
+		# them
 		rows = table.xpath('*//tr')
 
 		# Process the item by iterating over rows
+		# Log the item name to the log file
 		for row in rows:
 
 			item['block_name'] = row.xpath('td[1]//text()').extract_first() 
@@ -143,8 +161,9 @@ class FtoContentSpider(scrapy.Spider):
 			item['server'] = socket.gethostname()
 			item['fto_no'] = re.findall('fto_no=(.*FTO_\d+)&fin_year', response.url)[0]
 			
-			item['scrape_date'] = str(datetime.datetime.now().date())
-			item['scrape_time'] = str(datetime.datetime.now().time())
+			item['scrape_date'] = datetime.datetime.now().date()
+			item['scrape_time'] = datetime.datetime.now().time()
 			
 			self.logger.info(item['fto_no'])
+			
 			yield(item)
