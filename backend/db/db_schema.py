@@ -129,7 +129,14 @@ def create_db(engine):
 	
 	# Create the tables
 	metadata.create_all(engine)
-	
+
+def create_block_table(engine):
+
+	with open('./backend/db/blocks.json') as block_codes:
+		blocks = json.loads(block_codes)
+
+	pass
+
 # Create a JSON file with keys
 def send_keys_to_file(engine):
 	
