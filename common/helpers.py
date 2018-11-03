@@ -72,15 +72,17 @@ def get_keys(table):
 	return(keys)
 	
 # Insert a record into the SQL data-base
-def insert_data(item, keys, table):
+def insert_data(item, keys, table, unique = 0):
 		
 	# Get the inputs to the SQL command
 	keys = get_keys(table)
 	fields = u','.join(keys)
 	qm = u','.join([u'%s'] * len(keys))
+	sql = "INSERT INTO " + table + " (%s) VALUES (%s)"
+	sql_unique = "INSERT IGNORE INTO " + table + " (%s) VALUES (%s)"
 	
 	# Construct the SQL command and return
-	insert = "INSERT INTO " + table + " (%s) VALUES (%s)"
+	insert = sql if unique == 0 else sql_unique
 	sql = insert % (fields, qm)
 	data = [item[k] for k in keys]
 	return(sql, data)
