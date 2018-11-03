@@ -23,7 +23,7 @@ ROBOTSTXT_OBEY = True
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 CONCURRENT_REQUESTS = 1
-DOWNLOAD_TIMEOUT = 60
+DOWNLOAD_TIMEOUT = 45
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://doc.scrapy.org/en/latest/topics/settings.html#download-delay
@@ -85,8 +85,9 @@ LOG_LEVEL = 'INFO'
 LOG_FILE =  './nrega_output/log.csv'
 LOG_SHORT_NAMES = True
 
+CLOSESPIDER_ERRORCOUNT = 20
 CLOSESPIDER_ITEMCOUNT = 0
-CLOSESPIDER_TIMEOUT = 0
+CLOSESPIDER_TIMEOUT = 20
 
 
 # Enable and configure the AutoThrottle extension (disabled by default)
