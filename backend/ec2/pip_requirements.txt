@@ -1,0 +1,10 @@
+beautifulsoup4==4.6.0
+jsonschema==2.6.0
+mysql-connector-python==8.0.12
+PyMySQL==0.9.2
+requests==2.18.4
+Scrapy==1.5.1
+selenium==3.13.0
+SQLAlchemy==1.2.7
+Twisted==17.5.0
+dropbox==9.0.0
