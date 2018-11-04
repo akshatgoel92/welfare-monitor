@@ -79,7 +79,7 @@ This is the **scrapy items** file. It defines the **items** that are going to be
 
 * FTOItem: this is a **transaction**
 
-####pipelines.py 
+#### pipelines.py 
 
 This script contains two **scrapy pipeline objects** which process each **item** that is scraped by the two spiders. Each pipeline has the following steps: 
 
@@ -96,7 +96,7 @@ This file has common functions which are used by the spiders and pipelines file 
 
 * **insert_data**:  This function prepares a string SQL statement to insert data into the MySQL database. The SQL statement is based on the value of the variable **unique** which is 1 if the table that the data is going to be written to has to satisfy a uniqueness constraint and 0 otherwise.
 
-####settings.py
+#### settings.py
 
 This is the **scrapy settings file**. The important settings we customize for this project are: 
 
