@@ -47,17 +47,44 @@ def db_conn():
 	# Return statement
 	return(conn, cursor)
 	
-# Insert a record into the SQL data-base
-def insert_data(item, insert):
+	
+def clean_item(item, title_fields):
+	
+	for field in item.keys():
+		# Get rid of surrounding white-space for string variables
+		item[field] = item[field].strip() if type(item[field]) == str else item[field]
 		
-	# Construct the SQL command
-	keys = item.keys()
+		# Convert whatever fields that we can into title-case
+		if field in title_fields:
+			item[field] = item[field].title()
+	
+	# Return statement
+	return(item)
+
+# Get a table's keys
+def get_keys(table):
+	
+	# Construct SQL table and return
+	with open('./backend/db/table_keys.json') as file:
+		tables = json.load(file)
+		keys = tables[table]
+	# Return statement	
+	return(keys)
+	
+# Insert a record into the SQL data-base
+def insert_data(item, keys, table, unique = 0):
+		
+	# Get the inputs to the SQL command
+	keys = get_keys(table)
 	fields = u','.join(keys)
 	qm = u','.join([u'%s'] * len(keys))
+	sql = "INSERT INTO " + table + " (%s) VALUES (%s)"
+	sql_unique = "INSERT IGNORE INTO " + table + " (%s) VALUES (%s)"
+	
+	# Construct the SQL command and return
+	insert = sql if unique == 0 else sql_unique
 	sql = insert % (fields, qm)
-	# Get the data for the data-base
 	data = [item[k] for k in keys]
-	# Return
 	return(sql, data)
 
 # Send e-mail
@@ -106,14 +133,6 @@ def dropbox_upload(file_from, file_to):
     
     # Upload the file with option to over-write if it already exists
     with open(file_from, 'rb') as f:
-        dbx.files_upload(f.read(), file_to, mode = dropbox.files.WriteMode.overwrite)
-
- 	
- 				
-
-	
-   
-   
-   
-
-    	
+        dbx.files_upload(f.read(), 
+                         file_to, 
+                         mode = dropbox.files.WriteMode.overwrite)

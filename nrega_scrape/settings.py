@@ -23,6 +23,7 @@ ROBOTSTXT_OBEY = True
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 CONCURRENT_REQUESTS = 1
+DOWNLOAD_TIMEOUT = 45
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://doc.scrapy.org/en/latest/topics/settings.html#download-delay
@@ -33,7 +34,7 @@ CONCURRENT_REQUESTS = 1
 #CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
-#COOKIES_ENABLED = False
+COOKIES_ENABLED = False
 
 # Disable Telnet Console (enabled by default)
 #TELNETCONSOLE_ENABLED = False
@@ -84,8 +85,9 @@ LOG_LEVEL = 'INFO'
 LOG_FILE =  './nrega_output/log.csv'
 LOG_SHORT_NAMES = True
 
+CLOSESPIDER_ERRORCOUNT = 20
 CLOSESPIDER_ITEMCOUNT = 0
-CLOSESPIDER_TIMEOUT = 3600
+CLOSESPIDER_TIMEOUT = 7200
 
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -99,17 +101,22 @@ AUTOTHROTTLE_MAX_DELAY = 60
 # each remote server
 AUTOTHROTTLE_TARGET_CONCURRENCY = 0.5
 # Enable showing throttling stats for every response received:
-AUTOTHROTTLE_DEBUG = True
+AUTOTHROTTLE_DEBUG = False
 
 
 MEMDEBUG_ENABLED = True        # enable memory debugging
 MEMDEBUG_NOTIFY = []           # send memory debugging report by mail at engine shutdown
 
-MEMUSAGE_CHECK_INTERVAL_SECONDS = 60.0
+MEMUSAGE_CHECK_INTERVAL_SECONDS = 10.0
 MEMUSAGE_ENABLED = True
 MEMUSAGE_LIMIT_MB = 0
 MEMUSAGE_NOTIFY_MAIL = []
 MEMUSAGE_WARNING_MB = 1024
+
+RETRY_ENABLED = True
+RETRY_TIMES = 1  # initial response + 2 retries = 3 requests
+#RETRY_HTTP_CODES = [500, 502, 503, 504, 522, 524, 408]
+#RETRY_PRIORITY_ADJUST = -1
 
 
 # Enable and configure HTTP caching (disabled by default)

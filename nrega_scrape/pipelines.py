@@ -23,8 +23,11 @@ from scrapy.exceptions import DropItem
 from nrega_scrape.items import NREGAItem
 from nrega_scrape.items import FTONo
 from nrega_scrape.items import FTOItem
+
 from common.helpers import sql_connect
 from common.helpers import insert_data
+from common.helpers import clean_item
+from common.helpers import get_keys 
 
 # Twisted adbapi library for connection pools to SQL data-base
 from twisted.enterprise import adbapi
@@ -38,37 +41,43 @@ class FTOSummaryPipeline(object):
 		# Get credentials to connect to the data-base
 		user, password, host, db = sql_connect().values()
 		# Create a connection to the data-base
-		self.conn = pymysql.connect(host, user, password, db, charset="utf8", 
+		self.conn = pymysql.connect(host, 
+									user,
+									password,
+									db, charset="utf8", 
 									use_unicode=True)
 		
-    # Item processing function
+	# Item processing function
 	def process_item(self, item, spider):
-		
+			
 		# Check what instance type we have
 		if isinstance(item, NREGAItem):
-			
+			tables = ['fto_summary']
 			title_fields = ['block_name']
-			insert_sql = "INSERT INTO fto_summary (%s) VALUES (%s)"
-		
+			
 		# Check what instance type we have
 		elif isinstance(item, FTONo):
-			
+			tables = ['fto_nos']
 			title_fields = ['fto_stage']
-			insert_sql = "INSERT INTO fto_numbers (%s) VALUES (%s)"
 		
 		if spider.name == "fto_stats":
 			
-			for field in item.keys():
-				item[field] = item[field].strip() if type(item[field]) == str else item[field]
-				if field in title_fields:
-					item[field] = item[field].title()
+			# Clean item
+			item = clean_item(item, title_fields)
+			# Process each table
+			for table in tables:
+				# Get the keys
+				keys = get_keys(table)
+				# Get the inputs for the query
+				sql, data = insert_data(item,
+										keys, 
+										table)
 			
-			# Get the inputs we need to execute the	query
-			sql, data = insert_data(item, insert_sql)
 			# Execute query
 			self.conn.cursor().execute(sql, data)
 			# Commit to DB
 			self.conn.commit()
+		
 		# Return statement
 		return(item)
 	
@@ -81,52 +90,55 @@ class FTOSummaryPipeline(object):
 		del self.conn
 		
 class FTOContentPipeline(object):
-    
-    def __init__(self):
-    	
-    	# Get the connection credentials
-    	user, password, host, db_name = sql_connect().values()
-    	# Create the data-base connection pool using credentials
-    	self.dbpool = adbapi.ConnectionPool('pymysql', 
-    										db = db_name, 
-    										host = host, 
-    										user = user, 
-    										passwd = password, 
-    										cursorclass = pymysql.cursors.DictCursor, 
-    										charset = 'utf8', 
-    										use_unicode = True,
-    										cp_max = 16)
-    	self.title_fields = ['block_name', 'app_name', 'prmry_acc_holder_name', 'status', 'rejection_reason']
+
+	def __init__(self):
+		
+		# Get the connection credentials
+		user, password, host, db_name = sql_connect().values()
+		# Create the data-base connection pool using credentials
+		self.dbpool = adbapi.ConnectionPool('pymysql', 
+											db = db_name, 
+											host = host, 
+											user = user, 
+											passwd = password, 
+											cursorclass = pymysql.cursors.DictCursor, 
+											charset = 'utf8', 
+											use_unicode = True,
+											cp_max = 16)
+		self.tables = ['accounts', 'banks', 'transactions', 'wage_lists']
+		self.unique_tables = ['banks', 'wage_lists']
 	
 	# Process item method
-    def process_item(self, item, spider):
-    
-    	# Check if the current item is an FTO item instance
-    	if isinstance(item, FTOItem):
-    		if item['block_name'] is None:
-    			raise(DropItem("Block name missing"))
-    		else:
-    			for field in item.keys():
-    				item[field] = item[field].strip() if type(item[field]) ==str else item[field]
-    				if field in self.title_fields:
-    					item[field] = item[field].title()		
-    			# Insert into SQL
-    			insert_sql = "INSERT INTO fto_content (%s) VALUES (%s)"
-    			# If so get the SQL statement and data from the helper function
-    			sql, data = insert_data(item, insert_sql)
-    			# And then execute the SQL statement
-    			self.dbpool.runOperation(sql, data)
-    	# Return the item
-    	return(item)
+	def process_item(self, item, spider):
+
+		# Check if the current item is an FTO item instance
+		if isinstance(item, FTOItem):
+			title_fields = ['block_name',
+							'app_name', 
+							'prmry_acc_holder_name', 
+							'status', 
+							'rejection_reason']
+
+			if item['block_name'] is None:
+				raise(DropItem("Block name missing"))
+
+			else:
+				item = clean_item(item, title_fields)
+				for table in self.tables:
+					unique = 1 if table in self.unique_tables else 0
+					keys = get_keys(table)
+					sql, data = insert_data(item,
+											keys,
+											table, 
+											unique)
+					self.dbpool.runOperation(sql, data)
+		# Return the item
+		return(item)
 	
 	# Execute this function when the spider is closing
-    def close_spider(self, spider):
-    	# Shut down all the connections in the DB connection pool
-        self.dbpool.close()
-	
-
-			
-	
+	def close_spider(self, spider):
+		# Shut down all the connections in the DB connection pool
+		self.dbpool.close()
 
 
 	

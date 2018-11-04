@@ -1,0 +1,55 @@
+{
+    "accounts": [
+        "jcn",
+        "acc_no",
+        "ifsc_code",
+        "prmry_acc_holder_name"
+    ],
+    "banks": [
+        "ifsc_code",
+        "bank_code"
+    ],
+    "blocks": [
+        "block_name"
+    ],
+    "fto_nos": [
+        "fto_no",
+        "fto_stage",
+        "state_code",
+        "district_code",
+        "process_date",
+        "scrape_date",
+        "scrape_time"
+    ],
+    "fto_queue": [
+        "fto_no",
+        "scrape_date",
+        "scrape_time"
+    ],
+    "fto_stages": [
+        "fto_stage_name"
+    ],
+    "fto_summary": [
+        "block_name",
+        "scrape_date",
+        "scrape_time"
+    ],
+    "transactions": [
+        "block_name",
+        "jcn",
+        "transact_ref_no",
+        "transact_date",
+        "app_name",
+        "wage_list_no",
+        "acc_no",
+        "status",
+        "processed_date",
+        "utr_no",
+        "rejection_reason",
+        "fto_no"
+    ],
+    "wage_lists": [
+        "wage_list_no",
+        "block_name"
+    ]
+}
