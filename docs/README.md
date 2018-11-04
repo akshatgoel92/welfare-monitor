@@ -69,7 +69,7 @@ This script is run from **nrega_etl.sh** as soon as **fto_filter.py** finishes. 
 * Scrape **the response**
 * Write scraped data to MySQL DB **via the pipeline**
 
-####items.py
+#### items.py
 
 This is the **scrapy items** file. It defines the **items** that are going to be scraped by the scrapy project as classes composed of **scrapy field** attributes. Our file defines **three items**.
 
