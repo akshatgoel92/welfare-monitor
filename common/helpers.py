@@ -21,10 +21,12 @@ pymysql.install_as_MySQLdb()
 def sql_connect():
 	
 	# Open the secrets file
-	with open('./gma_secrets.json') as secrets:
-		# This gets credentials
-		sql_access = json.load(secrets)['mysql']
+	# This gets credentials
 	# Return statement	
+	with open('./gma_secrets.json') as secrets:
+		
+		sql_access = json.load(secrets)['mysql']
+	
 	return(sql_access)
 
 # Return connection and cursor
