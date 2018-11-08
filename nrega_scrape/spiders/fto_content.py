@@ -55,8 +55,8 @@ class FtoContentSpider(scrapy.Spider):
 	# Set globals
 	name = "fto_content"
 	basic = "http://mnregaweb4.nic.in/netnrega/fto/fto_status_dtl.aspx?"
-	fin_year = "2018-2019"
-	state_code = "33"
+	fin_year = "2016-2017"
+	state_code = "17"
 	output_dir = os.path.abspath(".")
 	
 	# Set Path to Chrome driver
@@ -65,10 +65,7 @@ class FtoContentSpider(scrapy.Spider):
 	path_to_chrome_driver = os.path.abspath(path)
 
 	# Get the target FTO nos.
-	conn, cursor = db_conn()
-	fto_nos = pd.read_sql("SELECT fto_no FROM fto_nos LIMIT 1000;", con = conn).values.tolist()
-	cursor.close()
-	conn.close()
+	fto_nos = pd.read_excel("/Users/Akshat/Desktop/gwalior.xlsx").values.tolist()
 
 	# Store target FTO nos.
 	fto_nos = [fto_no[0] for fto_no in fto_nos]
@@ -176,8 +173,8 @@ class FtoContentSpider(scrapy.Spider):
 			item['server'] = socket.gethostname()
 			item['fto_no'] = re.findall('fto_no=(.*FTO_\d+)&fin_year', response.url)[0]
 			
-			item['scrape_date'] = datetime.datetime.now().date()
-			item['scrape_time'] = datetime.datetime.now().time()
+			item['scrape_date'] = str(datetime.datetime.now().date())
+			item['scrape_time'] = str(datetime.datetime.now().time())
 			
 			self.logger.info(item['fto_no'])
 			
