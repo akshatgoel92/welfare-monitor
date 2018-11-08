@@ -106,7 +106,7 @@ class FTOContentPipeline(object):
 											use_unicode = True,
 											cp_max = 16)
 		self.tables = ['accounts', 'banks', 'transactions', 'wage_lists']
-		self.unique_tables = ['banks', 'wage_lists']
+		self.unique_tables = ['accounts', 'banks', 'wage_lists']
 	
 	# Process item method
 	def process_item(self, item, spider):
