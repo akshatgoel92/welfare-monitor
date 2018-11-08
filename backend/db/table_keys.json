@@ -9,28 +9,9 @@
         "ifsc_code",
         "bank_code"
     ],
-    "blocks": [
-        "block_name"
-    ],
-    "fto_nos": [
+    "gwalior": [
         "fto_no",
-        "fto_stage",
-        "state_code",
-        "district_code",
-        "process_date",
-        "scrape_date",
-        "scrape_time"
-    ],
-    "fto_queue": [
-        "fto_no",
-        "scrape_date",
-        "scrape_time"
-    ],
-    "fto_stages": [
-        "fto_stage_name"
-    ],
-    "fto_summary": [
-        "block_name",
+        "scraped",
         "scrape_date",
         "scrape_time"
     ],
@@ -42,6 +23,7 @@
         "app_name",
         "wage_list_no",
         "acc_no",
+        "ifsc_code",
         "status",
         "processed_date",
         "utr_no",
