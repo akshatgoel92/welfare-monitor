@@ -51,15 +51,15 @@ def create_db(engine):
 										Column('block_name', String(50)))
 	
 	# Accounts table
-	# Assumption: Primary account holder name and IFSC code is unique within a JCN and 
-	# account number
-	accounts = Table('accounts', metadata,
-										Column("id", Integer, 
-												primary_key = True, 
-												autoincrement = True), 
-										Column('jcn', String(50)), 
-										Column('acc_no', String(50)),
-										Column('ifsc_code', String(50)),
+	# Assumption: Primary account holder name and IFSC 
+	# code is unique within a JCN and account number
+	accounts = Table('accounts', metadata, 
+										Column('jcn', String(50), 
+												primary_key = True), 
+										Column('acc_no', String(50), 
+												primary_key = True),
+										Column('ifsc_code', String(50),
+												primary_key = True),
 										Column('prmry_acc_holder_name', 
 												String(50)))
 	
@@ -69,11 +69,10 @@ def create_db(engine):
 												primary_key = True), 
 										Column('bank_code', String(30)))
 	
-	
 	# Create the tables
 	metadata.create_all(engine)
 
-# Take the Excel list of FTO nos
+# Take the Excel list of FTO nos.
 # Put it in the SQL data-base using pandas
 # Add a column to the Excel file which tells you whether it has been scraped
 def put_data(table, engine, path):
@@ -106,18 +105,18 @@ if __name__ == '__main__':
 	# Get engine
 	# Create data-base
 	# Send keys to file
+	# Send target FTOs to data-base by block
+	# Iterate over these two lists and put the tables in the
+	# data-base
+	# Send keys to file
 	user, password, host, db = sql_connect().values()
 	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
 	create_db(engine)
 	
-	# Send target FTOs to data-base by block
 	block_list = ['gwalior']
 	paths = [os.path.abspath('./fto_nos/' + block + '.xlsx') for block in block_list]
 	
-	# Iterate over these two lists and put the tables in the
-	# data-base
 	for block, path in zip(block_list, paths):
 		put_data(block, engine, path)
 
-	# Send keys to file
 	send_keys_to_file(engine)
