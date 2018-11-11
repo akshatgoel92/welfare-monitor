@@ -43,7 +43,10 @@ def db_conn():
 	host = sql_access['host']
 	db = sql_access['db']
 	
-	conn = pymysql.connect(host, user, password, db, charset="utf8", use_unicode=True)
+	conn = pymysql.connect(host, user, 
+							password, db, 
+							charset="utf8", 
+							use_unicode=True)
 	cursor = conn.cursor()
 	
 	return(conn, cursor)
