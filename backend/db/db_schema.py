@@ -76,7 +76,7 @@ def put_fto_nos(table, engine, path):
     
     fto_nos = pd.read_excel(path).drop_duplicates()
     fto_nos['done'] = 0
-    fto_nos.to_sql(table, con = engine, if_exists = 'replace')
+    fto_nos.to_sql(table, con = engine, index = False)
   
 def send_keys_to_file(engine):
 	

@@ -10,10 +10,7 @@
         "bank_code"
     ],
     "gwalior": [
-        "fto_no",
-        "scraped",
-        "scrape_date",
-        "scrape_time"
+        "fto_no"
     ],
     "transactions": [
         "block_name",
@@ -28,7 +25,9 @@
         "processed_date",
         "utr_no",
         "rejection_reason",
-        "fto_no"
+        "fto_no",
+        "scrape_date",
+        "scrape_time"
     ],
     "wage_lists": [
         "wage_list_no",
