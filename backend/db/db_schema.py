@@ -22,8 +22,6 @@ from common.helpers import sql_connect
 # Creates the data-base
 def create_db(engine):
 	
-	# Create engine
-	# Create meta-data object
 	metadata = MetaData()
 	
 	# Transactions table
@@ -74,20 +72,12 @@ def create_db(engine):
 	# Create the tables
 	metadata.create_all(engine)
 
-# Take the Excel list of FTO nos.
-# Put it in the SQL data-base using pandas
-# Add a column to the Excel file which tells you whether it has been scraped
 def put_fto_nos(table, engine, path):
     
-    data_types = {'fto_no': str, 'done': 1}
-    data = pd.read_excel(path, dtype = data_types).drop_duplicates()
-    data.to_sql(table, con = engine, if_exists = 'replace')
-
-# Create a JSON file with keys
-# Get the table names and store them as a dictionary
-# Now for each table:
-# First store the columns and then put them in the table dictionary
-# Dump the table dictionary to a JSON file  
+    fto_nos = pd.read_excel(path).drop_duplicates()
+    fto_nos['done'] = 0
+    fto_nos.to_sql(table, con = engine, if_exists = 'replace')
+  
 def send_keys_to_file(engine):
 	
 	inspector = reflection.Inspector.from_engine(engine)
@@ -100,25 +90,24 @@ def send_keys_to_file(engine):
 	with open('./backend/db/table_keys.json', 'w') as file:
 		json.dump(tables, file, sort_keys=True, indent=4)
 		
-# Execute
 if __name__ == '__main__':
 	
-	# Get values
-	# Get engine
-	# Create data-base
-	# Send keys to file
-	# Send target FTOs to data-base by block
-	# Iterate over these two lists and put the tables in the
-	# data-base
-	# Send keys to file
+	# Create block list here
+	# Create file paths after that
 	block_list = ['gwalior']
 	paths = [os.path.abspath('./fto_nos/' + block + '.xlsx') for block in block_list]
 
+	# Create the DB engine here
+	# Then create the data-base using the schema defined above
 	user, password, host, db = sql_connect().values()
 	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
 	create_db(engine)
 	
+	# Put the FTO no. in the queue here
 	for block, path in zip(block_list, paths):
 		put_fto_nos(block, engine, path)
 
+	# Send table keys to a JSON file here
+	# Pipelines object will use this to write 
+	# item fields to the correct table
 	send_keys_to_file(engine)
