@@ -33,21 +33,24 @@ from common.helpers import get_keys
 from twisted.enterprise import adbapi
 
 	
-# FTO number pipe-line		
+# FTO number pipe-line
+# Get credentials to connect to the data-base
+# Create a connection to the data-base
+# Item processing function	
+# Execute query
+# Commit to DB	
 class FTOSummaryPipeline(object):
 	
 	def __init__(self):
 		
-		# Get credentials to connect to the data-base
+		
 		user, password, host, db = sql_connect().values()
-		# Create a connection to the data-base
 		self.conn = pymysql.connect(host, 
 									user,
 									password,
 									db, charset="utf8", 
 									use_unicode=True)
 		
-	# Item processing function
 	def process_item(self, item, spider):
 			
 		# Check what instance type we have
@@ -60,42 +63,44 @@ class FTOSummaryPipeline(object):
 			tables = ['fto_nos']
 			title_fields = ['fto_stage']
 		
+		# Do this for the FTO stats spider
 		if spider.name == "fto_stats":
 			
 			# Clean item
-			item = clean_item(item, title_fields)
 			# Process each table
+			# Get the keys
+			# Get the inputs for the query
+			item = clean_item(item, title_fields)
+
 			for table in tables:
-				# Get the keys
 				keys = get_keys(table)
-				# Get the inputs for the query
 				sql, data = insert_data(item,
 										keys, 
 										table)
 			
-			# Execute query
 			self.conn.cursor().execute(sql, data)
-			# Commit to DB
 			self.conn.commit()
 		
-		# Return statement
 		return(item)
 	
-	# Execute this function when the spider closes		
+	# Execute this function when the spider closes
+	# Close the data-base connection
+	# Delete the data-base connection		
 	def close_spider(self, spider):
 		
-		# Close the data-base connection
 		self.conn.close()
-		# Delete the data-base connection
 		del self.conn
-		
+
+# Get the connection credentials
+# Create the data-base connection pool using credentials
+# Process item method	
 class FTOContentPipeline(object):
 
 	def __init__(self):
 		
-		# Get the connection credentials
+
 		user, password, host, db_name = sql_connect().values()
-		# Create the data-base connection pool using credentials
+		
 		self.dbpool = adbapi.ConnectionPool('pymysql', 
 											db = db_name, 
 											host = host, 
@@ -108,7 +113,7 @@ class FTOContentPipeline(object):
 		self.tables = ['accounts', 'banks', 'transactions', 'wage_lists']
 		self.unique_tables = ['accounts', 'banks', 'wage_lists']
 	
-	# Process item method
+	
 	def process_item(self, item, spider):
 
 		# Check if the current item is an FTO item instance
@@ -132,13 +137,10 @@ class FTOContentPipeline(object):
 											table, 
 											unique)
 					self.dbpool.runOperation(sql, data)
-		# Return the item
+		
 		return(item)
 	
 	# Execute this function when the spider is closing
+	# Shut down all the connections in the DB connection pool
 	def close_spider(self, spider):
-		# Shut down all the connections in the DB connection pool
 		self.dbpool.close()
-
-
-	

@@ -43,7 +43,9 @@ def create_db(engine):
 										Column('processed_date', String(50)),
 										Column('utr_no', String(50)), 
 										Column('rejection_reason', String(50)),
-										Column('fto_no', String(50)))
+										Column('fto_no', String(50)), 
+										Column('scrape_date', String(50)),
+										Column('scrape_time', String(50)))
 	# FTO content table
 	wage_list = Table('wage_lists', metadata, 
 										Column('wage_list_no', String(50), 
@@ -75,9 +77,9 @@ def create_db(engine):
 # Take the Excel list of FTO nos.
 # Put it in the SQL data-base using pandas
 # Add a column to the Excel file which tells you whether it has been scraped
-def put_data(table, engine, path):
+def put_fto_nos(table, engine, path):
     
-    data_types = {'fto_no': str, 'scrape_date': str, 'scrape_time': str}
+    data_types = {'fto_no': str, 'done': 1}
     data = pd.read_excel(path, dtype = data_types).drop_duplicates()
     data.to_sql(table, con = engine, if_exists = 'replace')
 
@@ -109,14 +111,14 @@ if __name__ == '__main__':
 	# Iterate over these two lists and put the tables in the
 	# data-base
 	# Send keys to file
+	block_list = ['gwalior']
+	paths = [os.path.abspath('./fto_nos/' + block + '.xlsx') for block in block_list]
+
 	user, password, host, db = sql_connect().values()
 	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
 	create_db(engine)
 	
-	block_list = ['gwalior']
-	paths = [os.path.abspath('./fto_nos/' + block + '.xlsx') for block in block_list]
-	
 	for block, path in zip(block_list, paths):
-		put_data(block, engine, path)
+		put_fto_nos(block, engine, path)
 
 	send_keys_to_file(engine)
