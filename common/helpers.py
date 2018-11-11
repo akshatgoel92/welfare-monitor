@@ -25,9 +25,7 @@ pymysql.install_as_MySQLdb()
 # Return statement
 def sql_connect():
 	
-	
 	with open('./gma_secrets.json') as secrets:
-		
 		sql_access = json.load(secrets)['mysql']
 	
 	return(sql_access)
@@ -144,23 +142,12 @@ def dropbox_upload(file_from, file_to):
                          file_to, 
                          mode = dropbox.files.WriteMode.overwrite)
 
-# Process the log
-def process_log():
+# Uploads log file
+def process_log(log_file_from, log_file_to):
 	
-	# Store recipients
-	with open('./backend/mail/recipients.json') as r:
-		recipients = json.load(r)
-	
-	# Store date 
-	now = str(datetime.datetime.now())
-	
-	# Upload log file and send notification
-	helpers.dropbox_upload('./nrega_output/log.csv', '/Logs/log_' + now + '.csv')
-	os.unlink('./nrega_output/log.csv')
+	helpers.dropbox_upload(log_file_from, log_file_to)
+	os.unlink(log_file_from)
 
 # Update the FTO nos table
-def update_fto_nos():
-
+def update_fto_nos(block):
 	pass
-	# SELECT DISTINCT fto_nos FROM transactions WHERE scrape_date = today;"
-	# UPDATE scraped = 1 WHERE 

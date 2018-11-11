@@ -4,5 +4,6 @@ import helpers
 # Execute the processing
 if __name__ == '__main__':
 
-	helpers.process_log()
+	now = str(datetime.datetime.now())
+	helpers.process_log('./nrega_output/log.csv', '/Logs/log_' + now + '.csv')
 	helpers.update_fto_nos()
