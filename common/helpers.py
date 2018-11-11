@@ -1,4 +1,6 @@
 # Import packages
+# Install SQL connector as MySQLDb to ensure
+# back-ward compatability
 import os
 import json
 import sys
@@ -18,11 +20,12 @@ pymysql.install_as_MySQLdb()
 
 
 # Connect to AWS RDB
+# Open the secrets file
+# This gets credentials
+# Return statement
 def sql_connect():
 	
-	# Open the secrets file
-	# This gets credentials
-	# Return statement	
+	
 	with open('./gma_secrets.json') as secrets:
 		
 		sql_access = json.load(secrets)['mysql']
@@ -35,7 +38,6 @@ def sql_connect():
 def db_conn():
 	
 	with open('./gma_secrets.json') as secrets:
-		# This gets credentials
 		sql_access = json.load(secrets)['mysql']
 	
 	user = sql_access['username']
@@ -93,13 +95,12 @@ def insert_data(item, keys, table, unique = 0):
 	return(sql, data)
 
 # Send e-mail
+# Load credentials
 def send_email(msg, subject, recipients):
 
-	# Load credentials
 	with open('./gma_secrets.json') as secrets:
 		credentials = json.load(secrets)['smtp']
 	
-	# Store credentials	
 	user = credentials['user']
 	password = credentials['password']
 	region = credentials['region']
@@ -142,3 +143,24 @@ def dropbox_upload(file_from, file_to):
         dbx.files_upload(f.read(), 
                          file_to, 
                          mode = dropbox.files.WriteMode.overwrite)
+
+# Process the log
+def process_log():
+	
+	# Store recipients
+	with open('./backend/mail/recipients.json') as r:
+		recipients = json.load(r)
+	
+	# Store date 
+	now = str(datetime.datetime.now())
+	
+	# Upload log file and send notification
+	helpers.dropbox_upload('./nrega_output/log.csv', '/Logs/log_' + now + '.csv')
+	os.unlink('./nrega_output/log.csv')
+
+# Update the FTO nos table
+def update_fto_nos():
+
+	pass
+	# SELECT DISTINCT fto_nos FROM transactions WHERE scrape_date = today;"
+	# UPDATE scraped = 1 WHERE 
