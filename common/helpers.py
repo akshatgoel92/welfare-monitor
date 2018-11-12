@@ -7,6 +7,8 @@ import sys
 import dropbox
 import pymysql
 import smtplib
+import pandas as pd
+import numpy as np
 
 from smtplib import SMTP
 from email.mime.text import MIMEText
@@ -148,6 +150,40 @@ def process_log(log_file_from, log_file_to):
 	helpers.dropbox_upload(log_file_from, log_file_to)
 	os.unlink(log_file_from)
 
-# Update the FTO nos table
+# Update the FTO nos. table
 def update_fto_nos(block):
-	pass
+
+	get_scraped_ftos = "SELECT DISTINCT fto_no FROM transactions;"
+	get_target_ftos = "SELECT * FROM " + block + ";"
+
+	user, password, host, db = sql_connect().values()
+	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
+	conn = engine.connect()
+	trans = conn.begin()
+	try: 
+		scraped_ftos = pd.read_sql(get_scraped_ftos, con = conn)
+		target_ftos = pd.read_sql(get_target_ftos, con = conn)
+	 
+		all_ftos = pd.merge(scraped_ftos, 
+							target_ftos, 
+							how = 'outer', 
+							on = ['fto_no'], 
+							indicator = True)
+	
+		all_ftos.loc[(all_ftos['_merge'] == 'both'), 'done'] = 1
+	
+		all_ftos.drop(['_merge'], axis = 1, inplace = True)
+
+		all_ftos.to_sql(block, 
+						con = conn, 
+						index = False, 
+						if_exists = 'replace')
+		trans.commit()
+		conn.close()
+
+	except Exception as e: 
+		print(e)
+		trans.rollback()
+		conn.close()
+	
+
