@@ -5,5 +5,6 @@ import helpers
 if __name__ == '__main__':
 
 	now = str(datetime.datetime.now())
-	helpers.process_log('./nrega_output/log.csv', '/Logs/log_' + now + '.csv')
-	helpers.update_fto_nos()
+	file_from = './nrega_output/log.csv'
+	file_to = '/Logs/fba/log_' + now + '.csv'
+	helpers.process_log(file_from, file_to )
