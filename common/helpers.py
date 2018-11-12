@@ -147,7 +147,7 @@ def dropbox_upload(file_from, file_to):
 # Uploads log file
 def process_log(log_file_from, log_file_to):
 	
-	helpers.dropbox_upload(log_file_from, log_file_to)
+	dropbox_upload(log_file_from, log_file_to)
 	os.unlink(log_file_from)
 
 # Update the FTO nos. table
