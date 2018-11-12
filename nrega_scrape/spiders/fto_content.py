@@ -61,13 +61,13 @@ class FtoContentSpider(scrapy.Spider):
 	block = "gwalior"
 	
 	# Set Path to Chrome driver
-	user = 'local'
+	user = 'ec2-user'
 	path = "./../software/chromedriver/" if user == 'local' else "/home/ec2-user/chromedriver/"
 	path_to_chrome_driver = os.path.abspath(path)
 
 	# Get the target FTO nos.
 	conn, cursor = db_conn()
-	fto_nos = pd.read_sql("SELECT fto_no FROM " + block + " ;", con = conn).values.tolist()
+	fto_nos = pd.read_sql("SELECT fto_no FROM " + block + " WHERE done = 0;", con = conn).values.tolist()
 	cursor.close()
 	conn.close()
 
