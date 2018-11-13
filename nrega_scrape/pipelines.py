@@ -130,8 +130,6 @@ class FTOContentPipeline(object):
 			else:
 				
 				item = clean_item(item, title_fields)
-				item['credit_amt_due'] = str(item['credit_amt_due'])
-				item['credit_amt_actual'] = str(item['credit_amt_actual'])
 				
 				for table in self.tables:
 					unique = 1 if table in self.unique_tables else 0
