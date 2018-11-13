@@ -166,12 +166,9 @@ class FtoContentSpider(scrapy.Spider):
 			
 			item['ifsc_code'] = row.xpath('td[10]//text()').extract_first()
 			item['credit_amt_due'] = row.xpath('td[11]//text()').extract_first()
-			
-			print(row.xpath('td[11]//text()').extract_first())
-			print(row.xpath('td[12]//text()').extract_first())
-
 			item['credit_amt_actual'] = row.xpath('td[12]//text()').extract_first()
-			
+			print(item['credit_amt_due'])
+			print(item['credit_amt_actual'])
 			item['status'] = row.xpath('td[13]//text()').extract_first()
 			item['processed_date'] = row.xpath('td[14]//text()').extract_first()
 			item['utr_no'] = row.xpath('td[15]//text()').extract_first()
