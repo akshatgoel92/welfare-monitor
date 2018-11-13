@@ -168,7 +168,7 @@ class FtoContentSpider(scrapy.Spider):
 			item['credit_amt_due'] = row.xpath('td[11]//text()').extract()
 			
 			print(row.xpath('td[11]/text()').extract_first())
-			print(row.xpath('td[12]/text()').extract()_first())
+			print(row.xpath('td[12]/text()').extract_first())
 
 			item['credit_amt_actual'] = row.xpath('td[12]//text()').extract_first()
 			
