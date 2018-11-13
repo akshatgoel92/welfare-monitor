@@ -170,7 +170,7 @@ class FtoContentSpider(scrapy.Spider):
 			print(row.xpath('td[11]//text()').extract_first())
 			print(row.xpath('td[12]//text()').extract_first())
 
-			item['credit_amt_actual'] = int(row.xpath('td[12]//text()').extract_first())
+			item['credit_amt_actual'] = row.xpath('td[12]//text()').extract_first()
 			
 			item['status'] = row.xpath('td[13]//text()').extract_first()
 			item['processed_date'] = row.xpath('td[14]//text()').extract_first()
