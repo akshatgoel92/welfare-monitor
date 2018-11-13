@@ -132,7 +132,6 @@ class FtoContentSpider(scrapy.Spider):
 
 		return(page_source)
 
-
 	def parse(self, response):
 		
 		# Create FTO content item
@@ -152,7 +151,7 @@ class FtoContentSpider(scrapy.Spider):
 		# Process the item by iterating over rows
 		# Log the item name to the log file
 		for row in rows:
-
+			
 			item['block_name'] = row.xpath('td[1]//text()').extract_first() 
 			item['jcn'] = row.xpath('td[2]//text()').extract_first()
 			item['transact_ref_no'] = row.xpath('td[3]//text()').extract_first()
@@ -166,8 +165,8 @@ class FtoContentSpider(scrapy.Spider):
 			item['bank_code'] = row.xpath('td[9]//text()').extract_first()
 			
 			item['ifsc_code'] = row.xpath('td[10]//text()').extract_first()
-			item['credit_amt_due'] = row.xpath('td[11]//text()').extract_first()
-			item['credit_amt_actual'] = row.xpath('td[12]//text()').extract_first()
+			item['credit_amt_due'] = row.xpath('td[11]//text()').extract()[0]
+			item['credit_amt_actual'] = row.xpath('td[12]//text()').extract()[0]
 			
 			item['status'] = row.xpath('td[13]//text()').extract_first()
 			item['processed_date'] = row.xpath('td[14]//text()').extract_first()
