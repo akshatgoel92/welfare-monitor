@@ -182,4 +182,4 @@ class FtoContentSpider(scrapy.Spider):
 				yield(item)
 			
 		except Exception as e:
-				self.logger.info('Parse error!')
+				self.logger.error('Parse error!')
