@@ -103,8 +103,8 @@ class FtoContentSpider(scrapy.Spider):
 	# to the log file
 	# This ensures that all errors are logged in case we
 	# want to do anything with them later
-	def error_handling(self, failure):
-		self.logger.error(repr(failure))
+	def error_handling(self, response):
+		self.logger.error(response.url)
 
 	# Get selector object for file
 	def get_source(self, response, driver):
