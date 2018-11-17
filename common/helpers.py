@@ -160,6 +160,7 @@ def update_fto_nos(block):
 	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
 	conn = engine.connect()
 	trans = conn.begin()
+	
 	try: 
 		scraped_ftos = pd.read_sql(get_scraped_ftos, con = conn)
 		target_ftos = pd.read_sql(get_target_ftos, con = conn)
@@ -171,13 +172,20 @@ def update_fto_nos(block):
 							indicator = True)
 	
 		all_ftos.loc[(all_ftos['_merge'] == 'both'), 'done'] = 1
-	
-		all_ftos.drop(['_merge'], axis = 1, inplace = True)
+
+		all_ftos.drop(['_merge'], 
+						axis = 1, 
+						inplace = True)
 
 		all_ftos.to_sql(block, 
 						con = conn, 
 						index = False, 
 						if_exists = 'replace')
+
+		done = len(all_ftos.loc[all_ftos['done'] == 1])
+		progress = done/len(all_ftos)
+		print(block + ':=' + progress + " done.")
+		
 		trans.commit()
 		conn.close()
 
@@ -185,5 +193,56 @@ def update_fto_nos(block):
 		print(e)
 		trans.rollback()
 		conn.close()
-	
 
+def upload_data(block, file_from, file_to, to_dropbox):
+
+	get_transactions = "SELECT * FROM transactions;"
+	get_banks = "SELECT * FROM banks;"
+	get_accounts = "SELECT * from accounts"
+
+	user, password, host, db = sql_connect().values()
+	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
+	conn = engine.connect()
+	trans = conn.begin()
+	
+	try: 
+		transactions = pd.read_sql(get_transactions, con = conn)
+		banks = pd.read_sql(get_banks, con = conn)
+		accounts = pd.read_sql(get_accounts, con = conn)
+				
+		trans.commit()
+		conn.close()
+
+	except Exception as e:
+		print(e)
+		trans.rollback()
+		conn.close()
+		
+
+	try: 
+		transactions = pd.merge(transactions, banks, 
+								how = 'outer', 
+								on = ['ifsc_code'], 
+								indicator = 'banks_merge')
+		
+		transactions = pd.merge(transactions, accounts, 
+								how = 'outer', 
+								on = ['jcn', 'acc_no', 'ifsc_code'], 
+								indicator = 'accounts_merge')
+
+	except Exception as e: 
+		print('Merge failed...please check the merge.')
+
+	try: 
+		transactions.to_csv(file_from, index = False)
+	
+	except Exception as e: 
+		print('Sending data to .csv failed...please check the .csv upload.')
+	
+	if to_dropbox == 1:
+
+		try:
+			dropbox_upload(file_from, file_to)
+	
+		except Exception as e:
+			print('Dropbox upload failed...please check the Dropbox upload.')
