@@ -138,14 +138,14 @@ class FtoContentSpider(scrapy.Spider):
 		# Get the source code of the FTO page
 		item = FTOItem()
 		source = self.get_source(response, self.driver)
-    try:
+		try:
 			# Get all the tables on the web-page
 			# Then select the correct one
 			tables = source.xpath('//table')
 			table = tables[4]
-			
-	except Exception as e: 
-		self.logger.error(response.url)
+
+		except Exception as e: 
+			self.logger.error(response.url)
 
 		# Store the rows so we can iterature over
 		# them
