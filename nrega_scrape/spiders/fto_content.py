@@ -144,44 +144,43 @@ class FtoContentSpider(scrapy.Spider):
 			tables = source.xpath('//table')
 			table = tables[4]
 
-		except Exception as e: 
-			self.logger.error(response.url)
+			rows = table.xpath('*//tr')
 
-		# Store the rows so we can iterature over
-		# them
-		rows = table.xpath('*//tr')
+			# Process the item by iterating over rows
+			# Log the item name to the log file
+			for row in rows:
+			
+				item['block_name'] = row.xpath('td[1]//text()').extract_first() 
+				item['jcn'] = row.xpath('td[2]//text()').extract_first()
+				item['transact_ref_no'] = row.xpath('td[3]//text()').extract_first()
 
-		# Process the item by iterating over rows
-		# Log the item name to the log file
-		for row in rows:
+				item['transact_date'] = row.xpath('td[4]//text()').extract_first()
+				item['app_name'] = row.xpath('td[5]//text()').extract_first()
+				item['prmry_acc_holder_name'] = row.xpath('td[6]//text()').extract_first()
+
+				item['wage_list_no'] = row.xpath('td[7]//text()').extract_first()
+				item['acc_no'] = row.xpath('td[8]//text()').extract_first()
+				item['bank_code'] = row.xpath('td[9]//text()').extract_first()
+
+				item['ifsc_code'] = row.xpath('td[10]//text()').extract_first()
+				item['credit_amt_due'] = row.xpath('td[11]//text()').extract_first()
+				item['credit_amt_actual'] = row.xpath('td[12]//text()').extract_first()
 			
-			item['block_name'] = row.xpath('td[1]//text()').extract_first() 
-			item['jcn'] = row.xpath('td[2]//text()').extract_first()
-			item['transact_ref_no'] = row.xpath('td[3]//text()').extract_first()
+				item['status'] = row.xpath('td[13]//text()').extract_first()
+				item['processed_date'] = row.xpath('td[14]//text()').extract_first()
+				item['utr_no'] = row.xpath('td[15]//text()').extract_first()
 			
-			item['transact_date'] = row.xpath('td[4]//text()').extract_first()
-			item['app_name'] = row.xpath('td[5]//text()').extract_first()
-			item['prmry_acc_holder_name'] = row.xpath('td[6]//text()').extract_first()
+				item['rejection_reason'] = row.xpath('td[16]//text()').extract_first()
+				item['server'] = socket.gethostname()
+				item['fto_no'] = re.findall('fto_no=(.*FTO_\d+)&fin_year', response.url)[0]
 			
-			item['wage_list_no'] = row.xpath('td[7]//text()').extract_first()
-			item['acc_no'] = row.xpath('td[8]//text()').extract_first()
-			item['bank_code'] = row.xpath('td[9]//text()').extract_first()
+				item['scrape_date'] = str(datetime.datetime.now().date())
+				item['scrape_time'] = str(datetime.datetime.now().time())
 			
-			item['ifsc_code'] = row.xpath('td[10]//text()').extract_first()
-			item['credit_amt_due'] = row.xpath('td[11]//text()').extract_first()
-			item['credit_amt_actual'] = row.xpath('td[12]//text()').extract_first()
+				self.logger.info(item['fto_no'])
 			
-			item['status'] = row.xpath('td[13]//text()').extract_first()
-			item['processed_date'] = row.xpath('td[14]//text()').extract_first()
-			item['utr_no'] = row.xpath('td[15]//text()').extract_first()
+				yield(item)
 			
-			item['rejection_reason'] = row.xpath('td[16]//text()').extract_first()
-			item['server'] = socket.gethostname()
-			item['fto_no'] = re.findall('fto_no=(.*FTO_\d+)&fin_year', response.url)[0]
-			
-			item['scrape_date'] = str(datetime.datetime.now().date())
-			item['scrape_time'] = str(datetime.datetime.now().time())
-			
-			self.logger.info(item['fto_no'])
-			
-			yield(item)
+			except Exception as e:
+				
+				self.logger.info('Parse error on %s')
