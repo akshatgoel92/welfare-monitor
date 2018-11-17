@@ -104,7 +104,7 @@ class FtoContentSpider(scrapy.Spider):
 	# This ensures that all errors are logged in case we
 	# want to do anything with them later
 	def error_handling(self, failure):
-		self.logger.error(failure.printBriefTraceback())
+		self.logger.error('Downloader error!')
 
 	# Get selector object for file
 	def get_source(self, response, driver):
