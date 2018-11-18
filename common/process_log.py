@@ -1,29 +1,11 @@
 # Import packages
-import os
-import datetime
-import pandas as pd
-import numpy as np
-import json
 import helpers
+import datetime
 
-
-# Process the log
-def process_log():
-	
-	# Store recipients
-	with open('./backend/mail/recipients.json') as r:
-		recipients = json.load(r)
-	
-	# Store date 
-	now = str(datetime.datetime.now())
-	
-	# Upload log file and send notification
-	helpers.dropbox_upload('./nrega_output/log.csv', '/Logs/log_' + now + '.csv')
-	helpers.send_email('Done, check the log!', 'GMA NREGA Scrape: Error count', recipients)
-	os.unlink('./nrega_output/log.csv')
-
+# Execute the processing
 if __name__ == '__main__':
 
-	# Execute the processing	
-	process_log()
-	
+	now = str(datetime.datetime.now())
+	file_from = './nrega_output/log.csv'
+	file_to = '/Logs/fba/log_' + now + '.csv'
+	helpers.process_log(file_from, file_to )

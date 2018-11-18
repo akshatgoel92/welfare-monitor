@@ -111,7 +111,6 @@ class FTOItem(scrapy.Item):
     
     rejection_reason = scrapy.Field()
     
-    # Housekeeping fields
     server = scrapy.Field()
     
     fto_no = scrapy.Field()
@@ -119,3 +118,30 @@ class FTOItem(scrapy.Item):
     scrape_date = scrapy.Field()
     
     scrape_time = scrapy.Field()
+
+class FTOOverviewItem(scrapy.Item):
+    
+    state = scrapy.Field()
+    
+    district = scrapy.Field()
+    
+    block_name = scrapy.Field()
+
+    fto_no = scrapy.Field()
+
+    fto_type = scrapy.Field()
+    
+    pay_mode = scrapy.Field()
+    
+    acc_signed_dt = scrapy.Field()
+
+    po_signed_dt = scrapy.Field()
+
+    acc_signed_dt_p2w = scrapy.Field()
+    
+    po_signed_dt_p2w = scrapy.Field()
+
+    cr_processed_dt = scrapy.Field()
+    
+    cr_processed_dt_P = scrapy.Field()
+

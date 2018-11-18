@@ -69,7 +69,6 @@ COOKIES_ENABLED = False
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'nrega_scrape.pipelines.FTOSummaryPipeline': 300,
     'nrega_scrape.pipelines.FTOContentPipeline': 1000
 }
 
@@ -78,16 +77,16 @@ ITEM_PIPELINES = {
 LOG_ENABLED = True
 LOG_ENCODING = 'utf-8'
 LOG_FORMATTER = 'scrapy.logformatter.LogFormatter'
-LOG_FORMAT = '%(name)s, %(lineno)s, %(exc_info)s, %(asctime)s, %(filename)s, %(funcName)s, %(levelno)s, %(message).50s'
+LOG_FORMAT = '%(name)s, %(lineno)s, %(exc_info)s, %(asctime)s, %(filename)s, %(funcName)s, %(levelno)s, %(message)100s'
 LOG_DATEFORMAT = '%Y-%m-%d %H:%M:%S'
 LOG_STDOUT = False
 LOG_LEVEL = 'INFO'
 LOG_FILE =  './nrega_output/log.csv'
 LOG_SHORT_NAMES = True
 
-CLOSESPIDER_ERRORCOUNT = 20
+CLOSESPIDER_ERRORCOUNT = 0
 CLOSESPIDER_ITEMCOUNT = 0
-CLOSESPIDER_TIMEOUT = 7200
+CLOSESPIDER_TIMEOUT = 14400
 
 
 # Enable and configure the AutoThrottle extension (disabled by default)
@@ -114,8 +113,8 @@ MEMUSAGE_NOTIFY_MAIL = []
 MEMUSAGE_WARNING_MB = 1024
 
 RETRY_ENABLED = True
-RETRY_TIMES = 1  # initial response + 2 retries = 3 requests
-#RETRY_HTTP_CODES = [500, 502, 503, 504, 522, 524, 408]
+RETRY_TIMES = 1  # initial response + 1 retries = 2 requests
+RETRY_HTTP_CODES = [500, 502, 503, 504, 522, 524, 408]
 #RETRY_PRIORITY_ADJUST = -1
 
 
