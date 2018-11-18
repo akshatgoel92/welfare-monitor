@@ -185,7 +185,7 @@ def update_fto_nos(block):
 						axis = 1, 
 						inplace = True)
 		
-		all_ftos.loc[(all_ftos['fto_type']) == '', 'fto_type'] = 'Wage'
+		all_ftos.loc[(all_ftos['fto_type'] == '') & (all_ftos['done'] == 1), 'fto_type'] = 'Wage'
 
 		
 

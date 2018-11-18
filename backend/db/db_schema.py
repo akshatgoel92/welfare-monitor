@@ -102,6 +102,7 @@ if __name__ == '__main__':
 	# Then create the data-base using the schema defined above
 	user, password, host, db = sql_connect().values()
 	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
+	
 	create_db(engine)
 	
 	# Put the FTO no. in the queue here
