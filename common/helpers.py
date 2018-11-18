@@ -81,8 +81,7 @@ def get_keys(table):
 # Construct the SQL command and return
 def insert_data(item, keys, table, unique = 0):
 		
-	
-	keys = get_keys(table)
+	keys = get_keys(table) & item.keys()
 	fields = u','.join(keys)
 	qm = u','.join([u'%s'] * len(keys))
 	sql = "INSERT INTO " + table + " (%s) VALUES (%s)"
@@ -92,6 +91,13 @@ def insert_data(item, keys, table, unique = 0):
 	sql = insert % (fields, qm)
 	data = [item[k] for k in keys]
 
+	return(sql, data)
+
+# Update FTO type
+def update_fto_type(fto_no, fto_type, table):
+
+	sql = "UPDATE " + table + " SET fto_type = %s WHERE fto_no = %s"
+	data = [fto_type, fto_no]
 	return(sql, data)
 
 # Send e-mail
@@ -173,18 +179,22 @@ def update_fto_nos(block):
 	
 		all_ftos.loc[(all_ftos['_merge'] == 'both'), 'done'] = 1
 
+		all_ftos.loc[(all_ftos['fto_type'] == 'Material'), 'done'] = 1
+
 		all_ftos.drop(['_merge'], 
 						axis = 1, 
 						inplace = True)
+		
+		all_ftos.loc[(all_ftos['fto_type']) == '', 'fto_type'] = 'Wage'
+
+		
 
 		all_ftos.to_sql(block, 
 						con = conn, 
 						index = False, 
 						if_exists = 'replace')
 
-		done = len(all_ftos.loc[all_ftos['done'] == 1])
-		progress = done/len(all_ftos)
-		print(block + ':=' + progress + " done.")
+
 		
 		trans.commit()
 		conn.close()
@@ -193,6 +203,12 @@ def update_fto_nos(block):
 		print(e)
 		trans.rollback()
 		conn.close()
+	
+	done = len(all_ftos.loc[all_ftos['done'] == 1])
+	progress = str(done/len(all_ftos))
+		
+	print(block + ' := ' + progress + " done.")
+	print(str(done) + ' / ' + str(len(all_ftos)) + ' done...')
 
 def upload_data(block, file_from, file_to, to_dropbox):
 

@@ -46,6 +46,7 @@ from twisted.internet.error import TimeoutError, TCPTimedOutError
 
 # Item class
 from nrega_scrape.items import FTOItem
+from nrega_scrape.items import FTOOverviewItem
 from common.helpers import *
 
 
@@ -61,7 +62,7 @@ class FtoContentSpider(scrapy.Spider):
 	block = "gwalior"
 	
 	# Set Path to Chrome driver
-	user = 'ec2-user'
+	user = 'local'
 	path = "./../software/chromedriver/" if user == 'local' else "/home/ec2-user/chromedriver/"
 	path_to_chrome_driver = os.path.abspath(path)
 
@@ -70,6 +71,8 @@ class FtoContentSpider(scrapy.Spider):
 	fto_nos = pd.read_sql("SELECT fto_no FROM " + block + " WHERE done = 0;", con = conn).values.tolist()
 	cursor.close()
 	conn.close()
+
+	print(fto_nos)
 
 	# Store target FTO nos.
 	fto_nos = [fto_no[0] for fto_no in fto_nos]
@@ -88,7 +91,8 @@ class FtoContentSpider(scrapy.Spider):
 	options.add_argument('--headless')
 
 	# Create driver object
-	driver = webdriver.Chrome(path_to_chrome_driver, chrome_options = options)
+	driver = webdriver.Chrome(path_to_chrome_driver, 
+								chrome_options = options)
 
 	def start_requests(self):
 
@@ -104,7 +108,7 @@ class FtoContentSpider(scrapy.Spider):
 	# This ensures that all errors are logged in case we
 	# want to do anything with them later
 	def error_handling(self, failure):
-		self.logger.error('Downloader error!')
+		self.logger.error('Downloader error')
 
 	# Get selector object for file
 	def get_source(self, response, driver):
@@ -136,16 +140,77 @@ class FtoContentSpider(scrapy.Spider):
 		
 		# Create FTO content item
 		# Get the source code of the FTO page
+		overview_item = FTOOverviewItem()
 		item = FTOItem()
-		source = self.get_source(response, self.driver)
-		try:
-			# Get all the tables on the web-page
-			# Then select the correct one
+
+		try: 
+			source = self.get_source(response, self.driver)
+		
+		except Exception as e:
+			self.logger.error('Get source error: %s', response.url)
+			return
+
+		try: 
 			tables = source.xpath('//table')
+			
+		except Exception as e:
+			self.logger.error('No table found error: %s', response.url)
+			return
+		
+		# First we scrape the over-view table on the top
+		try:
+			
+			table = tables[3]
+			content = []
+			for row in table.xpath('*//tr'):
+				content.append(row.xpath('*//text()').extract())
+			
+			content = [item.strip() for row in content 
+						for item in row if item.strip() != ''][1::2]
+
+		except Exception as e:
+			self.logger.error('Parse error on overview table: %s', 
+							response.url)
+			return
+		
+		try:
+			
+			overview_item['state'] = content[0]
+			overview_item['district'] = content[1]
+			overview_item['block_name'] = content[2]
+			
+			overview_item['fto_type'] = content[3]
+			overview_item['fto_no'] = content[4]
+			overview_item['pay_mode'] = content[5]
+			
+			overview_item['acc_signed_dt'] = content[6]
+			overview_item['po_signed_dt'] = content[7]
+			overview_item['acc_signed_dt_p2w'] = content[8]
+			
+			overview_item['po_signed_dt_p2w'] = content[9]
+			overview_item['cr_processed_dt'] = content[10]
+			overview_item['cr_processed_dt_P'] = content[11]
+			
+			yield(overview_item)
+
+		except Exception as e:
+			print(e)
+			self.logger.error('Item parse error on overview table: %s', 
+								response.url)
+			return
+		
+		# Go to the next function call
+		if overview_item['fto_type'] == 'Material':
+			return
+		
+		# Get all the tables on the web-page
+		# Then select the correct one
+		try:
+			
+			item = FTOItem()
 			table = tables[4]
-
 			rows = table.xpath('*//tr')
-
+			
 			# Process the item by iterating over rows
 			# Log the item name to the log file
 			for row in rows:
@@ -177,9 +242,11 @@ class FtoContentSpider(scrapy.Spider):
 				item['scrape_date'] = str(datetime.datetime.now().date())
 				item['scrape_time'] = str(datetime.datetime.now().time())
 			
-				self.logger.info(item['fto_no'])
-			
+				self.logger.info('Completed: %s', item['fto_no'])
 				yield(item)
 			
 		except Exception as e:
-				self.logger.error('Parse error: %s', response.url)
+				
+				# Log the exception first 
+				# Then move on 
+				self.logger.error('Parse error on transactions table: %s', response.url)

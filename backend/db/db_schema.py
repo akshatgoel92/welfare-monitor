@@ -73,10 +73,11 @@ def create_db(engine):
 	metadata.create_all(engine)
 
 def put_fto_nos(table, engine, path):
-    
+
     fto_nos = pd.read_excel(path).drop_duplicates()
     fto_nos['done'] = 0
-    fto_nos.to_sql(table, con = engine, index = False)
+    fto_nos['fto_type'] = ''
+    fto_nos.to_sql(table, con = engine, index = False, if_exists = 'replace')
   
 def send_keys_to_file(engine):
 	

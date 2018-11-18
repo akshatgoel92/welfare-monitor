@@ -23,11 +23,14 @@ from scrapy.exceptions import DropItem
 from nrega_scrape.items import NREGAItem
 from nrega_scrape.items import FTONo
 from nrega_scrape.items import FTOItem
+from nrega_scrape.items import FTOOverviewItem
 
 from common.helpers import sql_connect
 from common.helpers import insert_data
+from common.helpers import update_fto_type
 from common.helpers import clean_item
 from common.helpers import get_keys 
+
 
 # Twisted adbapi library for connection pools to SQL data-base
 from twisted.enterprise import adbapi
@@ -110,35 +113,60 @@ class FTOContentPipeline(object):
 											charset = 'utf8', 
 											use_unicode = True,
 											cp_max = 16)
-		self.tables = ['accounts', 'banks', 'transactions', 'wage_lists']
-		self.unique_tables = ['accounts', 'banks', 'wage_lists']
-	
+		
 	
 	def process_item(self, item, spider):
 
+		if isinstance(item, FTOOverviewItem):
+			title_fields = ['state', 
+							'district',
+							'block', 
+							'type',
+							'pay_mode']
+		
 		# Check if the current item is an FTO item instance
 		if isinstance(item, FTOItem):
+			
 			title_fields = ['block_name',
 							'app_name', 
 							'prmry_acc_holder_name', 
 							'status', 
 							'rejection_reason']
+			
+			tables = ['accounts', 
+					  'banks', 
+					  'transactions', 
+					  'wage_lists']
+			
+			unique_tables = ['accounts', 
+							'banks', 
+							'wage_lists']
 
-			if item['block_name'] is None:
-				raise(DropItem("Block name missing"))
+		if item['block_name'] is None:
+			raise(DropItem("Block name missing"))
 
-			else:
+		elif isinstance(item, FTOItem):
 				
+			item = clean_item(item, title_fields)	
+			for table in tables:
+				
+				unique = 1 if table in unique_tables else 0
+				keys = get_keys(table)
+				sql, data = insert_data(item,
+										keys,
+										table, 
+										unique)
+				self.dbpool.runOperation(sql, 
+										data)
+		
+		elif isinstance(item, FTOOverviewItem):
+
 				item = clean_item(item, title_fields)
-				
-				for table in self.tables:
-					unique = 1 if table in self.unique_tables else 0
-					keys = get_keys(table)
-					sql, data = insert_data(item,
-											keys,
-											table, 
-											unique)
-					self.dbpool.runOperation(sql, data)
+				sql,  data = update_fto_type(item['fto_no'], 
+											 item['fto_type'], 
+											 str(spider.block))
+				self.dbpool.runOperation(sql, 
+										 data)
 		
 		return(item)
 	
