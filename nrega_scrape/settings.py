@@ -69,7 +69,6 @@ COOKIES_ENABLED = False
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    #'nrega_scrape.pipelines.FTOSummaryPipeline': 300,
     'nrega_scrape.pipelines.FTOContentPipeline': 1000
 }
 
@@ -82,7 +81,7 @@ LOG_FORMAT = '%(name)s, %(lineno)s, %(exc_info)s, %(asctime)s, %(filename)s, %(f
 LOG_DATEFORMAT = '%Y-%m-%d %H:%M:%S'
 LOG_STDOUT = False
 LOG_LEVEL = 'INFO'
-# LOG_FILE =  './nrega_output/log.csv'
+LOG_FILE =  './nrega_output/log.csv'
 LOG_SHORT_NAMES = True
 
 CLOSESPIDER_ERRORCOUNT = 0
