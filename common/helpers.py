@@ -207,8 +207,8 @@ def update_fto_nos(block):
 	done = len(all_ftos.loc[all_ftos['done'] == 1])
 	progress = str(done/len(all_ftos))
 		
-	print(block + ' := ' + progress + " done.")
-	print(str(done) + ' / ' + str(len(all_ftos)) + ' done...')
+	print(block + ' is ' + progress + " done.")
+	print('The code has done ' + str(done) + ' / ' + str(len(all_ftos)) + ' done...')
 
 def upload_data(block, file_from, file_to, to_dropbox):
 
