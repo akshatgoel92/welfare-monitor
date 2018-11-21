@@ -210,28 +210,28 @@ def update_fto_nos(block):
 	print(block + ' is ' + progress + " done.")
 	print('The code has done ' + str(done) + ' / ' + str(len(all_ftos)) + ' done...')
 
-def upload_data(block, file_from, file_to, to_dropbox):
+def upload_data(block, path_from = '/Users/Akshat/Desktop/', path_to = '', to_dropbox = 0):
 
 	get_transactions = "SELECT * FROM transactions;"
 	get_banks = "SELECT * FROM banks;"
 	get_accounts = "SELECT * from accounts"
 
+	file_from = path_from + block + '.csv'
+
 	user, password, host, db = sql_connect().values()
 	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
 	conn = engine.connect()
-	trans = conn.begin()
-	
+
 	try: 
 		transactions = pd.read_sql(get_transactions, con = conn)
 		banks = pd.read_sql(get_banks, con = conn)
 		accounts = pd.read_sql(get_accounts, con = conn)
 				
-		trans.commit()
+		
 		conn.close()
 
 	except Exception as e:
 		print(e)
-		trans.rollback()
 		conn.close()
 		
 
@@ -247,12 +247,14 @@ def upload_data(block, file_from, file_to, to_dropbox):
 								indicator = 'accounts_merge')
 
 	except Exception as e: 
+		print(e)
 		print('Merge failed...please check the merge.')
 
 	try: 
 		transactions.to_csv(file_from, index = False)
 	
-	except Exception as e: 
+	except Exception as e:
+		print(e) 
 		print('Sending data to .csv failed...please check the .csv upload.')
 	
 	if to_dropbox == 1:
