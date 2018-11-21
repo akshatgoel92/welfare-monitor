@@ -59,10 +59,10 @@ class FtoContentSpider(scrapy.Spider):
 	fin_year = "2016-2017"
 	state_code = "17"
 	output_dir = os.path.abspath(".")
-	block = "gwalior"
+	block = "morena"
 	
 	# Set Path to Chrome driver
-	user = 'ec2-user'
+	user = 'local'
 	path = "./../software/chromedriver/" if user == 'local' else "/home/ec2-user/chromedriver/"
 	path_to_chrome_driver = os.path.abspath(path)
 
