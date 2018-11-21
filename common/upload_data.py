@@ -2,7 +2,7 @@ import helpers
 
 if __name__ == '__main__':
 
-    block = 'gwalior'
+    block = 'morena'
     file_from = './nrega_output/' + block + '.csv'
     file_to = ''
     to_dropbox = 0
