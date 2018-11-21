@@ -86,7 +86,7 @@ LOG_SHORT_NAMES = True
 
 CLOSESPIDER_ERRORCOUNT = 0
 CLOSESPIDER_ITEMCOUNT = 0
-CLOSESPIDER_TIMEOUT = 50400
+CLOSESPIDER_TIMEOUT = 18000
 
 
 # Enable and configure the AutoThrottle extension (disabled by default)
