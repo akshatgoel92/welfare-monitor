@@ -10,4 +10,4 @@ scrapy crawl fto_content
 # Then update the queue in the SQL database 
 # Then update the log
 python ./common/update_ftos.py
-python ./common/process_log.py
+python ./common/process_log.py ./nrega_output/log.csv /Logs/fba/
