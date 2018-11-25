@@ -23,10 +23,14 @@ def put_fto_nos(table, engine, path):
 
 if __name__ == '__main__':
 
-    # Create block list here
-	# Create file paths after that
-	block_list = ['morena']
-	paths = [os.path.abspath('./fto_nos/' + block + '.xlsx') for block in block_list]
+	 # Create parser
+	parser = argparse.ArgumentParser(description='Parse the block')
+	parser.add_argument('block', type=str, help='Block name', required = True)
+
+	# Parse arguments
+	args = parser.parse_args()
+	block = args.block
+	path = os.path.abspath('./fto_nos/' + block + '.xlsx')
 	
     # Create the DB engine here
 	# Then create the data-base using the schema defined above
