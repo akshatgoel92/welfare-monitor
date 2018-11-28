@@ -84,7 +84,8 @@ def get_keys(table):
 
 # Insert a new item into the SQL data-base	
 def insert_data(item, keys, table, unique = 0):
-		
+
+	# Only insert fields which are both in the item and the table	
 	keys = get_keys(table) & item.keys()
 	fields = u','.join(keys)
 	
