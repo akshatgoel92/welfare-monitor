@@ -13,10 +13,7 @@ pymysql.install_as_MySQLdb()
 # Import date and time
 from datetime import datetime
 
-# Import item files
-from nrega_scrape.items import FTOItem
-from nrega_scrape.items import NREGAItem
-from nrega_scrape.items import FTONo
+# Import other modules
 from common.helpers import sql_connect
 
 # Creates the data-base
