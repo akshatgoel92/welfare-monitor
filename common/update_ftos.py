@@ -11,7 +11,6 @@ import numpy as np
 
 from sqlalchemy import *
 
-
 pymysql.install_as_MySQLdb()
 
 # Update the FTO nos. table
@@ -42,29 +41,23 @@ def update_fto_nos(block):
 							on = ['fto_no'], 
 							indicator = True)
 		
-		print(len(all_ftos))
 		# Update the tracker for the FTOs which are transactions
 		all_ftos.loc[(all_ftos['_merge'] == 'both'), 'done'] = 1
 
-		# Update the materials FTOs
+		# Update the materials FTOs because there are no transactions scraped from these
 		all_ftos.loc[(all_ftos['fto_type'] == 'Material'), 'done'] = 1
 
-		print(len(all_ftos))
 		# Drop the merge variable
 		all_ftos.drop(['_merge'], 
 						axis = 1, 
 						inplace = True)
 
-		print(len(all_ftos))
-		
 		# Write to the SQL table
 		all_ftos.to_sql(block, 
 						con = conn, 
 						index = False, 
 						if_exists = 'replace')
 
-		print(len(all_ftos))
-		
 		# Commit the changes and close the connection
 		trans.commit()
 		conn.close()

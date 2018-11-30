@@ -23,7 +23,7 @@ pymysql.install_as_MySQLdb()
 # Upload data to Dropbox
 def upload_data(block, path_from = '', path_to = '', to_dropbox = 0):
 
-	get_transactions = "SELECT * FROM transactions where block = " + block + ";"
+	get_transactions = "SELECT * FROM transactions where block_name = '" + block.capitalize() + "';"
 	get_banks = "SELECT * FROM banks;"
 	get_accounts = "SELECT * from accounts"
 
@@ -77,7 +77,7 @@ if __name__ == '__main__':
 
     # Create parser
     parser = argparse.ArgumentParser(description='Parse the block')
-    parser.add_argument('block', type=str, help='Block name', required = True)
+    parser.add_argument('block', type=str, help='Block name')
     parser.add_argument('to_dropbox', type=int, help='Whether to write to Dropbox')
     
     # Parse arguments
@@ -86,7 +86,7 @@ if __name__ == '__main__':
     to_dropbox = args.to_dropbox
     
     # Set file paths
-    file_from = './nrega_output/' + block + '.csv'
+    file_from = './nrega_output/' + block + '_data.csv'
     file_to = ''
     
     # Call function
