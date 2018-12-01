@@ -21,7 +21,7 @@ if __name__ == '__main__':
 	# Parse arguments
 	args = parser.parse_args()
 	file_from = args.file_from
-	file_to = args.file_to + str(datetime.now()) + '.csv'
+	file_to = args.file_to + str(datetime.today()) + '.csv'
 
 	# Call the function
 	process_log(file_from, file_to )
