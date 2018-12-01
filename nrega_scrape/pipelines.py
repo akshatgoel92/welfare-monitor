@@ -95,6 +95,8 @@ class FTOContentPipeline(object):
 			if item['block_name'] is None:
 				raise(DropItem("Block name missing"))
 			
+			item = clean_item(item, title_fields)
+			
 			for table in tables:
 				
 				unique = 1 if table in unique_tables else 0
