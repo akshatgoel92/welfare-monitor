@@ -25,7 +25,7 @@
         "fto_no",
         "scrape_date",
         "scrape_time",
-        "credit_amt_due", 
+        "credit_amt_due",
         "credit_amt_actual"
     ],
     "wage_lists": [

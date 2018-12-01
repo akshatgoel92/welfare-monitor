@@ -14,7 +14,7 @@ pymysql.install_as_MySQLdb()
 from datetime import datetime
 
 # Import other modules
-from common.helpers import sql_connect
+from common import helpers
 
 # Creates the data-base
 def create_db(engine):
@@ -85,7 +85,7 @@ if __name__ == '__main__':
 	
 	# Create the DB engine here
 	# Then create the data-base using the schema defined above
-	user, password, host, db = sql_connect().values()
+	user, password, host, db = helpers.sql_connect().values()
 	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
 	
 	create_db(engine)
