@@ -2,7 +2,7 @@
 
 # Execute the ETL
 # Switch to the working directory
-cd /home/ec2-user/fba-bank-scrape/
+cd /home/ec2-user/fto-scrape/
 
 # Then execute the content spider
 scrapy crawl fto_content
