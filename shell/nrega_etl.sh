@@ -1,7 +1,13 @@
 #!/bin/sh
 
 # Execute the ETL
-cd /home/ec2-user/fba-bank-scrape/
+# Switch to the working directory
+cd /home/ec2-user/fto-scrape/
+
+# Then execute the content spider
 scrapy crawl fto_content
-python ./common/update_ftos.py
-python ./common/process_log.py
+
+# Then update the queue in the SQL database 
+# Then update the log
+python ./common/update_ftos.py arang
+python ./common/process_log.py './nrega_output/log.csv' '/Female Mobile Phones Phase I/Data/Secondary Data/MIS Scrapes/Logs/log'
