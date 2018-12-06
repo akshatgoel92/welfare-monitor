@@ -48,7 +48,8 @@ def get_common_cols(bank, branch):
 	bank_cols = bank.columns.values.tolist()
 	branch_cols = branch.columns.values.tolist()
 	cols = list(set(branch_cols) & set(bank_cols))
-	
+	cols.remove('transact_ref_no')
+
 	return(cols)
 
 # Check to make sure the same transaction reference no. contains the same information
@@ -58,6 +59,11 @@ def check_common_transactions(both, cols):
 	merge_checks = [(col, (both[col + '_x'] != both[col + '_y']).sum()) for col in cols]
 		
 	return(merge_checks)
+
+def check_common_ftos():
+
+	pass
+
 
 # Execute this script
 if __name__ == '__main__':
@@ -72,23 +78,13 @@ if __name__ == '__main__':
 
 	# Get common columns
 	cols = get_common_cols(bank_data, branch_data)
-	cols.remove('transact_ref_no')
-	print(cols)
-
+	
 	# Restrict both data-sets to common FTOs
 	bank_data, branch_data = get_common_ftos(bank_data, branch_data)
 
 	# Merge both data-sets and get discrepancies
 	merged_data = merge_data(bank_data, branch_data)
-	checked = check_data(merged_data)
-
-	# These are transactions only in: 
-	# 1) only bank 
-	# 2) only branch
-	# 3) both data-sets
-	only_bank = checked[0]
-	only_branch = checked[1]
-	both = checked[2]
+	only_bank, only_branch, both = check_data(merged_data)
 
 	# Merged data checks
 	merge_checks = check_common_transactions(both, cols)
