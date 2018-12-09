@@ -56,13 +56,13 @@ class FtoContentSpider(scrapy.Spider):
 	# Set globals
 	name = "fto_content"
 	basic = "http://mnregaweb4.nic.in/netnrega/fto/fto_status_dtl.aspx?"
-	fin_year = "2018-2019"
-	state_code = "33"
-	block = "arang"
+	fin_year = "2016-2017"
+	state_code = "17"
+	block = "sheopur"
 	output_dir = os.path.abspath(".")
 	
 	# Set Path to Chrome driver
-	user = 'ec2-user'
+	user = 'local'
 	path = "./../software/chromedriver/" if user == 'local' else "/home/ec2-user/chromedriver/"
 	path_to_chrome_driver = os.path.abspath(path)
 
