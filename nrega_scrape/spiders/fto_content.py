@@ -58,7 +58,7 @@ class FtoContentSpider(scrapy.Spider):
 	basic = "http://mnregaweb4.nic.in/netnrega/fto/fto_status_dtl.aspx?"
 	fin_year = "2016-2017"
 	state_code = "17"
-	block = "sheopur"
+	block = "fto_queue"
 	output_dir = os.path.abspath(".")
 	
 	# Set Path to Chrome driver
@@ -68,7 +68,7 @@ class FtoContentSpider(scrapy.Spider):
 
 	# Get the target FTO nos.
 	conn, cursor = db_conn()
-	fto_nos = pd.read_sql("SELECT fto_no FROM fto_queue WHERE done = 0;", con = conn).values.tolist()
+	fto_nos = pd.read_sql("SELECT fto_no FROM " + block " WHERE done = 0;", con = conn).values.tolist()
 	cursor.close()
 	conn.close()
 
