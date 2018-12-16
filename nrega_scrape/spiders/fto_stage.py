@@ -61,7 +61,14 @@ def get_ftos(soup):
 	# Scrape the table
 	for row in table.find_all('tr')[1:]:
 		cols = row.find_all('td')[1:]
-		fto_nos.append([col.get_text().strip() for col in cols])
+		col_text = [col.get_text().strip() for col in cols]
+		
+		if 'Total' in col_text: 
+			pass
+		
+		else: 
+
+			fto_nos.append(col_text)
 	
 	# Convert the lists into a data-frame
 	fto_nos = pd.DataFrame(fto_nos)
@@ -72,7 +79,7 @@ def get_ftos(soup):
 	return(fto_nos)
 
 # Allocate the stages
-def allocate_stage(fto_no, fto_stages):
+def get_stage(fto_no, fto_stages):
 
 	# Store the stages
 	stages = ['pb', 'sb', 'sec_sig', 'fst_sig_not', 'sec_sig_not', 'fst_sig', 'pp', 'P']
@@ -103,7 +110,7 @@ def make_data(fto_no):
 	# Store the column names for the block stage
 	if fto_type in block:
 	
-		columns = ['fto_no', 'institution', 'sign_date',
+		columns = ['fto_no', 'institution', 'sign_date', 
 				   ]
 	
 	# Store the column names for the bank stage
@@ -151,7 +158,7 @@ if __name__ == '__main__':
 			if 'typ' in link and
 			'typ=R' not in link]
 
-	blocks = [re.findall('block_name=(.+)&block', link)[0]
+	blocks = [re.findall('block_name=(.+)&block', link)[0].title()
 			  for link in links
 			  if 'typ' in link and 
 			  'typ=R' not in link]
