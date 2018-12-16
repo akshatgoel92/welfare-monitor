@@ -4,8 +4,16 @@ import requests
 import re
 import os 
 
+from datetime import datetime
+
 # Import sub-modules
 from bs4 import BeautifulSoup
+
+from sqlalchemy import *
+from sqlalchemy.engine import reflection
+
+# Import helpers
+from common import helpers
 
 # Construct URL 
 def construct_url(basic, state_name, state_code, 
@@ -63,10 +71,9 @@ def get_ftos(soup):
 		cols = row.find_all('td')[1:]
 		col_text = [col.get_text().strip() for col in cols]
 		
-		if 'Total' in col_text: 
-			pass
-		
-		else: 
+		# We don't want any rows with the word Total in them 
+		# We only want FTO nos.		
+		if 'Total' not in col_text:
 
 			fto_nos.append(col_text)
 	
@@ -79,13 +86,13 @@ def get_ftos(soup):
 	return(fto_nos)
 
 # Allocate the stages
-def get_stage(fto_no, fto_stages):
+def get_stage(fto_nos, fto_stages):
 
 	# Store the stages
 	stages = ['pb', 'sb', 'sec_sig', 'fst_sig_not', 'sec_sig_not', 'fst_sig', 'pp', 'P']
 
-	# Create a dictionary of indices 
-	indices = { stage: [i for i in range(len(fto_stages)) if fto_stages[i] == stage] for stage in stages}
+	# For each stage store a list of indices in the stages table at that stage
+	indices = {stage: [i for i in range(len(fto_stages)) if fto_stages[i] == stage] for stage in stages}
 
 	# Now create the data-frames
 	fto_nos = {stage: pd.concat([fto_nos[i] for i in indices[stage]]) for stage in indices}
@@ -93,7 +100,7 @@ def get_stage(fto_no, fto_stages):
 	return(fto_nos)
 
 # Make columns
-def make_data(fto_no):
+def get_stage_table(fto_type, fto_nos, engine):
 
 	# Store the stage names to use as SQL table names
 	stages =	{'pb': 'fto_processed_by_bank', 'sb': 'fto_sent_to_bank', 
@@ -105,24 +112,80 @@ def make_data(fto_no):
 	block = ['sec_sig', 'fst_sig', 'fst_sig_not', 'sec_sig_not']
 
 	# Bank
-	bank = [stage for stage in stages.keys if stage not in block]
+	bank = [stage for stage in stages.keys() if stage not in block]
+
+	# Tables
+	table = stages[fto_type]
+
+	columns = ['fto_no', 'institution', 'sign_date', 
+			   'total_transact_due', 'total_amt_due',
+			   'total_transact_processed', 'total_amt_processed',
+			   'total_transact_rejected', 'total_amt_rejected',
+			   'total_credited_amt','total_invalid_account', 'block']
 
 	# Store the column names for the block stage
-	if fto_type in block:
+	if fto_type in bank:
+		
+		columns.remove('sign_date')
+
+	# Rename the columns
+	fto_nos.columns = columns
+
+	# Write the stage-wise table to data-base	
+	fto_nos.to_sql(table, con = engine, index = False, if_exists = 'replace')
+
+	return(fto_nos)
+
+
+# Get current stage
+def get_current_stage_table(stage_tables, engine):
 	
-		columns = ['fto_no', 'institution', 'sign_date', 
-				   ]
+	stages =	{'pb': 8, 'sb': 5, 'sec_sig': 4, 'fst_sig': 2,
+				'fst_sig_not': 1, 'sec_sig_not': 3, 'pp': 7, 'P': 6}
 	
-	# Store the column names for the bank stage
-	elif fto_type in bank:
+				
+	for stage, fto_nos in stage_tables.items():
+		print(stage)
+		fto_nos['stage'] = stages[stage]
+		fto_nos = fto_nos[['fto_no', 'stage']]
+		
+	fto_current_stage = pd.concat(stage_tables.values())
 
-		columns = ['']
+	fto_current_stage['current_stage'] = fto_current_stage.groupby(['fto_no'])['stage'].transform(max)
 
-	pass
+	fto_current_stage = fto_current_stage[['fto_no', 'current_stage']]
 
-def write_data():
-	pass
+	fto_current_stage['date'] = str(datetime.today().strftime('%d-%m-%Y'))
 
+	fto_current_stage.drop_duplicates(inplace = True)
+
+	fto_current_stage.to_sql('fto_current_stage', con = engine, index = False, if_exists = 'replace')
+
+	return(fto_current_stage)
+	
+# Get new FTOs and put them in the queue
+def get_new_ftos(fto_current_stage, engine):
+
+	# Store the new FTOs as today's date 
+	date_today = str(datetime.today().strftime('%d-%m-%Y'))
+
+	# Read the FTO queue
+	fto_queue = pd.read_sql('SELECT fto_no FROM fto_queue', con = engine)
+
+	# Do a left join because we want to keep all the FTOs in the current stage table
+	new_ftos = pd.merge(fto_current_stage, fto_queue, how = 'left', 
+						on = ['fto_no'], indicator = True)
+
+	# Now keep only those observations from the stage table which did not merge 
+	new_ftos = new_ftos.loc[new_ftos['_merge'] == 'left_only']
+
+	# Now keep only the new FTO numbers column
+	new_ftos = new_ftos['fto_no']
+	
+	# Now write this file to Excel and get 
+	new_ftos.to_excel('./fto_nos/fto_queue_' + date_today + '.xlsx', index = False)
+
+	return(new_ftos)
 		
 # Execute 
 if __name__ == '__main__':
@@ -158,12 +221,30 @@ if __name__ == '__main__':
 			if 'typ' in link and
 			'typ=R' not in link]
 
+	# Store block names for each table		
 	blocks = [re.findall('block_name=(.+)&block', link)[0].title()
 			  for link in links
 			  if 'typ' in link and 
 			  'typ=R' not in link]
+
+	# Get database credentials and then create an engine to use for the SQL connection
+	user, password, host, db = helpers.sql_connect().values()
 	
-	# Get the FTO nos
+	# Create an engine object
+	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
+	
+	# Now get the FTO nos.
 	fto_final = [get_ftos(soup) for soup in soup_links]
 
+	# Now reorganize the data-sets by stage rather than block
+	fto_stages = get_stage(fto_final, types)
 
+	# Now add column names and write these tables to data-base
+	fto_stages = {fto_stage: get_stage_table(fto_stage, fto_nos, engine) for fto_stage, fto_nos in fto_stages.items()}
+
+	# Test from here
+	# Next create a table for the current stage of the FTO and write that to the data-base
+	fto_current_stage = get_current_stage_table(fto_stages, engine)
+
+	# Next figure out which FTOs to append to the FTO queue
+	get_new_ftos(fto_current_stage, engine)
