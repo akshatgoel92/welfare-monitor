@@ -56,8 +56,8 @@ class FtoContentSpider(scrapy.Spider):
 	# Set globals
 	name = "fto_content"
 	basic = "http://mnregaweb4.nic.in/netnrega/fto/fto_status_dtl.aspx?"
-	fin_year = "2016-2017"
-	state_code = "17"
+	fin_year = "2018-2019"
+	state_code = "33"
 	block = "fto_queue"
 	output_dir = os.path.abspath(".")
 	
