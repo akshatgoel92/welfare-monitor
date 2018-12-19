@@ -86,7 +86,7 @@ if __name__ == '__main__':
     to_dropbox = args.to_dropbox
     
     # Set file paths
-    file_from = './nrega_output/' + block + '_data.csv'
+    file_from = './nrega_output/' + block
     file_to = ''
     
     # Call function
