@@ -43,5 +43,4 @@ nrega_output/
 #############
 .vscode/
 *.DS_Store
-.DS_Store
 .python-version
