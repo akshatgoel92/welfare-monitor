@@ -10,7 +10,7 @@ import random
 random.seed(90123)
 
 # Load data
-def load_data(path = './nrega_output/arang_pilot_full_v2.csv'):
+def load_data(path = './nrega_output/arang_pilot_full_v3.csv'):
 
 	return(pd.read_csv(path, low_memory = False))
 
@@ -31,7 +31,7 @@ def get_time_window(data):
 	return(data)
 
 # Load field
-def load_field(field = '/Users/akshatgoel/Desktop/16Dec_Tekari1_jcn.xlsx'):
+def load_field(field = '/Users/akshatgoel/Desktop/20Dec_Bhansoj_jcn.xlsx'):
 
 	wb = xw.Book(field)
 	sheet = wb.sheets['16Dec_Tekari1_jcn.xlsx']
@@ -40,7 +40,10 @@ def load_field(field = '/Users/akshatgoel/Desktop/16Dec_Tekari1_jcn.xlsx'):
 	return(field)
 
 # Clean field
-def clean_field(field, village_code = 'CH-16-015-010-001'):
+def clean_field(field, village_code = 'CH-16-015-014-001'):
+
+	# Drop missing values
+	field = field.loc[~field['jcn'].isna()]
 
 	# Clean variables
 	field['sky_phone'] = field['sky_phone'].astype(int).astype(str)
