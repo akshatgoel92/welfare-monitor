@@ -23,9 +23,9 @@ pymysql.install_as_MySQLdb()
 # Upload data to Dropbox
 def upload_data(block, path_from = '', path_to = '', to_dropbox = 0):
 
-	get_transactions = "SELECT * FROM transactions where block_name = '" + block.capitalize() + "';"
+	get_transactions = "SELECT * FROM transactions where fto_no in (SELECT fto_no from " + block + ");"
 	get_banks = "SELECT * FROM banks;"
-	get_accounts = "SELECT * from accounts"
+	get_accounts = "SELECT * from accounts;"
 
 	file_from = path_from + block + '.csv'
 
@@ -45,12 +45,12 @@ def upload_data(block, path_from = '', path_to = '', to_dropbox = 0):
 		
 	try: 
 		transactions = pd.merge(transactions, banks, 
-								how = 'outer', 
+								how = 'left', 
 								on = ['ifsc_code'], 
 								indicator = 'banks_merge')
 		
 		transactions = pd.merge(transactions, accounts, 
-								how = 'outer', 
+								how = 'left', 
 								on = ['jcn', 'acc_no', 'ifsc_code'], 
 								indicator = 'accounts_merge')
 
