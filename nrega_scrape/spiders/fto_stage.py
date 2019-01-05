@@ -261,18 +261,46 @@ if __name__ == '__main__':
 
 		# Get database credentials and then create an engine to use for the SQL connection
 		user, password, host, db = helpers.sql_connect().values()
+
+	except Exception as e:
+		print('There was an error getting the credentials from the helper file...')
+
+	try: 
 	
 		# Create an engine object
 		engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
+
+	except Exception as e:
+		print('There was an error creating a data-base engine..')
+
+	try: 
 	
 		# Now get the FTO nos.
 		fto_final = [get_ftos(soup) for soup in soup_links]
 
+	except Exception as e:
+
+		print('FTO final error...')
+
+	try:
+
 		# Now reorganize the data-sets by stage rather than block
 		fto_stages = get_stage(fto_final, types)
 
+	except Exception as e:
+
+		print('fto_stage error')
+
+	try: 
+
 		# Now add column names and write these tables to data-base
 		fto_stages = {fto_stage: get_stage_table(fto_stage, fto_nos, engine) for fto_stage, fto_nos in fto_stages.items()}
+
+	except Exception as e:
+
+		print('adding column name and writing to db error')
+
+	try: 
 
 		# Test from here
 		# Next create a table for the current stage of the FTO and write that to the data-base
@@ -283,4 +311,4 @@ if __name__ == '__main__':
 
 	except Exception as e:
 		print(e)
-		print('There is an error in MySQL writes...')
+		print('There is an error in final MySQL writes...')
