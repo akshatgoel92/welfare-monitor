@@ -55,23 +55,42 @@ def get_summary_data(soup):
 # Get FTO nos.
 def get_ftos(soup):
 
+
+	print('Yay')
+
 	# Create place-holder for FTO data
 	fto_nos = []
-	# Store the table 
-	table = soup.find_all('table')[-1]
-	# Store the text in the last span tag
-	location = soup.find_all('span')[-1].get_text()
-	# Store block
-	block = re.findall('Block.*:(.+)', location)[-1].strip().title()
-	# Scrape the table
-	for row in table.find_all('tr')[1:]:
-		cols = row.find_all('td')[1:]
-		col_text = [col.get_text().strip() for col in cols]
+	# Store the table
+	try:  
+		table = soup.find_all('table')[-1]
+		# Store the text in the last span tag
+		location = soup.find_all('span')[-1].get_text()
+
+	except Exception as e:
+		print(e)
+		print('Table not found')
+		
+	try: 
+		# Store block
+		block = re.findall('Block.*:(.+)', location)[-1].strip().title()
+	
+	except Exception as e:
+		print('block not found')
+
+	try: 
+		# Scrape the table
+		for row in table.find_all('tr')[1:]:
+			cols = row.find_all('td')[1:]
+			col_text = [col.get_text().strip() for col in cols]
 		
 		# We don't want any rows with the word Total in them 
 		# We only want FTO nos.		
 		if 'Total' not in col_text:
 			fto_nos.append(col_text)
+
+	except Exception as e:
+		print(e)
+		print('table scrape error')
 	
 	# Convert the lists into a data-frame
 	fto_nos = pd.DataFrame(fto_nos)
