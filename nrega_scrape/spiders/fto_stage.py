@@ -282,5 +282,5 @@ if __name__ == '__main__':
 		new_ftos = get_new_ftos(fto_current_stage, engine)
 
 	except Exception as e:
-
+		print(e)
 		print('There is an error in MySQL writes...')
