@@ -136,7 +136,7 @@ def get_stage_table(fto_type, fto_nos, engine):
 	fto_nos = fto_nos.loc[fto_nos['fto_no'].apply(lambda x: 'FTO' in x)]
 	
 	# Write the stage-wise table to data-base	
-	fto_nos.to_sql(table, con = engine, index = False, if_exists = 'replace')
+	fto_nos.to_sql(table, con = engine, index = False, if_exists = 'replace', chunksize = 100)
 
 	return(fto_nos)
 
@@ -167,7 +167,7 @@ def get_current_stage_table(stage_tables, engine):
 
 	print('There are ' + str(len(fto_current_stage)) + ' entries! This is nuts!')
 
-	fto_current_stage.to_sql('fto_current_stage', con = engine, index = False, if_exists = 'replace')
+	fto_current_stage.to_sql('fto_current_stage', con = engine, index = False, if_exists = 'replace', chunksize = 100)
 
 	return(fto_current_stage)
 	
@@ -232,83 +232,47 @@ if __name__ == '__main__':
 
 		print('There is an error in getting the links from the HTML that we got from the summary page...')
 	
-	try:
-		# Link content as BeautifulSoup objects
-		soup_links = [get_source(link) 
-				  	  for link in links 
-				  	  if 'typ' in link and 
-				  	 'typ=R' not in link]
-
-
 	
-		# Store the FTO types
-		types = [re.findall('typ=(.+)&mode', link)[0] 
-				for link in links
-				if 'typ' in link and
-				'typ=R' not in link]
+	# Link content as BeautifulSoup objects
+	soup_links = [get_source(link) 
+				  for link in links 
+				  if 'typ' in link and 
+				  'typ=R' not in link]
+
+	# Store the FTO types
+	types = [re.findall('typ=(.+)&mode', link)[0] 
+			for link in links
+			if 'typ' in link and
+			'typ=R' not in link]
 
 		# Store block names for each table		
-		blocks = [re.findall('block_name=(.+)&block', link)[0].title()
-				  for link in links
-				  if 'typ' in link and 
-			  	 'typ=R' not in link]
+	blocks = [re.findall('block_name=(.+)&block', link)[0].title()
+			  for link in links
+			  if 'typ' in link and 
+			  'typ=R' not in link]
 
-	except Exception as e:
 
-		print('Parse error in getting FTO types and block names')
+	# Get database credentials and then create an engine to use for the SQL connection
+	user, password, host, db = helpers.sql_connect().values()
 
-	try: 
-
-		# Get database credentials and then create an engine to use for the SQL connection
-		user, password, host, db = helpers.sql_connect().values()
-
-	except Exception as e:
-		print('There was an error getting the credentials from the helper file...')
-
-	try: 
+	# Create an engine object
+	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
 	
-		# Create an engine object
-		engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
+	# Now get the FTO nos.
+	fto_final = [get_ftos(soup) for soup in soup_links]
 
-	except Exception as e:
-		print('There was an error creating a data-base engine..')
 
-	try: 
-	
-		# Now get the FTO nos.
-		fto_final = [get_ftos(soup) for soup in soup_links]
+	# Now reorganize the data-sets by stage rather than block
+	fto_stages = get_stage(fto_final, types)
 
-	except Exception as e:
-		print(e)
-		print('FTO final error...')
+	# Now add column names and write these tables to data-base
+	fto_stages = {fto_stage: get_stage_table(fto_stage, fto_nos, engine) for fto_stage, fto_nos in fto_stages.items()}
 
-	try:
+	# Test from here
+	# Next create a table for the current stage of the FTO and write that to the data-base
+	fto_current_stage = get_current_stage_table(fto_stages, engine)
 
-		# Now reorganize the data-sets by stage rather than block
-		fto_stages = get_stage(fto_final, types)
+	# Next figure out which FTOs to append to the FTO queue
+	new_ftos = get_new_ftos(fto_current_stage, engine)
 
-	except Exception as e:
-		print(e)
-		print('fto_stage error')
 
-	try: 
-
-		# Now add column names and write these tables to data-base
-		fto_stages = {fto_stage: get_stage_table(fto_stage, fto_nos, engine) for fto_stage, fto_nos in fto_stages.items()}
-
-	except Exception as e:
-		print(e)
-		print('adding column name and writing to db error')
-
-	try: 
-
-		# Test from here
-		# Next create a table for the current stage of the FTO and write that to the data-base
-		fto_current_stage = get_current_stage_table(fto_stages, engine)
-
-		# Next figure out which FTOs to append to the FTO queue
-		new_ftos = get_new_ftos(fto_current_stage, engine)
-
-	except Exception as e:
-		print(e)
-		print('There is an error in final MySQL writes...')
