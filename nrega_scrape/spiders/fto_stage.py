@@ -32,11 +32,11 @@ def construct_url(basic, state_name, state_code,
 
 # Get source
 def get_source(url):
-
+	print(url)
 	response = requests.get(url)
 	soup = BeautifulSoup(response.text, 'lxml')
 	print('Done')
-	
+	print(soup)
 	return(soup)
 
 # Get links from the source
@@ -57,20 +57,22 @@ def get_ftos(soup):
 
 
 	print('Yay')
-
+	print(soup)
 	# Create place-holder for FTO data
 	fto_nos = []
 	# Store the table
 	try:  
 		table = soup.find_all('table')[-1]
-		# Store the text in the last span tag
-		location = soup.find_all('span')[-1].get_text()
 
 	except Exception as e:
 		print(e)
 		print('Table not found')
-		
+			
 	try: 
+
+		# Store the text in the last span tag
+		location = soup.find_all('span')[-1].get_text()
+
 		# Store block
 		block = re.findall('Block.*:(.+)', location)[-1].strip().title()
 	
@@ -83,10 +85,10 @@ def get_ftos(soup):
 			cols = row.find_all('td')[1:]
 			col_text = [col.get_text().strip() for col in cols]
 		
-		# We don't want any rows with the word Total in them 
-		# We only want FTO nos.		
-		if 'Total' not in col_text:
-			fto_nos.append(col_text)
+			# We don't want any rows with the word Total in them 
+			# We only want FTO nos.		
+			if 'Total' not in col_text:
+				fto_nos.append(col_text)
 
 	except Exception as e:
 		print(e)
@@ -264,7 +266,7 @@ if __name__ == '__main__':
 			if 'typ' in link and
 			'typ=R' not in link]
 
-		# Store block names for each table		
+	# Store block names for each table		
 	blocks = [re.findall('block_name=(.+)&block', link)[0].title()
 			  for link in links
 			  if 'typ' in link and 
@@ -280,7 +282,6 @@ if __name__ == '__main__':
 	# Now get the FTO nos.
 	fto_final = [get_ftos(soup) for soup in soup_links]
 
-
 	# Now reorganize the data-sets by stage rather than block
 	fto_stages = get_stage(fto_final, types)
 
@@ -293,5 +294,3 @@ if __name__ == '__main__':
 
 	# Next figure out which FTOs to append to the FTO queue
 	new_ftos = get_new_ftos(fto_current_stage, engine)
-
-
