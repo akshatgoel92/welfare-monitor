@@ -36,7 +36,6 @@ def get_source(url):
 	response = requests.get(url)
 	soup = BeautifulSoup(response.text, 'lxml')
 	print('Done')
-	print(soup)
 	return(soup)
 
 # Get links from the source
@@ -53,11 +52,11 @@ def get_summary_data(soup):
 	pass
 
 # Get FTO nos.
-def get_ftos(soup):
+def get_ftos(soup, link):
 
 	# Create place-holder for FTO data
 	fto_nos = []
-	
+	print(link)
 	# Store the table
 	try:  
 		table = soup.find_all('table')[-1]
@@ -159,8 +158,6 @@ def get_stage_table(fto_type, fto_nos, engine):
 	
 	# Write the stage-wise table to data-base	
 	fto_nos.to_sql(table, con = engine, index = False, if_exists = 'replace', chunksize = 100)
-
-	trans.commit()
 
 	return(fto_nos)
 
@@ -297,16 +294,16 @@ if __name__ == '__main__':
 		trans = conn.begin()
 	
 	except Exception as e:
-
+		print(e)
 		print('Error creating engine...')
 		sys.exit()
 
 	try:
 		# Now get the FTO nos.
-		fto_final = [get_ftos(soup) for soup in soup_links]
+		fto_final = [get_ftos(soup, link) for soup, link in zip(soup_links, links)]
 
 	except Exception as e:
-
+		print(e)
 		print('Error getting FTO numbers...')
 		trans.rollback()
 		conn.close()
@@ -317,6 +314,7 @@ if __name__ == '__main__':
 		fto_stages = get_stage(fto_final, types)
 
 	except Exception as e:
+		print(e)
 		print('There was an error organizing the data-sets by stage...')
 		trans.rollback()
 		conn.close()
@@ -325,8 +323,9 @@ if __name__ == '__main__':
 	try:
 		# Now add column names and write these tables to data-base
 		fto_stages = {fto_stage: get_stage_table(fto_stage, fto_nos, conn) for fto_stage, fto_nos in fto_stages.items()}
-
+		
 	except Exception as e:
+		print(e)
 		print('There was an error writing the stage-wise tables to the data-base...')
 		trans.rollback()
 		conn.close()
@@ -337,10 +336,10 @@ if __name__ == '__main__':
 		fto_current_stage = get_current_stage_table(fto_stages, conn)
 		fto_current_stage.to_sql('fto_current_stage', con = conn, 
 								index = False, if_exists = 'replace', chunksize = 100)
-		trans.commit()
+		
 
 	except Exception as e:
-
+		print(e)
 		print('There was an error writing current stage table to the data-base...')
 		trans.rollback()
 		conn.close()
@@ -355,6 +354,7 @@ if __name__ == '__main__':
 		conn.close()
 
 	except Exception as e:
+		print(e)
 		print('Error appending to FTO queue...')
 		trans.rollback()
 		conn.close()
