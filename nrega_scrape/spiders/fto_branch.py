@@ -49,18 +49,24 @@ class FtoContentSpider(CrawlSpider):
 
 	# Set globals
 	name = "fto_branch"
+	state_name = "CHHATTISGARH"
+	state_code = '33' 
+	district_name = 'RAIPUR'
+	district_code = '3316'
+	block_name = 'ARANG'
+	block_code = district_code + '015'
+	fin_year = '2018-2019'
 
 	# Construct the URL
-	basic = 'http://mnregaweb4.nic.in/netnrega/FTO/'
-	aspx = 'fto_reprt_detail.aspx?lflag=&flg=W&page=b'
-	state = '&state_name=CHHATTISGARH&state_code=33'
-	district = '&district_name=RAIPUR&district_code=3316'
-	block = '&block_name=ARANG&block_code=3316015'
-	fin_year = '&fin_year=2018-2019'
+	basic = 'http://mnregaweb4.nic.in/netnrega/FTO/fto_reprt_detail.aspx?lflag=&flg=W&page=b'
+	state = '&state_name=' + state_name + '&state_code=' + state_code
+	district = '&district_name=' + district_name + '&district_code=' + district_code
+	block = '&block_name=' + block_name + '&block_code=' + block_code 
+	fin_year = '&fin_year=' + fin_year 
 	meta = '&typ=pb&mode=b&source=national&Digest=lJyuFv4MCVqYcWXqb+Upfw'
 
 	# Store the start URL
-	start_urls = [basic + aspx + state + district + block + fin_year + meta]
+	start_urls = [basic + state + district + block + fin_year + meta]
 	urls = []
 
 	# Parse function 
@@ -77,11 +83,18 @@ class FtoContentSpider(CrawlSpider):
 		# Prepend basic URL to the scraped href
 		urls = [self.basic + url for url in urls]
 
+		# Get the target FTO nos.
+		conn, cursor = db_conn()
+		fto_nos = pd.read_sql("SELECT fto_no FROM " + block + " WHERE done = 0;", con = conn).values.tolist()
+		cursor.close()
+		conn.close()
+
 		# Now go through each hyperlink on the table
 		# Call the FTO list parser on each URL
 		# Yield the result of the response to processing pipeline
 		for url in urls:
-			yield(response.follow(url, self.parse_fto_content))
+			if re.findall('fto_no=(.*FTO_\d+)&source', url)[0] in fto_nos:  
+				yield(response.follow(url, self.parse_fto_content))
 
 	# This takes as input a Twisted failure object
 	# It returns as output a representation of this object
