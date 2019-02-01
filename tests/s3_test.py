@@ -16,7 +16,6 @@ def s3_download():
 
 
 
-
 if __name__ == '__main__': 
 
-	
+	s3_connect()
