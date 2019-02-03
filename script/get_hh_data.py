@@ -10,19 +10,12 @@ import random
 random.seed(90123)
 
 # Load data
-def load_data(path = './nrega_output/arang_pilot_full_v3.csv'):
+def load_data(path = './nrega_output/abhanpur_pilot_v1.csv'):
 
 	return(pd.read_csv(path, low_memory = False))
 
-def clean_data(data):
-
-	pass
-
 # Restrict to a particular time window
-def get_time_window(data):
-
-	start_date = '2018-11-01'
-	end_date = '2018-12-16'
+def get_time_window(data, start_date = '2018-11-01', end_date = '2018-12-16'):
 
 	data['date'] = pd.to_datetime(data['transact_date'])
 	mask = (data['date'] > start_date) & (data['date'] <= end_date)
@@ -31,21 +24,27 @@ def get_time_window(data):
 	return(data)
 
 # Load field
-def load_field(field = '/Users/akshatgoel/Desktop/20Dec_Bhansoj_jcn.xlsx'):
+def load_field(field = './nrega_output/btt_field.xls'):
 
 	wb = xw.Book(field)
-	sheet = wb.sheets['16Dec_Tekari1_jcn.xlsx']
-	field = sheet['A1:E43'].options(pd.DataFrame, index = False, header = True).value
+	sheet = wb.sheets['Sheet1']
+	field = sheet['A1:F71'].options(pd.DataFrame, index = False, header = True).value
 	
 	return(field)
 
 # Clean field
-def clean_field(field, village_code = 'CH-16-015-014-001'):
+def clean_field(field, village_code = 'CH-16-008-026-001'):
 
 	# Drop missing values
 	field = field.loc[~field['jcn'].isna()]
 
-	# Clean variables
+	# Fill in missing values
+	field['sky_phone'].fillna('', inplace = True)
+	field['id'].fillna('', inplace = True)
+	field['time_pref'].fillna('', inplace = True)
+	
+
+	# 
 	field['sky_phone'] = field['sky_phone'].astype(int).astype(str)
 	field['id'] = field['id'].astype(int).astype(str)
 	field['time_pref'] = field['time_pref'].astype(int).astype(str)
@@ -202,8 +201,6 @@ def execute(path = '', file_to ='/Users/akshatgoel/Desktop/btt_script.csv',
 	script.to_csv(file_to, index = False)
 	
 	return(script)
-
-
 
 
 # Execute the script
