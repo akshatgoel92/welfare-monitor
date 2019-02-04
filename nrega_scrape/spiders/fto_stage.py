@@ -1,3 +1,16 @@
+#------------------------------------------------------------------#
+# Author: Akshat Goel
+# Date: 8th August 2018
+# Python version: 3.6.3
+# Dependencies:
+
+# [Only modules outside Python standard listed]
+# 1) scrapy 
+# 2) pandas 
+# 3) numpy 
+# 4) Selenium
+#------------------------------------------------------------------#
+
 # Import packages
 import pandas as pd
 import requests
@@ -32,10 +45,13 @@ def construct_url(basic, state_name, state_code,
 
 # Get source
 def get_source(url):
+	
 	print(url)
 	response = requests.get(url)
+	
 	soup = BeautifulSoup(response.text, 'lxml')
-	print('Done')
+	print('Done successfully....')
+	
 	return(soup)
 
 # Get links from the source
@@ -45,6 +61,20 @@ def get_links(soup):
 	links = [prefix + link.get('href') for link in soup.find_all('a', href=True)]
 	
 	return(links)
+
+# This will output the returned dictionary as a .json file.
+def write_links(links):
+	
+	with open('fto_urls.json', 'w') as urls:
+
+		json.dump(links, urls, indent = 4, sort_keys = True)
+
+# Load links from a .json file
+def load_links(links):
+
+	with open('./nrega_scrape/spiders/fto_urls.json') as f:
+
+		urls = json.load(f)
 
 # Scrape the summary table
 def get_summary_data(soup):
@@ -56,12 +86,13 @@ def get_ftos(soup, link):
 
 	# Create place-holder for FTO data
 	fto_nos = []
-	print(link)
+	
 	# Store the table
 	try:  
 		table = soup.find_all('table')[-1]
 
 	except Exception as e:
+		
 		print(e)
 		print('Table not found...exiting program!')
 		sys.exit()
@@ -75,21 +106,23 @@ def get_ftos(soup, link):
 		block = re.findall('Block.*:(.+)', location)[-1].strip().title()
 	
 	except Exception as e:
+		
 		print('The block name has not been found...exiting program!')
 		sys.exit()
 
 	try: 
+		
 		# Scrape the table
 		for row in table.find_all('tr')[1:]:
 			cols = row.find_all('td')[1:]
 			col_text = [col.get_text().strip() for col in cols]
 		
-			# We don't want any rows with the word Total in them 
-			# We only want FTO nos.		
+			# We don't want any rows with the word Total in them
 			if 'Total' not in col_text:
 				fto_nos.append(col_text)
 
 	except Exception as e:
+		
 		print(e)
 		print('There is a table scrape error....exiting program!')
 		sys.exit()
@@ -125,32 +158,35 @@ def get_stage_table(fto_type, fto_nos, engine):
 				'fst_sig_not': 'fto_first_sign_pending', 'sec_sig_not': 'fto_second_sign_pending',
 				'pp': 'fto_partial_processed_by_bank', 'P': 'fto_pending_bank_processing'}
 
-	# Block
+	# Block level stages 
 	block = ['sec_sig', 'fst_sig', 'fst_sig_not', 'sec_sig_not']
 
-	# Bank
+	# Bank level stages
 	bank = [stage for stage in stages.keys() if stage not in block]
 
 	# Tables
 	table = stages[fto_type]
 
+	# Block office columns
 	columns = ['fto_no', 'institution', 'sign_date', 
 			   'total_transact_due', 'total_amt_due',
 			   'total_transact_processed', 'total_amt_processed',
 			   'total_transact_rejected', 'total_amt_rejected',
 			   'total_credited_amt','total_invalid_account', 'block']
 
-	# Store the column names for the block stage
+	# Rename the columns depending on the stage
 	if fto_type in bank:
 		
 		columns.remove('sign_date')
 
-	# Rename the columns
+	# Logic for when there are are no columns at a particular stage
 	if fto_nos.empty:
 		
 		fto_nos = fto_nos.reindex(columns = columns)
 
+	# These are the columns
 	else: 
+		
 		fto_nos.columns = columns
 
 	# Keep only those entries with the substring 'FTO' in them
@@ -207,14 +243,16 @@ def get_new_ftos(fto_current_stage, engine):
 	# Now keep only the new FTO numbers column
 	new_ftos = new_ftos['fto_no']
 
+	# Column for whether FTO has been done already
 	new_ftos['done'] = 0
 
+	# Column for the FTO type
 	new_ftos['fto_type'] = ''
 	
 	return(new_ftos)
 		
 # Execute 
-if __name__ == '__main__':
+def main():
 	
 	# Store the variables we need for the summary page URL
 	basic = 'http://mnregaweb4.nic.in/netnrega/FTO/FTOReport.aspx?page=d&mode=B&flg=W&'
@@ -245,6 +283,7 @@ if __name__ == '__main__':
 		sys.exit()
 	
 	try: 
+		
 		# Store all the hyperlinks
 		links = get_links(source)
 
@@ -254,6 +293,7 @@ if __name__ == '__main__':
 		sys.exit()
 	
 	try: 
+		
 		# Link content as BeautifulSoup objects
 		soup_links = [get_source(link) 
 					  for link in links 
@@ -261,11 +301,13 @@ if __name__ == '__main__':
 					  'typ=R' not in link]
 
 	except Exception as e:
+		
 		print(e)
 		print('There is an error in making the link content into BeautifulSoup objects...now exiting the program.')
 		sys.exit()
 
 	try: 
+		
 		# Store the FTO types
 		types = [re.findall('typ=(.+)&mode', link)[0] 
 				for link in links
@@ -273,6 +315,7 @@ if __name__ == '__main__':
 				'typ=R' not in link]
 
 	except Exception as e:
+		
 		print(e)
 		print('There is an error getting FTO types....')
 		sys.exit()
@@ -284,25 +327,28 @@ if __name__ == '__main__':
 			  'typ=R' not in link]
 
 	try:
-		# Get database credentials and then create an engine to use for the SQL connection
-		user, password, host, db = helpers.sql_connect().values()
+		
 		# Create an engine object
+		user, password, host, db = helpers.sql_connect().values()
 		engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
-
+		
 		# Begin the transaction
 		conn = engine.connect()
 		trans = conn.begin()
 	
 	except Exception as e:
+		
 		print(e)
 		print('Error creating engine...')
 		sys.exit()
 
 	try:
+		
 		# Now get the FTO nos.
 		fto_final = [get_ftos(soup, link) for soup, link in zip(soup_links, links)]
 
 	except Exception as e:
+		
 		print(e)
 		print('Error getting FTO numbers...')
 		trans.rollback()
@@ -310,10 +356,12 @@ if __name__ == '__main__':
 		sys.exit()
 
 	try:
+		
 		# Now reorganize the data-sets by stage rather than block
 		fto_stages = get_stage(fto_final, types)
 
 	except Exception as e:
+		
 		print(e)
 		print('There was an error organizing the data-sets by stage...')
 		trans.rollback()
@@ -321,10 +369,12 @@ if __name__ == '__main__':
 		sys.exit()
 
 	try:
+		
 		# Now add column names and write these tables to data-base
 		fto_stages = {fto_stage: get_stage_table(fto_stage, fto_nos, conn) for fto_stage, fto_nos in fto_stages.items()}
 		
 	except Exception as e:
+		
 		print(e)
 		print('There was an error writing the stage-wise tables to the data-base...')
 		trans.rollback()
@@ -332,6 +382,7 @@ if __name__ == '__main__':
 		sys.exit()
 
 	try:
+		
 		# Next create a table for the current stage of the FTO and write that to the data-base
 		fto_current_stage = get_current_stage_table(fto_stages, conn)
 		fto_current_stage.to_sql('fto_current_stage', con = conn, 
@@ -339,6 +390,7 @@ if __name__ == '__main__':
 		
 
 	except Exception as e:
+		
 		print(e)
 		print('There was an error writing current stage table to the data-base...')
 		trans.rollback()
@@ -346,16 +398,21 @@ if __name__ == '__main__':
 		sys.exit()
 
 	try: 
+		
 		# Next figure out which FTOs to append to the FTO queue
 		new_ftos = get_new_ftos(fto_current_stage, conn)
-		# Now write this file to Excel and get 
 		new_ftos.to_sql('fto_queue', con = conn, index = False, if_exists = 'append')
 		trans.commit()
 		conn.close()
 
 	except Exception as e:
+		
 		print(e)
 		print('Error appending to FTO queue...')
 		trans.rollback()
 		conn.close()
 		sys.exit()
+
+if __name__ == '__main__':
+
+	main()
