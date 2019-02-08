@@ -20,12 +20,14 @@ from sqlalchemy import *
 
 pymysql.install_as_MySQLdb()
 
+
 # Upload data to Dropbox
 def upload_data(block, path_from = '', path_to = '', to_dropbox = 0):
 
-	get_transactions = "SELECT * FROM transactions where block_name = '" + block.capitalize() + "';"
+	get_transactions = "SELECT * FROM transactions where fto_no in (SELECT fto_no from " + block + ");"
 	get_banks = "SELECT * FROM banks;"
-	get_accounts = "SELECT * from accounts"
+	get_accounts = "SELECT * from accounts;"
+
 
 	file_from = path_from + block + '.csv'
 
@@ -34,34 +36,44 @@ def upload_data(block, path_from = '', path_to = '', to_dropbox = 0):
 	conn = engine.connect()
 
 	try: 
+		
 		transactions = pd.read_sql(get_transactions, con = conn)
 		banks = pd.read_sql(get_banks, con = conn)
 		accounts = pd.read_sql(get_accounts, con = conn)
+		print('Got transactions')
 		conn.close()
 
 	except Exception as e:
+		
 		print(e)
 		conn.close()
 		
 	try: 
+		
 		transactions = pd.merge(transactions, banks, 
-								how = 'outer', 
+								how = 'left', 
 								on = ['ifsc_code'], 
 								indicator = 'banks_merge')
+		print('Banks merge done..')
 		
 		transactions = pd.merge(transactions, accounts, 
-								how = 'outer', 
+								how = 'left', 
 								on = ['jcn', 'acc_no', 'ifsc_code'], 
 								indicator = 'accounts_merge')
+		print('Accounts merge done..')
 
 	except Exception as e: 
+		
 		print(e)
 		print('Merge failed...please check the merge.')
 
 	try: 
+		
 		transactions.to_csv(file_from, index = False)
+		print('Transactions sent to .csv...')
 	
 	except Exception as e:
+		
 		print(e) 
 		print('Sending data to .csv failed...please check the .csv upload.')
 	
@@ -72,6 +84,7 @@ def upload_data(block, path_from = '', path_to = '', to_dropbox = 0):
 	
 		except Exception as e:
 			print('Dropbox upload failed...please check the Dropbox upload.')
+
 
 if __name__ == '__main__':
 
@@ -86,7 +99,7 @@ if __name__ == '__main__':
     to_dropbox = args.to_dropbox
     
     # Set file paths
-    file_from = './nrega_output/' + block + '_data.csv'
+    file_from = './nrega_output/' + block
     file_to = ''
     
     # Call function

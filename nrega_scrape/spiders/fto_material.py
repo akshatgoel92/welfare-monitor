@@ -48,7 +48,7 @@ from common.helpers import *
 class FtoContentSpider(CrawlSpider):
 
 	# Set globals
-	name = "fto_branch"
+	name = "fto_material"
 	state_name = "CHHATTISGARH"
 	state_code = '33' 
 	district_name = 'RAIPUR'

@@ -24,9 +24,13 @@ google-chrome --version && which google-chrome
 # Install pip
 pip install --upgrade pip
 
-# Install packages listed in requirements.txt
-pip install -r /home/ec2-user/fto-scrape/backend/ec2/requirements.txt
+# Install gcc
+# This is needed to install scrapy
+sudo yum -y install gcc
+
+# Install packages listed in pip_requirements.txt
+pip install -r /home/ec2-user/fto-scrape/backend/ec2/pip_requirements.txt
 
 # Make directory for log files
-mkdir nrega_output
+mkdir /home/ec2-user/fto-scrape/nrega_output
 
