@@ -164,3 +164,32 @@ class FTOContentPipeline(object):
 	# Shut down all the connections in the DB connection pool
 	def close_spider(self, spider):
 		self.dbpool.close()
+
+class FTOMaterialPipeline(object):
+
+	def open_spider(self, spider):
+	
+		if spider.name == 'fto_material':
+		
+			self.file = open('fto_content.csv', 'w+b')
+			
+			self.exporter = CsvItemExporter(self.file)
+			
+			self.exporter.start_exporting()
+
+	def process_item(self, item, spider):
+	
+		if isinstance(item, FTOMaterialItem):
+		
+			self.exporter.export_item(item)
+			
+		return(item)
+		
+	def close_spider(self, spider):
+	
+		if spider_name == 'fto_material':
+		
+			self.exporter.finish_exporting()
+			
+			self.file.close()
+
