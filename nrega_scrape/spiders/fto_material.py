@@ -53,17 +53,17 @@ class FtoContentSpider(CrawlSpider):
 	state_code = '33' 
 	district_name = 'RAIPUR'
 	district_code = '3316'
-	block_name = 'ARANG'
-	block_code = district_code + '015'
+	block_name = 'ABHANPUR'
+	block_code = district_code + '008'
 	fin_year = '2018-2019'
-
+	
 	# Construct the URL
-	basic = 'http://mnregaweb4.nic.in/netnrega/FTO/fto_reprt_detail.aspx?lflag=&flg=W&page=b'
+	basic = 'http://mnregaweb4.nic.in/netnrega/FTO/fto_sign_detail.aspx?lflag=&flg=M&page=b'
 	state = '&state_name=' + state_name + '&state_code=' + state_code
 	district = '&district_name=' + district_name + '&district_code=' + district_code
 	block = '&block_name=' + block_name + '&block_code=' + block_code 
 	fin_year = '&fin_year=' + fin_year 
-	meta = '&typ=pb&mode=b&source=national&Digest=lJyuFv4MCVqYcWXqb+Upfw'
+	meta = '&typ=fst_sig&mode=b&source=national&Digest=8QNGgmbQHeXr43fWKEhzaw'
 
 	# Store the start URL
 	start_urls = [basic + state + district + block + fin_year + meta]
@@ -83,18 +83,11 @@ class FtoContentSpider(CrawlSpider):
 		# Prepend basic URL to the scraped href
 		urls = [self.basic + url for url in urls]
 
-		# Get the target FTO nos.
-		conn, cursor = db_conn()
-		fto_nos = pd.read_sql("SELECT fto_no FROM " + block + " WHERE done = 0;", con = conn).values.tolist()
-		cursor.close()
-		conn.close()
-
 		# Now go through each hyperlink on the table
 		# Call the FTO list parser on each URL
 		# Yield the result of the response to processing pipeline
 		for url in urls:
-			if re.findall('fto_no=(.*FTO_\d+)&source', url)[0] in fto_nos:  
-				yield(response.follow(url, self.parse_fto_content))
+			yield(response.follow(url, self.parse_fto_content))
 
 	# This takes as input a Twisted failure object
 	# It returns as output a representation of this object
@@ -110,24 +103,24 @@ class FtoContentSpider(CrawlSpider):
 		# Then select the correct one
 		try:
 			
-			item = FTOItem()
+			item = FTOMaterialItem()
 			table = response.xpath('//table')[2]
 			rows = table.xpath('//tr')
 			
 			# Process the item by iterating over rows
 			# Log the item name to the log file
 			for row in rows[4:]:
-			
+				
+				item['sr_no'] = row.xpath('td[1]//text()').extract_first()
 				item['block_name'] = row.xpath('td[2]//text()').extract_first()
-				item['jcn'] = row.xpath('td[3]//text()').extract_first()
-				item['transact_ref_no'] = row.xpath('td[4]//text()').extract_first()
+				item['transact_ref_no'] = row.xpath('td[3]//text()').extract_first()
 
-				item['transact_date'] = row.xpath('td[5]//text()').extract_first()
-				item['app_name'] = row.xpath('td[6]//text()').extract_first()
-				item['wage_list_no'] = row.xpath('td[7]//text()').extract_first()
+				item['transact_date'] = row.xpath('td[4]//text()').extract_first()
+				item['vendor_name'] = row.xpath('td[5]//text()').extract_first()
+				item['vendor_id'] = row.xpath('td[6]//text()').extract_first()
+				item['voucher_no'] = row.xpath('td[7]//text()').extract_first()
 
 				item['prmry_acc_holder_name'] = row.xpath('td[8]//text()').extract_first()
-				item['acc_no'] = ''
 				item['bank_code'] = row.xpath('td[9]//text()').extract_first()
 
 				item['ifsc_code'] = row.xpath('td[10]//text()').extract_first()
