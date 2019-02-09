@@ -88,7 +88,9 @@ class FtoMaterialSpider(CrawlSpider):
 		# Prepend basic URL to the scraped href
 		urls = [basic_1 + url for url in urls]
 		print(urls)
-
+		# Clean up further 
+		# urls = [re.findall('(.+fto_no.+Digest.+)/.+referer', url) for url in urls]
+		# print(urls)
 
 		# Now go through each hyperlink on the table
 		# Call the FTO list parser on each URL
@@ -111,34 +113,34 @@ class FtoMaterialSpider(CrawlSpider):
 		try:
 			
 			item = FTOMaterialItem()
-			table = response.xpath('//table')[-2]
+			table = response.xpath('//table')[2]
 			rows = table.xpath('//tr')
 			
 			# Process the item by iterating over rows
 			# Log the item name to the log file
 			for row in rows[4:]:
 				
-				item['sr_no'] = row.xpath('td[1]//text()').extract_first().strip()
-				item['block_name'] = row.xpath('td[2]//text()').extract_first().strip()
-				item['transact_ref_no'] = row.xpath('td[3]//text()').extract_first().strip()
+				item['sr_no'] = row.xpath('td[1]//text()').extract_first()
+				item['block_name'] = row.xpath('td[2]//text()').extract_first()
+				item['transact_ref_no'] = row.xpath('td[3]//text()').extract_first()
 
-				item['transact_date'] = row.xpath('td[4]//text()').extract_first().strip()
-				item['vendor_name'] = row.xpath('td[5]//text()').extract_first().strip()
-				item['vendor_id'] = row.xpath('td[6]//text()').extract_first().strip()
-				item['voucher_no'] = row.xpath('td[7]//text()').extract_first().strip()
+				item['transact_date'] = row.xpath('td[4]//text()').extract_first()
+				item['vendor_name'] = row.xpath('td[5]//text()').extract_first()
+				item['vendor_id'] = row.xpath('td[6]//text()').extract_first()
+				item['voucher_no'] = row.xpath('td[7]//text()').extract_first()
 
-				item['prmry_acc_holder_name'] = row.xpath('td[8]//text()').extract_first().strip()
-				item['bank_code'] = row.xpath('td[9]//text()').extract_first().strip()
+				item['prmry_acc_holder_name'] = row.xpath('td[8]//text()').extract_first()
+				item['bank_code'] = row.xpath('td[9]//text()').extract_first()
 
-				item['ifsc_code'] = row.xpath('td[10]//text()').extract_first().strip()
-				item['credit_amt_due'] = row.xpath('td[11]//text()').extract_first().strip()
-				item['credit_amt_actual'] = row.xpath('td[12]//text()').extract_first().strip()
+				item['ifsc_code'] = row.xpath('td[10]//text()').extract_first()
+				item['credit_amt_due'] = row.xpath('td[11]//text()').extract_first()
+				item['credit_amt_actual'] = row.xpath('td[12]//text()').extract_first()
 			
-				item['status'] = row.xpath('td[13]//text()').extract_first().strip()
-				item['processed_date'] = row.xpath('td[14]//text()').extract_first().strip()
-				item['utr_no'] = row.xpath('td[16]//text()').extract_first().strip()
+				item['status'] = row.xpath('td[13]//text()').extract_first()
+				item['processed_date'] = row.xpath('td[14]//text()').extract_first()
+				item['utr_no'] = row.xpath('td[16]//text()').extract_first()
 			
-				item['rejection_reason'] = row.xpath('td[17]//text()').extract_first().strip()
+				item['rejection_reason'] = row.xpath('td[17]//text()').extract_first()
 				item['server'] = socket.gethostname()
 				item['fto_no'] = re.findall('fto_no=(.*FTO_\d+)&source', response.url)[0]
 			
