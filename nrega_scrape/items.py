@@ -186,4 +186,6 @@ class FTOMaterialItem(scrapy.Item):
     scrape_date = scrapy.Field()
     
     scrape_time = scrapy.Field()
+    
+
 
