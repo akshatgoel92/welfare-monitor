@@ -50,50 +50,19 @@ class FtoMaterialSpider(CrawlSpider):
 
 	# Set globals
 	name = "fto_material"
-	state_name = "CHHATTISGARH"
-	state_code = '33' 
-	district_name = 'RAIPUR'
-	district_code = '3316'
-	block_name = 'ABHANPUR'
-	block_code = district_code + '008'
-	fin_year = '2018-2019'
-
-	# Construct the URL
-	basic = 'http://mnregaweb4.nic.in/netnrega/FTO/fto_sign_detail.aspx?lflag=&flg=M&page=b'
-	state = '&state_name=' + state_name + '&state_code=' + state_code
-	district = '&district_name=' + district_name + '&district_code=' + district_code
-	block = '&block_name=' + block_name + '&block_code=' + block_code 
-	fin_year = '&fin_year=' + fin_year 
-	meta = '&typ=fst_sig&mode=b&source=national&Digest=8QNGgmbQHeXr43fWKEhzaw'
-
+	
 	# Store the start URL
-	start_urls = [basic + state + district + block + fin_year + meta]
-	urls = []
+	if os.path.exists('fto_urls.csv'): 
+		start_urls = pd.read_csv('./fto_urls.csv')['url'].values.tolist()
 
+	else:
+		start_urls = []	
+	
 	# Parse function 
 	def parse(self, response):
 		
-		# Store the last table of the response
-		tables = response.xpath('//table')
-		# Store the table
-		table = response.xpath('//table')[-1]
-		
-		# Store new URL basic
-		basic_1 = 'http://mnregaweb4.nic.in/netnrega/FTO/'
-
-		# Store the URLs in the table
-		# We will follow these in the next parse function
-		urls = table.xpath('*//a//@href').extract()
-		print(urls)
-		# Prepend basic URL to the scraped href
-		urls = [basic_1 + url for url in urls]
-		print(urls)
-
-
-		# Now go through each hyperlink on the table
-		# Call the FTO list parser on each URL
 		# Yield the result of the response to processing pipeline
-		for url in urls:
+		for url in self.start_urls:
 			yield(response.follow(url, self.parse_fto_content))
 
 	# This takes as input a Twisted failure object
