@@ -1,43 +1,59 @@
 # -*- coding: utf-8 -*-
 
+#---------------------------------------------------------------------# 
 # Define your item pipelines here
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
+#---------------------------------------------------------------------# 
 
+#---------------------------------------------------------------------# 
 # Import packages
+#---------------------------------------------------------------------# 
 import os
 import json
 import re
 
+#---------------------------------------------------------------------# 
 # MySQL driver 
-# Install this as MySQLdb to ensure backward compatibality
+# Install this as MySQLdb to ensure
+#---------------------------------------------------------------------# 
 import pymysql
 pymysql.install_as_MySQLdb()
 
+#---------------------------------------------------------------------# 
 # Scrapy
+#---------------------------------------------------------------------# 
 from scrapy import signals
 from scrapy.contrib.exporter import CsvItemExporter
 from scrapy.exceptions import DropItem
 
+#---------------------------------------------------------------------# 
 # Project specific
+#---------------------------------------------------------------------# 
 from nrega_scrape.items import NREGAItem
 from nrega_scrape.items import FTONo
 from nrega_scrape.items import FTOItem
 from nrega_scrape.items import FTOOverviewItem
+from nrega_scrape.items import FTOMaterialItem
 
+#---------------------------------------------------------------------# 
 # Import helper functions
+#---------------------------------------------------------------------# 
 from common.helpers import sql_connect
 from common.helpers import insert_data
 from common.helpers import update_fto_type
 from common.helpers import clean_item
 from common.helpers import get_keys 
 
-
+#---------------------------------------------------------------------# 
 # Twisted adbapi library for connection pools to SQL data-base
+#---------------------------------------------------------------------# 
 from twisted.enterprise import adbapi
 
+#---------------------------------------------------------------------# 
 # Process each item using this pipeline
+#---------------------------------------------------------------------# 
 class FTOContentPipeline(object):
 
 	def __init__(self):
@@ -57,7 +73,9 @@ class FTOContentPipeline(object):
 	
 	def process_item(self, item, spider):
 
+		#---------------------------------------------------------------------# 
 		# Do this for over-view item spider
+		#---------------------------------------------------------------------# 
 		if isinstance(item, FTOOverviewItem) and spider.name == 'fto_content':
 			
 			title_fields = ['state', 
@@ -74,7 +92,9 @@ class FTOContentPipeline(object):
 			
 			self.dbpool.runOperation(sql, data)
 		
+		#---------------------------------------------------------------------# 
 		# Do this for FTO content spider
+		#---------------------------------------------------------------------# 
 		if isinstance(item, FTOItem) and spider.name == 'fto_content':
 
 			title_fields = ['block_name,' 
@@ -111,7 +131,9 @@ class FTOContentPipeline(object):
 				except Exception as e:
 					self.logger.error('Error in the data-base upload: %s', str(e))
 
+		#---------------------------------------------------------------------# 
 		# Do this for FTO branch spider
+		#---------------------------------------------------------------------# 
 		if isinstance(item, FTOItem) and spider.name == 'fto_branch':
 			
 			title_fields = ['block_name',
@@ -138,7 +160,9 @@ class FTOContentPipeline(object):
 			if item['wage_list_no'] == '':
 				raise(DropItem("Wage list no. missing"))
 			
+			#---------------------------------------------------------------------# 
 			# Drop transaction reference numbers that don't match the format
+			#---------------------------------------------------------------------# 
 			if re.search('\d{10}NRG\d{17}', item['transact_ref_no']) is None:
 				raise(DropItem("Transaction ref no does not fit format"))
 				
@@ -160,8 +184,10 @@ class FTOContentPipeline(object):
 					
 		return(item)
 	
+	#---------------------------------------------------------------------# 
 	# Execute this function when the spider is closing
 	# Shut down all the connections in the DB connection pool
+	#---------------------------------------------------------------------# 
 	def close_spider(self, spider):
 		self.dbpool.close()
 
@@ -170,26 +196,41 @@ class FTOMaterialPipeline(object):
 	def open_spider(self, spider):
 	
 		if spider.name == 'fto_material':
-		
-			self.file = open('fto_content.csv', 'w+b')
 			
+			self.file = open('./output/fto_material.csv', 'w+b')
 			self.exporter = CsvItemExporter(self.file)
-			
 			self.exporter.start_exporting()
 
 	def process_item(self, item, spider):
-	
-		if isinstance(item, FTOMaterialItem):
 		
+		#---------------------------------------------------------------------# 
+		# Check to see whether items are missing
+		# There are rows on FTOs which don't contain transaction information
+		# This sequence of statements removes these rows from the final scrape
+		#---------------------------------------------------------------------# 
+		if isinstance(item, FTOMaterialItem) and spider.name == 'fto_material': 
+			
+			if item['block_name'] is None:
+				raise(DropItem("Block name missing"))
+
+			if item['block_name'] == '':
+				raise(DropItem("Block name missing"))
+
+			if item['ifsc_code'] is None:
+				raise(DropItem('IFSC code missing'))
+		
+			if item['ifsc_code'] == "Total":
+				raise(DropItem("IFSC code missing"))
+
 			self.exporter.export_item(item)
 			
 		return(item)
 		
-	def close_spider(self, spider):
-	
-		if spider_name == 'fto_material':
-		
+	def close_spider(self, spider):	
+		#---------------------------------------------------------------------# 
+		# Finish exporting item before closing the spider
+		#---------------------------------------------------------------------# 
+		if spider.name == 'fto_material':
 			self.exporter.finish_exporting()
-			
 			self.file.close()
 
