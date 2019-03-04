@@ -66,7 +66,7 @@ class FTONo(scrapy.Item):
 	
 	block_code = scrapy.Field()
 	
-	process_date = scrapy.Field()
+	transact_date = scrapy.Field()
 	
 	# Housekeeping fields
 	url = scrapy.Field()

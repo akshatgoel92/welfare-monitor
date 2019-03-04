@@ -54,6 +54,47 @@ from twisted.enterprise import adbapi
 #---------------------------------------------------------------------# 
 # Process each item using this pipeline
 #---------------------------------------------------------------------# 
+class FTONoPipeline(object):
+
+	def open_spider(self, spider):
+	
+		if spider.name == 'fto_urls':
+			
+			self.file = open('./output/' + spider.stage + '.csv', 'w+b')
+			self.exporter = CsvItemExporter(self.file)
+			self.exporter.start_exporting()
+
+	def process_item(self, item, spider):
+		
+		#---------------------------------------------------------------------# 
+		# Check to see whether items are missing
+		# There are rows on FTOs which don't contain transaction information
+		# This sequence of statements removes these rows from the final scrape
+		#---------------------------------------------------------------------# 
+		if isinstance(item, FTONo) and spider.name == 'fto_urls': 
+			
+			if item['fto_no'] is None:
+				raise(DropItem("Block name missing"))
+
+			if item['fto_no'] == '':
+				raise(DropItem("Block name missing"))
+
+			if item['url'] is None:
+				raise(DropItem('IFSC code missing'))
+		
+			self.exporter.export_item(item)
+
+		return(item)
+		
+	def close_spider(self, spider):	
+		#---------------------------------------------------------------------# 
+		# Finish exporting item before closing the spider
+		#---------------------------------------------------------------------# 
+		if spider.name == 'fto_urls':
+			self.exporter.finish_exporting()
+			self.file.close()
+
+		
 class FTOContentPipeline(object):
 
 	def __init__(self):

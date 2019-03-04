@@ -8,6 +8,7 @@
 #----------------------------------------------------------------------#
 import scrapy
 import datetime
+import time
 import socket
 import re
 import os
@@ -50,7 +51,6 @@ from selenium.webdriver.chrome.options import Options
 #----------------------------------------------------------------------#
 from nrega_scrape.items import NREGAItem
 from nrega_scrape.items import FTONo
-from nrega_scrape.items import URLItem
 
 #----------------------------------------------------------------------#
 # This class scrapes the FTO URLs
@@ -64,45 +64,45 @@ class FTOUrls(CrawlSpider):
 	basic = 'http://mnregaweb4.nic.in/netnrega/FTO/FTOReport.aspx?page=d&mode=B&flg=W&'
 	state_name = 'CHHATTISGARH'
 	state_code = '33'
-	district_name = 'AGAR-MALWA'
+	district_name = 'RAIPUR'
 	district_code = '3316'
 	fin_year = '2018-2019'
-
-	#----------------------------------------------------------------------#
-	# Store the components of the state URL
-	#----------------------------------------------------------------------#
-	state = 'state_name=' + state_name +'&state_code=' + state_code
-	district = '&district_name=' + district_name + '&district_code=' + district_code 
-	fin_year_url = '&fin_year=' + fin_year
-	meta = '&dstyp=B&source=national&Digest=tuhEXy+HR52YT8lJYijdtw'
+	stage = 'sec_sig'
 	
 	#----------------------------------------------------------------------#
 	# Store whether to parse the URLS from a block level page or not
+	# Store whether we need materials FTOs or wage FTOs
 	#----------------------------------------------------------------------#
-	block = 0
-	material = 1
+	block = 1
+	material = 0
+	
 	#----------------------------------------------------------------------#
 	# Store the start URL here
 	#----------------------------------------------------------------------#
-
-	start_urls = [("http://mnregaweb4.nic.in/netnrega/FTO/FTOReport.aspx?"
-				 "page=s&mode=B&flg=W&state_name=MADHYA+PRADESH&state_code" 
-				 "=17&fin_year=2018-2019&dstyp=B&source=national&Digest="
-				 "5DA1ZSxezvKXndS3loV25w")]
+	if block == 0: 
+		start_urls = [("http://mnregaweb4.nic.in/netnrega/FTO/FTOReport.aspx?"
+				   	   "page=s&mode=B&flg=W&state_name=CHHATTISGARH&state_code" 
+				       "=33&fin_year=2018-2019&dstyp=B&source=national&"
+				       "Digest=UdEewHqde6mcn4hhpT93Qg")]
+	if block == 1:
+		start_urls = [("http://mnregaweb4.nic.in/netnrega/FTO/FTOReport.aspx?"
+					   "page=d&mode=B&lflag=&flg=W&state_name=CHHATTISGARH&state_code"
+					   "=33&district_name=RAIPUR&district_code=3316&fin_year=2018-2019"
+					   "&dstyp=B&source=national&Digest=y12oPa482OVLnSqnCc3NKQ")] 
 
 	#----------------------------------------------------------------------#
 	# Parse the block page
+	# Get the urls from the block page
 	#----------------------------------------------------------------------#			
 	def parse_block(self, response):
 		
-		# We will follow these in the next parse function
 		urls = response.xpath('*//a//@href').extract()
 		
 		block_urls = pd.DataFrame(urls, columns = ['url'])
 		block_urls.to_csv('block_urls.csv', index = False)
 
 		for url in urls:
-			if 'block_name' in url and 'Rejected' not in url:
+			if 'block_name' in url and self.stage + '&' in url:
 				yield(response.follow(url, self.parse_fto_list))
 
 
@@ -111,17 +111,35 @@ class FTOUrls(CrawlSpider):
 	#----------------------------------------------------------------------#
 	def parse_fto_list(self, response):
 
-		item = URLItem()
-		urls = response.xpath('*//a//@href').extract()
-		urls = ['http://mnregaweb4.nic.in/netnrega/FTO/' + url for url in urls]
-		
-		fto_urls = pd.DataFrame(urls, columns = ['url'])
-		fto_urls.to_csv('fto_urls.csv', index = False)
 
-		for url in fto_urls:
-			if 'block_name' in url and 'Rejected' not in url:
-				item['link'] = url
-				yield(item)
+		#----------------------------------------------------------------------#
+		# Get the URLs
+		#----------------------------------------------------------------------#
+		item = FTONo()
+		urls = response.xpath('*//a//@href').extract()
+		
+		#----------------------------------------------------------------------#
+		# Print the URLs
+		#----------------------------------------------------------------------#
+		urls = ['http://mnregaweb4.nic.in/netnrega/FTO/' + url for url in urls]
+		urls = [url for url in urls if 'fto_no' in url]
+		
+		#----------------------------------------------------------------------#
+		# Parse URLs the FTO list
+		#----------------------------------------------------------------------#		
+		for url in urls:
+			
+			item['url'] = url
+			item['fto_no'] = re.findall('fto_no=(.+)&source', url)[0]
+			item['state_code'] = re.findall('state_code=(.+)&state_name', url)[0]
+			item['district_code'] = re.findall('district_code=(.+)&district_name', url)[0]
+			item['block_code'] = re.findall('block_code=(.+)&block_name', url)[0]
+			item['transact_date'] = re.findall('fto_no=CH\d{7}_(.{6})', url)[0]
+			item['scrape_date'] = str(datetime.datetime.now().date())
+			item['scrape_time'] = str(datetime.datetime.now().time())
+			item['fto_stage'] = self.stage
+
+			yield(item)
 
 	#----------------------------------------------------------------------#
 	# Select the check box
@@ -159,7 +177,7 @@ class FTOUrls(CrawlSpider):
 		time.sleep(3)
 
 		#----------------------------------------------------------------------#
-		# Storge the source and return it as a selector object
+		# Store the source and return it as a selector object
 		#----------------------------------------------------------------------#
 		page_source = driver.page_source
 		page_source = Selector(text = page_source)
@@ -171,37 +189,43 @@ class FTOUrls(CrawlSpider):
 	#----------------------------------------------------------------------#
 	def parse(self, response):
 
-		if material == 1:
+		if self.material == 1 and self.block == 0:
 
-			source = self.select_check_box(response)
+			page_source = self.select_check_box(response)
+			district_urls = page_source.xpath('*//a//@href').extract()
 
+		elif self.material == 0 and self.block == 0:
+
+			district_urls = response.xpath('*//a//@href').extract()
+		
 		#----------------------------------------------------------------------#
 		# Store which callback you want here
 		# Then parse the district URLs
 		# Then yield those to the processing function
-		#----------------------------------------------------------------------#
-		if self.block == 1:
-			process_link = self.parse_block
-		
-		elif self.block == 0:
-			process_link = self.parse_fto_list	
-		
-		#----------------------------------------------------------------------#
-		# Store the district URLs
-		# Parse them to get the links to all FTOs which have been through the 
-		# first sign stage
 		#----------------------------------------------------------------------#		
-		district_urls = source.xpath('*//a//@href').extract()
+		elif self.block == 0:
+			process_link = self.parse_fto_list		
 		
-		for url in district_urls:
-			if 'district_name' in url and self.district_name in url and 'fst_sig' in url:
-				yield(response.follow(url, process_link))
-
 		#----------------------------------------------------------------------#
 		# Store the district URLs
+		# Parse them to get the links to all FTOs which have been through the selected stage
 		#----------------------------------------------------------------------#
-		district_urls = ['http://mnregaweb4.nic.in/netnrega/FTO/' + url for url in district_urls]
-		district_urls = pd.DataFrame(district_urls, columns = ['url'])
-		district_urls = district_urls.to_csv('district_urls.csv')
+		if self.block == 0:
+			
+			stage = self.stage + '&'
+			
+			for url in district_urls:
+				if 'district_name' in url and stage in url and self.district_name in url:
+					print('Following URL....:' + url)
+					yield(response.follow(url, self.parse_fto_list))
+			
+			district_urls = pd.DataFrame(['http://mnregaweb4.nic.in/netnrega/FTO/' + url for url in district_urls],
+									  	  columns = ['url']).to_csv('district_urls.csv')
 
-	
+		if self.block == 1:
+
+			for url in self.start_urls:
+				yield(scrapy.Request(url, 
+									 callback = self.parse_block, 
+									 dont_filter = True))
+
