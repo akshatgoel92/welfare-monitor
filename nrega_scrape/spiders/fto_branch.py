@@ -45,7 +45,7 @@ from common.helpers import *
 
 
 # FTO scraper
-class FtoContentSpider(CrawlSpider):
+class FtoBranchSpider(CrawlSpider):
 
 	# Set globals
 	name = "fto_branch"
