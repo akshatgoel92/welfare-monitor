@@ -53,7 +53,11 @@ class FtoMaterialSpider(CrawlSpider):
 	
 	# Store the start URL
 	if os.path.exists('fto_urls.csv'): 
-		start_urls = pd.read_csv('./fto_urls.csv')['url'].values.tolist()
+		try: 
+			start_urls = pd.read_csv('./fto_urls.csv')['url'].values.tolist()
+		except Exception as e:
+			print(e)
+			pass
 
 	else:
 		start_urls = []	
