@@ -108,12 +108,27 @@ def create_fto_queue(engine):
 	metadata.create_all(engine)
 
   
-def send_keys_to_file(engine):
-	
+def get_table_names(engine):
+
 	inspector = reflection.Inspector.from_engine(engine)
-	
+
 	tables = dict.fromkeys(inspector.get_table_names(), '')
 
+	return(inspector, tables)
+
+
+def check_table_empty(conn, table):
+
+	# MySQL uses an arbitrary index 
+	# Exists return 1 if the row exists else 0
+	# We take that and store it in not_empty	
+	is_empty = 1 - conn.execute("SELECT EXISTS (SELECT 1 FROM " + table))
+
+	return(is_empty)
+ 
+
+def send_keys_to_file(inspector, tables):
+	
 	for table in tables:
 		
 		tables[table] = [column['name'] for column in inspector.get_columns(table) 
