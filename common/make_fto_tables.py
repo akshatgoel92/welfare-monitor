@@ -14,21 +14,28 @@ from sqlalchemy import *
 from common import helpers
 from backend.db import db_schema
 
+#-------------------------#
+# Backend
+#-------------------------#
 pymysql.install_as_MySQLdb()
 
 
 #-------------------------------------#
 # Make stage table
 #-------------------------------------#
-def make_stage_tables(conn, stages, cols): 
+def make_stage_tables(engine, stages, cols): 
 
+	conn = engine.connect()
+	trans = conn.begin()
 	get_tables = "SELECT table_name FROM information_schema.tables"
+	
 	tables = [stage for stage in pd.read_sql(get_tables, con = conn).values.tolist() if stage in stages]
 	empty_tables = [db_schema.check_table_empty(conn, stage) for stage in tables]
 
 	for stage, is_empty in zip(stages, empty_tables):
 		
 		if stage not in tables or is_empty == 1:
+			
 			try: 
 				
 				db_schema.create_stage(engine, stage)
@@ -37,10 +44,20 @@ def make_stage_tables(conn, stages, cols):
 				
 				print(e)
 				print('Error making the stage table for...:' + stage)
+				trans.rollback()
 				sys.exit(10000)
 
+	trans.commit()
 
-def update_stage_tables(conn, stages, cols):
+
+
+#-------------------------------------#
+# Update stage tables
+#-------------------------------------#
+def update_stage_tables(engine, stages, cols):
+
+	conn = engine.connect()
+	trans = conn.begin()
 
 	for stage in stages:
 
@@ -62,13 +79,23 @@ def update_stage_tables(conn, stages, cols):
 
 			print(e)
 			print('There was an uncaught error in the creation of the SQL table for stage: ' + stage)
-			continue
+			trans.rollback()
+
+	trans.commit()
 
 
+
+#-------------------------------------#
+# Update current stage table
+#-------------------------------------#
 def update_current_stage_table(stages, conn):
 
 	pass
 
+
+#-------------------------------------#
+# Update FTO queue
+#-------------------------------------#
 def update_fto_queue(conn): 
 
 	fto_queue = pd.read_sql("SELECT * FROM fto_queue", con = conn) 
@@ -77,6 +104,9 @@ def update_fto_queue(conn):
 	new_ftos.to_sql(fto_queue, if_exists = 'append', con = conn, chunksize = 100)
 
 
+#-------------------------------------#
+# Main
+#-------------------------------------#
 def main(): 
 	
 	stages = ['fst_sig', 'fst_sig_not', 'sec_sig', 'sec_sig_not', 
@@ -88,21 +118,13 @@ def main():
 
 	user, password, host, db = helpers.sql_connect().values()
 	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
-	conn = engine.connect()
-	trans = conn.begin()
-	
-	try:
 
-		make_stage_tables(conn, stages, cols)
-		make_current_stage_table(con, stages, cols) 
-		trans.commit()
+	make_stage_tables(engine, stages, cols)
+	update_stage_tables(engine, stages, cols) 
 
-	except Exception as e:
-
-		print(e)
-		trans.rollback()
-
-
+#-------------------------------------#
+# Main
+#-------------------------------------#
 if __name__ == "__main__": 
 
 	main()
