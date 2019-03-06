@@ -12,16 +12,13 @@ pymysql.install_as_MySQLdb()
 
 # Import date and time
 from datetime import datetime
-
-# Import other modules
 from common import helpers
 
 # Creates the data-base
-def create_db(engine):
+def create_transactions(engine):
 	
 	metadata = MetaData()
 	
-	# Transactions table
 	transactions = Table('transactions', metadata, 
 										Column('block_name', String(50)), 
 										Column('jcn', String(50)), 
@@ -40,33 +37,76 @@ def create_db(engine):
 										Column('fto_no', String(50)), 
 										Column('scrape_date', String(50)),
 										Column('scrape_time', String(50)))
-	# FTO content table
+
+	metadata.create_all(engine)
+
+
+def create_wage_list(engine):
+
+	metadata = MetaData()
+
 	wage_list = Table('wage_lists', metadata, 
 										Column('wage_list_no', String(50), primary_key = True), 
 										Column('block_name', String(50)))
+
+	metadata.create_all(engine)
+
+
+def create_accounts(engine):
 	
-	# Accounts table
-	# Assumption: Primary account holder name and IFSC 
-	# code is unique within a JCN and account number
+	metadata = MetaData()
+
 	accounts = Table('accounts', metadata, 
 										Column('jcn', String(50), primary_key = True), 
 										Column('acc_no', String(50), primary_key = True),
 										Column('ifsc_code', String(50), primary_key = True),
 										Column('prmry_acc_holder_name', String(50)))
+
+	metadata.create_all(engine)
+
+
+def create_banks(engine):
 	
-	# Banks table
+	metadata = MetaData()
+
 	banks = Table('banks', metadata, 
 										Column('ifsc_code', String(50), primary_key = True), 
 										Column('bank_code', String(30)))
 
+	metadata.create_all(engine)
+
+
+
+def create_stage(engine, stage):
+
+	metadata = MetaData()
+
+	stage = Table(stage, metadata, 
+						Column('state_code'),
+						Column('district_code'), 
+						Column('block_code'), 
+						Column('fto_no'), 
+						Column('fto_stage'),
+						Column('transact_date'),
+						Column('scrape_date'), 
+						Column('scrape_time'), 
+						Column('url'))
+
+	metadata.create_all(engine)
+
+
+def create_fto_queue(engine):
+
+	metadata = MetaData()
 
 	fto_queue = Table('fto_queue', metadata, 
 										Column('fto_no', String(50), primary_key = True),
 										Column('done', Integer()), 
 										Column('fto_type', String(20)))
-	
-	# Create the tables
+
+
 	metadata.create_all(engine)
+
   
 def send_keys_to_file(engine):
 	
@@ -76,20 +116,12 @@ def send_keys_to_file(engine):
 
 	for table in tables:
 		
-		tables[table] = [column['name'] for column in inspector.get_columns(table) if 'autoincrement' not in column.keys()]
+		tables[table] = [column['name'] for column in inspector.get_columns(table) 
+						if 'autoincrement' not in column.keys()]
 		
 	with open('./backend/db/table_keys.json', 'w') as file:
 		
-		json.dump(tables, file, sort_keys=True, indent=4)
-		
-if __name__ == '__main__':
-	
-	# Create the DB engine here
-	# Then create the data-base using the schema defined above
-	user, password, host, db = helpers.sql_connect().values()
-	
-	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
-	
-	create_db(engine)
-	
-	send_keys_to_file(engine)
+		json.dump(tables, file, sort_keys = True, indent = 4)
+
+
+
