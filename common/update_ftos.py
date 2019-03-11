@@ -1,3 +1,6 @@
+#-------------------------#
+# Import packages
+#-------------------------#
 import os
 import json
 import sys
@@ -8,7 +11,6 @@ import argparse
 import helpers
 import pandas as pd
 import numpy as np
-
 from sqlalchemy import *
 
 pymysql.install_as_MySQLdb()
