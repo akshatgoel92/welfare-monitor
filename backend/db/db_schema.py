@@ -1,20 +1,25 @@
+#------------------------#
 # Import packages
+#------------------------#
 import os
 import json 
-
-# Import SQL modules
 import pandas as pd
 import numpy as np
 import pymysql
+
 from sqlalchemy import *
 from sqlalchemy.engine import reflection
-pymysql.install_as_MySQLdb()
-
-# Import date and time
 from datetime import datetime
 from common import helpers
 
-# Creates the data-base
+#------------------------#
+# Use PyMySQL
+#------------------------# 
+pymysql.install_as_MySQLdb()
+
+#-------------------------------#
+# Creates the transactions table
+#-------------------------------#
 def create_transactions(engine):
 	
 	metadata = MetaData()
@@ -40,7 +45,9 @@ def create_transactions(engine):
 
 	metadata.create_all(engine)
 
-
+#-----------------------------#
+# Creates the wage list table
+#-----------------------------#
 def create_wage_list(engine):
 
 	metadata = MetaData()
@@ -51,7 +58,9 @@ def create_wage_list(engine):
 
 	metadata.create_all(engine)
 
-
+#---------------------------#
+# Creates the accounts table
+#---------------------------#
 def create_accounts(engine):
 	
 	metadata = MetaData()
@@ -65,6 +74,9 @@ def create_accounts(engine):
 	metadata.create_all(engine)
 
 
+#------------------------#
+# Create tha banks table
+#------------------------#
 def create_banks(engine):
 	
 	metadata = MetaData()
@@ -76,25 +88,29 @@ def create_banks(engine):
 	metadata.create_all(engine)
 
 
-
+#------------------------#
+# Create the stage table
+#------------------------#
 def create_stage(engine, stage):
 
 	metadata = MetaData()
 
 	stage = Table(stage, metadata, 
-						Column('state_code'),
-						Column('district_code'), 
-						Column('block_code'), 
-						Column('fto_no'), 
-						Column('fto_stage'),
-						Column('transact_date'),
-						Column('scrape_date'), 
-						Column('scrape_time'), 
-						Column('url'))
+						Column('state_code', BigInteger()),
+						Column('district_code', BigInteger()), 
+						Column('block_code', BigInteger()), 
+						Column('fto_no', String(100)), 
+						Column('fto_stage', String(20)),
+						Column('transact_date', String(20)),
+						Column('scrape_date', String(20)), 
+						Column('scrape_time', String(20)), 
+						Column('url', String(500)))
 
 	metadata.create_all(engine)
 
-
+#----------------------------#
+# Creates the FTO queue table
+#----------------------------#
 def create_fto_queue(engine):
 
 	metadata = MetaData()
@@ -107,28 +123,39 @@ def create_fto_queue(engine):
 
 	metadata.create_all(engine)
 
-  
+#----------------------------------#
+# Creates a list of the table names
+#----------------------------------#  
 def get_table_names(engine):
 
 	inspector = reflection.Inspector.from_engine(engine)
+	
+	tables = inspector.get_table_names()
 
-	tables = dict.fromkeys(inspector.get_table_names(), '')
+	return(tables)
 
-	return(inspector, tables)
-
-
+#----------------------------------------#
+# Check if a given table is empty
+# MySQL uses an arbitrary index 
+# Exists return 1 if the row exists else 0
+# We take that and store it in not_empty	
+#----------------------------------------#
 def check_table_empty(conn, table):
 
-	# MySQL uses an arbitrary index 
-	# Exists return 1 if the row exists else 0
-	# We take that and store it in not_empty	
-	is_empty = 1 - int(conn.execute("SELECT EXISTS (SELECT 1 FROM " + table))
+	result = pd.read_sql('SELECT EXISTS ' + '(SELECT 1 FROM ' + table + ')', con = conn)
 
-	return(is_empty)
+	return(result.values.tolist()[0])
+
  
-
-def send_keys_to_file(inspector, tables):
+#------------------------#
+# Send keys to file
+#------------------------#
+def send_keys_to_file(engine, tables):
 	
+	inspector = reflection.Inspector.from_engine(engine)
+	
+	tables = dict.fromkeys(inspector.get_table_names(), '')
+
 	for table in tables:
 		
 		tables[table] = [column['name'] for column in inspector.get_columns(table) 
