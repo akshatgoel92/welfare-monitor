@@ -12,10 +12,13 @@ import helpers
 import pandas as pd
 import numpy as np
 from sqlalchemy import *
+from common import helpers
 
 pymysql.install_as_MySQLdb()
 
-# Update the FTO nos. table
+#-------------------------#
+# Update FTO nos
+#-------------------------#
 def update_fto_nos(block):
 
 	# Create the SQL queries
@@ -26,41 +29,57 @@ def update_fto_nos(block):
 	user, password, host, db = helpers.sql_connect().values()
 	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
 	
-	# Begin the transaction
+	#-------------------------#
+	# Begin transaction
+	#-------------------------#
 	conn = engine.connect()
 	trans = conn.begin()
 	
 	try: 
 		
-		# Get the 1) scraped data from transactions and 2) get target FTOs
+		#---------------------------------#
+		# Get scraped FTOs and target FTOs
+		#---------------------------------#
 		scraped_ftos = pd.read_sql(get_scraped_ftos, con = conn)
 		target_ftos = pd.read_sql(get_target_ftos, con = conn)
 		
+		#-----------------------------------------------------------------------------------------#
 		# Use a right join to exclude all FTOs in transactions table from previous districts/blocks
+		#-----------------------------------------------------------------------------------------#
 		all_ftos = pd.merge(scraped_ftos, 
 							target_ftos, 
 							how = 'right', 
 							on = ['fto_no'], 
 							indicator = True)
 		
+		#-----------------------------------------------------------------------------------------#
 		# Update the tracker for the FTOs which are transactions
+		#-----------------------------------------------------------------------------------------#
 		all_ftos.loc[(all_ftos['_merge'] == 'both'), 'done'] = 1
 
+		#-----------------------------------------------------------------------------------------#
 		# Update the materials FTOs because there are no transactions scraped from these
+		#-----------------------------------------------------------------------------------------#
 		all_ftos.loc[(all_ftos['fto_type'] == 'Material'), 'done'] = 1
 
+		#-----------------------------------------------------------------------------------------#
 		# Drop the merge variable
+		#-----------------------------------------------------------------------------------------#
 		all_ftos.drop(['_merge'], 
 						axis = 1, 
 						inplace = True)
 
+		#-----------------------------------------------------------------------------------------#
 		# Write to the SQL table
+		#-----------------------------------------------------------------------------------------#
 		all_ftos.to_sql(block, 
 						con = conn, 
 						index = False, 
 						if_exists = 'replace')
 
+		#-----------------------------------------------------------------------------------------#
 		# Commit the changes and close the connection
+		#-----------------------------------------------------------------------------------------#
 		trans.commit()
 		conn.close()
 

@@ -151,11 +151,8 @@ def put_fto_nos(table, engine, path, if_exists):
 #-------------------------------------#
 def main(): 
 	
-	stages = ['fst_sig', 'fst_sig_not', 'sec_sig', 
-			  'sec_sig_not', 'sb', 'pp', 'pb', 'P'] 
-		
-	cols = ['state_code', 'district_code', 'block_code', 
-			'fto_no', 'fto_stage', 'transact_date', 
+	stages = ['fst_sig', 'fst_sig_not', 'sec_sig', 'sec_sig_not', 'sb', 'pp', 'pb', 'P'] 
+	cols = ['state_code', 'district_code', 'block_code', 'fto_no', 'fto_stage', 'transact_date', 
 			'scrape_date', 'scrape_time', 'url']
 
 	user, password, host, db = helpers.sql_connect().values()

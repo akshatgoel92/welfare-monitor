@@ -9,21 +9,12 @@ from sqlalchemy import *
 from sqlalchemy.engine import reflection
 
 # Import item files
-from helpers import sql_connect
+from common.helpers import sql_connect
+from make_fto_tables import put_fto_nos
 
 # Install this as MySQLdb
 pymysql.install_as_MySQLdb()
 
-# Put FTO queue in a table
-def put_fto_nos(table, engine, path, if_exists):
-
-    fto_nos = pd.read_excel(path).drop_duplicates()
-    fto_nos['done'] = 0
-    fto_nos['fto_type'] = ''
-    fto_nos.to_sql(table, 
-					con = engine, 
-					index = False, 
-					if_exists = if_exists)
 
 if __name__ == '__main__':
 

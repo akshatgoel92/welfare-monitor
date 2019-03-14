@@ -1,7 +1,7 @@
 # Import packages
-import helpers
 import argparse
 import os
+from common import helpers
 from datetime import datetime
 
 # Uploads log file
