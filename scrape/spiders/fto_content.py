@@ -45,8 +45,8 @@ from twisted.internet.error import DNSLookupError
 from twisted.internet.error import TimeoutError, TCPTimedOutError
 
 # Item class
-from nrega_scrape.items import FTOItem
-from nrega_scrape.items import FTOOverviewItem
+from scrape.items import FTOItem
+from scrape.items import FTOOverviewItem
 from common.helpers import *
 
 
@@ -62,7 +62,7 @@ class FtoContentSpider(scrapy.Spider):
 	output_dir = os.path.abspath(".")
 	
 	# Set Path to Chrome driver
-	user = 'ec2-user'
+	user = 'ec2'
 	path = "./../software/chromedriver/" if user == 'local' else "/home/ec2-user/chromedriver/"
 	path_to_chrome_driver = os.path.abspath(path)
 

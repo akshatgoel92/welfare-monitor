@@ -39,9 +39,9 @@ from twisted.internet.error import DNSLookupError
 from twisted.internet.error import TimeoutError, TCPTimedOutError
 
 # Item class
-from nrega_scrape.items import FTOItem
-from nrega_scrape.items import FTOOverviewItem
-from nrega_scrape.items import FTOMaterialItem
+from scrape.items import FTOItem
+from scrape.items import FTOOverviewItem
+from scrape.items import FTOMaterialItem
 from common.helpers import *
 
 

@@ -16,7 +16,7 @@ import re
 
 #---------------------------------------------------------------------# 
 # MySQL driver 
-# Install this as MySQLdb to ensure
+# Install this as MySQLdb to ensure compataibility
 #---------------------------------------------------------------------# 
 import pymysql
 pymysql.install_as_MySQLdb()
@@ -31,11 +31,11 @@ from scrapy.exceptions import DropItem
 #---------------------------------------------------------------------# 
 # Project specific
 #---------------------------------------------------------------------# 
-from nrega_scrape.items import NREGAItem
-from nrega_scrape.items import FTONo
-from nrega_scrape.items import FTOItem
-from nrega_scrape.items import FTOOverviewItem
-from nrega_scrape.items import FTOMaterialItem
+from scrape.items import NREGAItem
+from scrape.items import FTONo
+from scrape.items import FTOItem
+from scrape.items import FTOOverviewItem
+from scrape.items import FTOMaterialItem
 
 #---------------------------------------------------------------------# 
 # Import helper functions
@@ -64,13 +64,13 @@ class FTONoPipeline(object):
 			self.exporter = CsvItemExporter(self.file)
 			self.exporter.start_exporting()
 
+#---------------------------------------------------------------------# 
+# Check to see whether items are missing
+# There are rows on FTOs which don't contain transaction information
+# This sequence of statements removes these rows from the final scrape
+#---------------------------------------------------------------------# 
 	def process_item(self, item, spider):
 		
-		#---------------------------------------------------------------------# 
-		# Check to see whether items are missing
-		# There are rows on FTOs which don't contain transaction information
-		# This sequence of statements removes these rows from the final scrape
-		#---------------------------------------------------------------------# 
 		if isinstance(item, FTONo) and spider.name == 'fto_urls': 
 			
 			if item['fto_no'] is None:
@@ -85,11 +85,12 @@ class FTONoPipeline(object):
 			self.exporter.export_item(item)
 
 		return(item)
-		
+
+	#---------------------------------------------------------------------# 
+	# Finish exporting item before closing the spider
+	#---------------------------------------------------------------------# 
 	def close_spider(self, spider):	
-		#---------------------------------------------------------------------# 
-		# Finish exporting item before closing the spider
-		#---------------------------------------------------------------------# 
+
 		if spider.name == 'fto_urls':
 			self.exporter.finish_exporting()
 			self.file.close()
@@ -266,12 +267,14 @@ class FTOMaterialPipeline(object):
 			self.exporter.export_item(item)
 			
 		return(item)
-		
+
+	#---------------------------------------------------------------------# 
+	# Finish exporting item before closing the spider
+	#---------------------------------------------------------------------# 
 	def close_spider(self, spider):	
-		#---------------------------------------------------------------------# 
-		# Finish exporting item before closing the spider
-		#---------------------------------------------------------------------# 
+
 		if spider.name == 'fto_material':
+			
 			self.exporter.finish_exporting()
 			self.file.close()
 

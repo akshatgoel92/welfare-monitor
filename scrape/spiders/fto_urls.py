@@ -49,8 +49,8 @@ from selenium.webdriver.chrome.options import Options
 #----------------------------------------------------------------------#
 # Items
 #----------------------------------------------------------------------#
-from nrega_scrape.items import NREGAItem
-from nrega_scrape.items import FTONo
+from scrape.items import NREGAItem
+from scrape.items import FTONo
 
 #----------------------------------------------------------------------#
 # This class scrapes the FTO URLs
