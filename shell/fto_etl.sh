@@ -17,4 +17,4 @@ scrapy crawl fto_branch
 python ./common/update_ftos.py fto_queue
 
 # Then update the log
-python ./common/process_log.py './nrega_output/log.csv' '/Female Mobile Phones Phase I/Data/Secondary Data/MIS Scrapes/Logs/log'
+python ./common/process_log.py './output/log.csv' '/Female Mobile Phones Phase I/Data/Secondary Data/MIS Scrapes/Logs/log'
