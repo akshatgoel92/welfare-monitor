@@ -20,7 +20,7 @@ pymysql.install_as_MySQLdb()
 #-------------------------------#
 # Creates the transactions table
 #-------------------------------#
-def create_transactions(engine):
+def create_bank_transactions(engine):
 	
 	metadata = MetaData()
 	
@@ -32,6 +32,30 @@ def create_transactions(engine):
 										Column('app_name', String(50)),
 										Column('wage_list_no', String(50)),
 										Column('acc_no', String(50)),
+										Column('ifsc_code', String(50)),
+										Column('credit_amt_due', Integer),
+										Column('credit_amt_actual', Integer),
+										Column('status', String(50)),
+										Column('processed_date', String(50)),
+										Column('utr_no', String(50)), 
+										Column('rejection_reason', String(50)),
+										Column('fto_no', String(50)), 
+										Column('scrape_date', String(50)),
+										Column('scrape_time', String(50)))
+
+	metadata.create_all(engine)
+
+def create_branch_transactions(engine):
+	
+	metadata = MetaData()
+	
+	transactions = Table('transactions', metadata, 
+										Column('block_name', String(50)), 
+										Column('jcn', String(50)), 
+										Column('transact_ref_no', String(50), primary_key = True),
+										Column('transact_date', String(50)),
+										Column('app_name', String(50)),
+										Column('wage_list_no', String(50)),
 										Column('ifsc_code', String(50)),
 										Column('credit_amt_due', Integer),
 										Column('credit_amt_actual', Integer),
@@ -99,8 +123,7 @@ def create_stage(engine, stage):
 						Column('state_code', BigInteger()),
 						Column('district_code', BigInteger()), 
 						Column('block_code', BigInteger()), 
-						Column('fto_no', String(100)), 
-						Column('fto_stage', String(20)),
+						Column('fto_no', String(100)),
 						Column('transact_date', String(20)),
 						Column('scrape_date', String(20)), 
 						Column('scrape_time', String(20)), 
@@ -145,6 +168,84 @@ def check_table_empty(conn, table):
 	result = pd.read_sql('SELECT EXISTS ' + '(SELECT 1 FROM ' + table + ')', con = conn)
 
 	return(result.values.tolist()[0])
+
+
+#-----------------------------------------------#
+# Return only those entries in df_1 not in df_2 	
+#-----------------------------------------------#
+def left_join(df_1, df_2, on):
+
+	df = pd.merge(df_1, df_2, how = 'outer', on = on, indicator = 'True')
+
+	df = df.loc[df['_merge'] == 'left_only']
+
+	df.drop(['_merge'], inplace = True)
+
+	return(df)
+
+#-----------------------------------------------#
+# Add a trigger	
+#-----------------------------------------------#
+def make_trigger():
+
+
+	pass
+
+
+#-----------------------------------------------#
+# Add an index
+#-----------------------------------------------#
+def make_index():
+
+	pass
+
+
+#-----------------------------------------------#
+# Make primary key
+#-----------------------------------------------#
+def make_primary_key():
+
+	pass
+
+
+#-----------------------------------------------#
+# Check data types same
+#-----------------------------------------------#
+def check_data_types():
+
+	pass
+
+
+
+#---------------------------------------------------------------------# 
+# Insert a new item into the SQL data-base
+#---------------------------------------------------------------------# 	
+def insert_data(item, keys, table, unique = 0):
+
+	#---------------------------------------------------------------------# 
+	# Only insert fields which are both in the item and the table
+	#---------------------------------------------------------------------# 	
+	keys = get_keys(table) & item.keys()
+	fields = u','.join(keys)
+	
+	qm = u','.join([u'%s'] * len(keys))
+	sql = "INSERT INTO " + table + " (%s) VALUES (%s)"
+	sql_unique = "INSERT IGNORE INTO " + table + " (%s) VALUES (%s)"
+	
+	insert = sql if unique == 0 else sql_unique
+	sql = insert % (fields, qm)
+	data = [item[k] for k in keys]
+
+	return(sql, data)
+
+#---------------------------------------------------------------------# 
+# Update FTO type
+#---------------------------------------------------------------------# 
+def update_fto_type(fto_no, fto_type, table):
+
+	sql = "UPDATE " + table + " SET fto_type = %s WHERE fto_no = %s"
+	data = [fto_type, fto_no]
+	return(sql, data)
 
  
 #------------------------#
