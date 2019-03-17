@@ -43,8 +43,8 @@ from scrape.items import FTOMaterialItem
 from common.helpers import sql_connect
 from common.helpers import insert_data
 from common.helpers import update_fto_type
-from common.helpers import clean_item
-from common.helpers import get_keys 
+from backend.db.db_schema import clean_item
+from common.db.db_schema import get_keys 
 
 #---------------------------------------------------------------------# 
 # Twisted adbapi library for connection pools to SQL data-base
