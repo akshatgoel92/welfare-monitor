@@ -98,36 +98,6 @@ def get_keys(table):
 	return(keys)
 
 #---------------------------------------------------------------------# 
-# Insert a new item into the SQL data-base
-#---------------------------------------------------------------------# 	
-def insert_data(item, keys, table, unique = 0):
-
-	#---------------------------------------------------------------------# 
-	# Only insert fields which are both in the item and the table
-	#---------------------------------------------------------------------# 	
-	keys = get_keys(table) & item.keys()
-	fields = u','.join(keys)
-	
-	qm = u','.join([u'%s'] * len(keys))
-	sql = "INSERT INTO " + table + " (%s) VALUES (%s)"
-	sql_unique = "INSERT IGNORE INTO " + table + " (%s) VALUES (%s)"
-	
-	insert = sql if unique == 0 else sql_unique
-	sql = insert % (fields, qm)
-	data = [item[k] for k in keys]
-
-	return(sql, data)
-
-#---------------------------------------------------------------------# 
-# Update FTO type
-#---------------------------------------------------------------------# 
-def update_fto_type(fto_no, fto_type, table):
-
-	sql = "UPDATE " + table + " SET fto_type = %s WHERE fto_no = %s"
-	data = [fto_type, fto_no]
-	return(sql, data)
-
-#---------------------------------------------------------------------# 
 # Send e-mail
 #---------------------------------------------------------------------# 
 def send_email(msg, subject, recipients):
