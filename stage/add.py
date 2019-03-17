@@ -10,7 +10,7 @@ from sqlalchemy.engine import reflection
 
 # Import item files
 from common.helpers import sql_connect
-from make_fto_tables import put_fto_nos
+from make import put_fto_nos
 
 # Install this as MySQLdb
 pymysql.install_as_MySQLdb()
@@ -31,7 +31,7 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 	block = args.block
 	if_exists = args.if_exists
-	path = os.path.abspath('./fto_nos/' + block + '.xlsx')
+	path = os.path.abspath('./output/' + block + '.csv')
 	
     # Create the DB engine here
 	# Then create the data-base using the schema defined above
