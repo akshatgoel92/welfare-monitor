@@ -86,16 +86,6 @@ def clean_item(item, title_fields):
 	
 	return(item)
 
-#---------------------------------------------------------------------# 
-# Get a table's keys
-#---------------------------------------------------------------------# 
-def get_keys(table):
-
-	with open('./backend/db/table_keys.json') as file:
-		tables = json.load(file)
-		keys = tables[table]
-	
-	return(keys)
 
 #---------------------------------------------------------------------# 
 # Send e-mail

@@ -17,9 +17,9 @@ from common import helpers
 #------------------------# 
 pymysql.install_as_MySQLdb()
 
-#-------------------------------#
-# Creates the transactions table
-#-------------------------------#
+#---------------------------------------------------#
+# Creates the bank account source transactions table
+#---------------------------------------------------#
 def create_bank_transactions(engine):
 	
 	metadata = MetaData()
@@ -45,6 +45,11 @@ def create_bank_transactions(engine):
 
 	metadata.create_all(engine)
 
+
+#-------------------------------------------------#
+# Creates the transactions table for branch scrape
+# The branch scrape does not have bank account numbers
+#-------------------------------------------------#
 def create_branch_transactions(engine):
 	
 	metadata = MetaData()
@@ -265,6 +270,18 @@ def send_keys_to_file(engine, tables):
 	with open('./backend/db/table_keys.json', 'w') as file:
 		
 		json.dump(tables, file, sort_keys = True, indent = 4)
+
+
+#---------------------------------------------------------------------# 
+# Get a table's keys
+#---------------------------------------------------------------------# 
+def get_keys(table):
+
+	with open('./backend/db/table_keys.json') as file:
+		tables = json.load(file)
+		keys = tables[table]
+	
+	return(keys)
 
 
 
