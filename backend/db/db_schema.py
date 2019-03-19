@@ -9,6 +9,7 @@ import pymysql
 
 from sqlalchemy import *
 from sqlalchemy.engine import reflection
+from sqlachmey.schema import Index
 from datetime import datetime
 from common import helpers
 
@@ -146,9 +147,25 @@ def create_fto_queue(engine):
 	fto_queue = Table('fto_queue', metadata, 
 										Column('fto_no', String(50), primary_key = True),
 										Column('done', Integer()), 
-										Column('fto_type', String(20)))
+										Column('fto_type', String(20)), 
+										Column('scrape_date', String(20)), 
+										Column('scrape_time', String(20)))
 
 
+	metadata.create_all(engine)
+
+
+#------------------------------------#
+# Creates the FTO current stage table
+#------------------------------------#
+def create_fto_current_stage(engine):
+
+	metadata = MetaData()
+
+	fto_stage = Table('fto_stage', metadata, 
+										Column('fto_no', String(50), primary_key = True),
+										Columns('current_stage', Integer()),
+										Columns('updated_at', String(20)))
 	metadata.create_all(engine)
 
 #----------------------------------#
@@ -188,39 +205,23 @@ def left_join(df_1, df_2, on):
 
 	return(df)
 
-#-----------------------------------------------#
-# Add a trigger	
-#-----------------------------------------------#
-def make_trigger():
-
-
-	pass
-
-
-#-----------------------------------------------#
-# Add an index
-#-----------------------------------------------#
-def make_index():
-
-	pass
 
 
 #-----------------------------------------------#
 # Make primary key
 #-----------------------------------------------#
-def make_primary_key():
+def make_primary_key(engine, table, key):
 
-	pass
-
+	engine.execute('ALATER TABLE ' + table + ' ADD PRIMARY KEY(' + key + ')')
 
 #-----------------------------------------------#
-# Check data types same
+# Add an index
 #-----------------------------------------------#
-def check_data_types():
+def make_index(engine, table, col, name):
 
-	pass
-
-
+	index = Index(name, table.c.col)
+	
+	index.create(engine)
 
 #---------------------------------------------------------------------# 
 # Insert a new item into the SQL data-base
@@ -231,14 +232,19 @@ def insert_data(item, keys, table, unique = 0):
 	# Only insert fields which are both in the item and the table
 	#---------------------------------------------------------------------# 	
 	keys = get_keys(table) & item.keys()
+	
 	fields = u','.join(keys)
 	
 	qm = u','.join([u'%s'] * len(keys))
+	
 	sql = "INSERT INTO " + table + " (%s) VALUES (%s)"
+	
 	sql_unique = "INSERT IGNORE INTO " + table + " (%s) VALUES (%s)"
 	
 	insert = sql if unique == 0 else sql_unique
+	
 	sql = insert % (fields, qm)
+	
 	data = [item[k] for k in keys]
 
 	return(sql, data)
@@ -249,14 +255,16 @@ def insert_data(item, keys, table, unique = 0):
 def update_fto_type(fto_no, fto_type, table):
 
 	sql = "UPDATE " + table + " SET fto_type = %s WHERE fto_no = %s"
+	
 	data = [fto_type, fto_no]
+	
 	return(sql, data)
 
  
 #------------------------#
 # Send keys to file
 #------------------------#
-def send_keys_to_file(engine, tables):
+def send_keys_to_file(engine):
 	
 	inspector = reflection.Inspector.from_engine(engine)
 	
@@ -278,10 +286,32 @@ def send_keys_to_file(engine, tables):
 def get_keys(table):
 
 	with open('./backend/db/table_keys.json') as file:
+		
 		tables = json.load(file)
+		
 		keys = tables[table]
 	
 	return(keys)
 
 
 
+#---------------------------------------------------------------------# 
+# Create data-base
+#---------------------------------------------------------------------# 
+def create_db(engine, branch = 1):
+
+	if branch == 1:
+
+		create_branch_transactions(engine)
+
+	elif branch == 0:
+
+		create_bank_transactions(engine)
+
+	create_wage_list(engine)
+
+	create_accounts(engine)
+
+	create_banks(engine)
+
+	send_keys_to_file(engine)
