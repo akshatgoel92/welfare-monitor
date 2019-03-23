@@ -9,7 +9,7 @@ import pymysql
 
 from sqlalchemy import *
 from sqlalchemy.engine import reflection
-from sqlachmey.schema import Index
+from sqlalchemy.schema import Index
 from datetime import datetime
 from common import helpers
 
@@ -105,7 +105,7 @@ def create_accounts(engine):
 
 
 #------------------------#
-# Create tha banks table
+# Create the banks table
 #------------------------#
 def create_banks(engine):
 	
@@ -118,14 +118,44 @@ def create_banks(engine):
 	metadata.create_all(engine)
 
 
+
+#----------------------------------------------#
+# Create a .json file with stage table names
+#----------------------------------------------#
+def create_stage_table_names():
+
+	stage_table_names = {'fst_sig': 'fto_fst_sig_not', 'sec_sig': 'fto_sec_sig', 
+						 'sec_sig_not': 'fto_sec_sig_not', 'sb': 'fto_sent_to_bank', 
+						 'pp': 'fto_partial_processed_bank', 'pb': 'fto_pending_bank', 
+						 'P': 'fto_processed'}
+
+	with open('./backend/db/stage_table_names.json', 'w') as file:
+
+		json.dump(tables, file, sort_keys = True, indent = 4)
+
+
+#----------------------------------------------#
+# Create a .json file with stage table names
+#----------------------------------------------#
+def load_stage_tables_names():
+
+	with open('./backend/db/stage_table_names.json') as file:
+		
+		tables = json.load(file)
+
+	return(tables)
+
+
 #------------------------#
 # Create the stage table
 #------------------------#
 def create_stage(engine, stage):
 
+	tables = load_stage_tables_names()
+
 	metadata = MetaData()
 
-	stage = Table(stage, metadata, 
+	stage = Table(tables[stage], metadata, 
 						Column('state_code', BigInteger()),
 						Column('district_code', BigInteger()), 
 						Column('block_code', BigInteger()), 
@@ -164,8 +194,8 @@ def create_fto_current_stage(engine):
 
 	fto_stage = Table('fto_stage', metadata, 
 										Column('fto_no', String(50), primary_key = True),
-										Columns('current_stage', Integer()),
-										Columns('updated_at', String(20)))
+										Column('current_stage', Integer()),
+										Column('updated_at', String(20)))
 	metadata.create_all(engine)
 
 #----------------------------------#
@@ -195,7 +225,7 @@ def check_table_empty(conn, table):
 #-----------------------------------------------#
 # Return only those entries in df_1 not in df_2 	
 #-----------------------------------------------#
-def left_join(df_1, df_2, on):
+def anti_join(df_1, df_2, on):
 
 	df = pd.merge(df_1, df_2, how = 'outer', on = on, indicator = 'True')
 
@@ -212,7 +242,7 @@ def left_join(df_1, df_2, on):
 #-----------------------------------------------#
 def make_primary_key(engine, table, key):
 
-	engine.execute('ALATER TABLE ' + table + ' ADD PRIMARY KEY(' + key + ')')
+	engine.execute('ALTER TABLE ' + table + ' ADD PRIMARY KEY(' + key + ')')
 
 #-----------------------------------------------#
 # Add an index
@@ -222,6 +252,20 @@ def make_index(engine, table, col, name):
 	index = Index(name, table.c.col)
 	
 	index.create(engine)
+
+#-----------------------------------------------------------#
+# This function will get data from the columns that you want
+#-----------------------------------------------------------#
+def select_data(engine, table, cols = ['*']):
+
+	cols = '.'.join(cols)
+
+	query = 'SELECT {} FROM {};'.format(cols, table)
+
+	result = pd.from_sql(query, con = conn)
+
+	return(result)
+
 
 #---------------------------------------------------------------------# 
 # Insert a new item into the SQL data-base
@@ -272,9 +316,8 @@ def send_keys_to_file(engine):
 
 	for table in tables:
 		
-		tables[table] = [column['name'] for column in inspector.get_columns(table) 
-						if 'autoincrement' not in column.keys()]
-		
+		tables[table] = [column['name'] for column in inspector.get_columns(table)]
+						
 	with open('./backend/db/table_keys.json', 'w') as file:
 		
 		json.dump(tables, file, sort_keys = True, indent = 4)
@@ -293,12 +336,10 @@ def get_keys(table):
 	
 	return(keys)
 
-
-
 #---------------------------------------------------------------------# 
-# Create data-base
+# Create data-base when called
 #---------------------------------------------------------------------# 
-def create_db(engine, branch = 1):
+def db_create(engine, branch):
 
 	if branch == 1:
 
@@ -314,4 +355,11 @@ def create_db(engine, branch = 1):
 
 	create_banks(engine)
 
+	create_fto_queue(engine)
+
+	create_fto_current_stage(engine)
+
 	send_keys_to_file(engine)
+
+
+

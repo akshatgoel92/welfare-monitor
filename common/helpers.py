@@ -63,12 +63,20 @@ def db_conn():
 	#---------------------------------------------------------------------# 
 	return(conn, cursor)
 
+def db_engine():
+
+	user, password, host, db = sql_connect().values()
+	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
+
+	return(engine)
+
+
 
 #---------------------------------------------------------------------# 
 # Upload file to S3
 #---------------------------------------------------------------------# 
 def upload_file_s3(file_from, file_to, bucket_name):
-	
+
 	s3 = boto3.client('s3')
 	s3.upload_file(file_from, bucket_name, file_to)
 
@@ -76,17 +84,19 @@ def upload_file_s3(file_from, file_to, bucket_name):
 # Download file from S3
 #---------------------------------------------------------------------# 
 def download_file_s3(file_from, file_to, bucket_name):
-	
+
 	s3 = boto3.resource('s3')
-	
+
 	try:
-    	s3.Bucket(bucket_name).download_file(file_from, file_to)
-	
+		s3.Bucket(bucket_name).download_file(file_from, file_to)
+
 	except botocore.exceptions.ClientError as e:
-    	if e.response['Error']['Code'] == "404":
-        	print("The object does not exist.")
-    else:
-        raise
+
+		if e.response['Error']['Code'] == "404":
+			print("The object does not exist.")
+
+		else:
+			raise
 	
 #---------------------------------------------------------------------# 
 # Clean each item that goes through the pipeline
