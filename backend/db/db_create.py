@@ -1,5 +1,21 @@
+#---------------------------------------------------------------------# 
+# Import packages
+#---------------------------------------------------------------------# 
 import db_schema
+import sys
+
 from common import helpers
+
+#---------------------------------------------------------------------# 
+# Send stage table names to file
+#---------------------------------------------------------------------# 
+def stage_names_execute():
+
+	engine = helpers.db_engine()
+
+	db_schema.create_stage_table_names()
+
+	return
 
 #---------------------------------------------------------------------# 
 # Call the create data-base function
@@ -10,12 +26,14 @@ def db_execute(branch = 1):
 
 	db_schema.db_create(engine, branch)
 
+	return
+
 #---------------------------------------------------------------------# 
 # Create the stage tables
 #---------------------------------------------------------------------#
-def stage_tables_execute(stages):
+def stage_tables_execute():
 
-	stages = ['fst_sig', 'fst_sig_not', 'sec_sig', 'sec_sig_not', 'sb', 'pp', 'pb', 'P'] 
+	stages = db_schema.load_stage_table_names()
 
 	engine = helpers.db_engine() 
 
@@ -41,6 +59,8 @@ def stage_tables_execute(stages):
 
 	trans.commit()
 
+	return
+
 
 #---------------------------------------------------------------------# 
 # Create additional primary keys wherever needed
@@ -51,12 +71,18 @@ def primary_key_execute():
 
 	db_schema.make_primary_key(engine, 'banks', 'ifsc_code')
 
+	return
+
 
 def main():
+
+	stage_names_execute()
 
 	db_execute()
 	
 	stage_tables_execute()
+
+
 
 
 #---------------------------------------------------------------------# 
@@ -64,8 +90,7 @@ def main():
 #---------------------------------------------------------------------#
 if __name__ == '__main__':
 
-	db_execute()
+	main()
 
-	stage_tables_execute()
 
 	

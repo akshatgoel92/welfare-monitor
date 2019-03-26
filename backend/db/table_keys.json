@@ -9,12 +9,92 @@
         "ifsc_code",
         "bank_code"
     ],
+    "fto_fst_sig": [
+        "state_code",
+        "district_code",
+        "block_code",
+        "fto_no",
+        "transact_date",
+        "scrape_date",
+        "scrape_time",
+        "url"
+    ],
+    "fto_fst_sig_not": [
+        "state_code",
+        "district_code",
+        "block_code",
+        "fto_no",
+        "transact_date",
+        "scrape_date",
+        "scrape_time",
+        "url"
+    ],
+    "fto_partial_processed_bank": [
+        "state_code",
+        "district_code",
+        "block_code",
+        "fto_no",
+        "transact_date",
+        "scrape_date",
+        "scrape_time",
+        "url"
+    ],
+    "fto_pending_bank": [
+        "state_code",
+        "district_code",
+        "block_code",
+        "fto_no",
+        "transact_date",
+        "scrape_date",
+        "scrape_time",
+        "url"
+    ],
+    "fto_processed": [
+        "state_code",
+        "district_code",
+        "block_code",
+        "fto_no",
+        "transact_date",
+        "scrape_date",
+        "scrape_time",
+        "url"
+    ],
     "fto_queue": [
         "fto_no",
         "done",
         "fto_type",
         "scrape_date",
         "scrape_time"
+    ],
+    "fto_sec_sig": [
+        "state_code",
+        "district_code",
+        "block_code",
+        "fto_no",
+        "transact_date",
+        "scrape_date",
+        "scrape_time",
+        "url"
+    ],
+    "fto_sec_sig_not": [
+        "state_code",
+        "district_code",
+        "block_code",
+        "fto_no",
+        "transact_date",
+        "scrape_date",
+        "scrape_time",
+        "url"
+    ],
+    "fto_sent_to_bank": [
+        "state_code",
+        "district_code",
+        "block_code",
+        "fto_no",
+        "transact_date",
+        "scrape_date",
+        "scrape_time",
+        "url"
     ],
     "fto_stage": [
         "fto_no",

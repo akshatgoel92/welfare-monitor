@@ -124,10 +124,10 @@ def create_banks(engine):
 #----------------------------------------------#
 def create_stage_table_names():
 
-	stage_table_names = {'fst_sig': 'fto_fst_sig_not', 'sec_sig': 'fto_sec_sig', 
+	tables = {'fst_sig': 'fto_fst_sig', 'fst_sig_not': 'fto_fst_sig_not', 'sec_sig': 'fto_sec_sig', 
 						 'sec_sig_not': 'fto_sec_sig_not', 'sb': 'fto_sent_to_bank', 
-						 'pp': 'fto_partial_processed_bank', 'pb': 'fto_pending_bank', 
-						 'P': 'fto_processed'}
+						 'pp': 'fto_partial_processed_bank', 'pb': 'fto_processed', 
+						 'P': 'fto_pending_bank'}
 
 	with open('./backend/db/stage_table_names.json', 'w') as file:
 
@@ -137,7 +137,7 @@ def create_stage_table_names():
 #----------------------------------------------#
 # Create a .json file with stage table names
 #----------------------------------------------#
-def load_stage_tables_names():
+def load_stage_table_names():
 
 	with open('./backend/db/stage_table_names.json') as file:
 		
@@ -151,7 +151,7 @@ def load_stage_tables_names():
 #------------------------#
 def create_stage(engine, stage):
 
-	tables = load_stage_tables_names()
+	tables = load_stage_table_names()
 
 	metadata = MetaData()
 
@@ -166,6 +166,7 @@ def create_stage(engine, stage):
 						Column('url', String(500)))
 
 	metadata.create_all(engine)
+
 
 #----------------------------#
 # Creates the FTO queue table
@@ -219,7 +220,7 @@ def check_table_empty(conn, table):
 
 	result = pd.read_sql('SELECT EXISTS ' + '(SELECT 1 FROM ' + table + ')', con = conn)
 
-	return(result.values.tolist()[0])
+	return(1 - result.iloc[0, 0])
 
 
 #-----------------------------------------------#
@@ -227,11 +228,11 @@ def check_table_empty(conn, table):
 #-----------------------------------------------#
 def anti_join(df_1, df_2, on):
 
-	df = pd.merge(df_1, df_2, how = 'outer', on = on, indicator = 'True')
+	df = pd.merge(df_1, df_2, how = 'outer', on = on, indicator = True)
 
 	df = df.loc[df['_merge'] == 'left_only']
 
-	df.drop(['_merge'], inplace = True)
+	df.drop(['_merge'], inplace = True, axis = 1)
 
 	return(df)
 
@@ -262,7 +263,7 @@ def select_data(engine, table, cols = ['*']):
 
 	query = 'SELECT {} FROM {};'.format(cols, table)
 
-	result = pd.from_sql(query, con = conn)
+	result = pd.read_sql(query, con = engine)
 
 	return(result)
 
