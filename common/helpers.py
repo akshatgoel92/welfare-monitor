@@ -123,6 +123,19 @@ def clean_item(item, title_fields):
 	return(item)
 
 
+#---------------------------------------------------------------------# 	
+# Convert whatever fields that we can into title-case
+#---------------------------------------------------------------------# 
+def delete_files(path='./output/', extension='.csv'):
+
+	for filename in os.listdir(path):
+		print(filename)
+		if filename.endswith(extension):
+			os.unlink(path + filename)
+
+	return
+
+
 #---------------------------------------------------------------------# 
 # Send e-mail
 #---------------------------------------------------------------------# 
