@@ -118,34 +118,6 @@ def create_banks(engine):
 	metadata.create_all(engine)
 
 
-
-#----------------------------------------------#
-# Create a .json file with stage table names
-#----------------------------------------------#
-def create_stage_table_names():
-
-	tables = {'fst_sig': 'fto_fst_sig', 'fst_sig_not': 'fto_fst_sig_not', 'sec_sig': 'fto_sec_sig', 
-						 'sec_sig_not': 'fto_sec_sig_not', 'sb': 'fto_sent_to_bank', 
-						 'pp': 'fto_partial_processed_bank', 'pb': 'fto_processed', 
-						 'P': 'fto_pending_bank'}
-
-	with open('./backend/db/stage_table_names.json', 'w') as file:
-
-		json.dump(tables, file, sort_keys = True, indent = 4)
-
-
-#----------------------------------------------#
-# Create a .json file with stage table names
-#----------------------------------------------#
-def load_stage_table_names():
-
-	with open('./backend/db/stage_table_names.json') as file:
-		
-		tables = json.load(file)
-
-	return(tables)
-
-
 #------------------------#
 # Create the stage table
 #------------------------#
@@ -336,6 +308,32 @@ def get_keys(table):
 		keys = tables[table]
 	
 	return(keys)
+
+#----------------------------------------------#
+# Create a .json file with stage table names
+#----------------------------------------------#
+def create_stage_table_names():
+
+	tables = {'fst_sig': 'fto_fst_sig', 'fst_sig_not': 'fto_fst_sig_not', 'sec_sig': 'fto_sec_sig', 
+						 'sec_sig_not': 'fto_sec_sig_not', 'sb': 'fto_sent_to_bank', 
+						 'pp': 'fto_partial_processed_bank', 'pb': 'fto_processed', 
+						 'P': 'fto_pending_bank'}
+
+	with open('./backend/db/stage_table_names.json', 'w') as file:
+
+		json.dump(tables, file, sort_keys = True, indent = 4)
+
+
+#----------------------------------------------#
+# Create a .json file with stage table names
+#----------------------------------------------#
+def load_stage_table_names():
+
+	with open('./backend/db/stage_table_names.json') as file:
+		
+		tables = json.load(file)
+
+	return(tables)
 
 #---------------------------------------------------------------------# 
 # Create data-base when called
