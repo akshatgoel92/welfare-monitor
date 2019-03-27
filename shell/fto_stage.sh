@@ -9,6 +9,9 @@ export PYTHONPATH=.
 # Switch to the working directory
 cd /home/ec2-user/fto-scrape/
 
+# Clear existing .csv files
+rm output/*.csv
+
 # Then execute the stage spider
 scrapy crawl fto_urls -a stage=fst_sig
 
@@ -32,3 +35,6 @@ scrapy crawl fto_urls -a stage=P
 
 # Processed by bank
 scrapy crawl fto_urls -a stage=pb
+
+# Now make the data-base queue
+python queue/make.py
