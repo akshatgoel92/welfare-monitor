@@ -7,6 +7,10 @@
 # Overall imports
 #----------------------------------------------------------------------#
 import scrapy
+
+#----------------------------------------------------------------------#
+# Python standard
+#----------------------------------------------------------------------#
 import datetime
 import time
 import socket
@@ -15,11 +19,8 @@ import os
 import logging
 import pandas as pd
 import numpy as np
-
-#----------------------------------------------------------------------#
-# Python standard
-#----------------------------------------------------------------------#
 from itertools import chain
+
 #----------------------------------------------------------------------#
 # Scrapy submodules
 #----------------------------------------------------------------------#
@@ -58,7 +59,9 @@ from scrape.items import FTONo
 class FTOUrls(CrawlSpider):
 
 	#----------------------------------------------------------------------#
-	# Store the target URL
+	# Store command line arguments 
+	# To override these from the command line use the following syntax: 
+	# scrapy crawl fto_urls -a fin_year=2019-2020 -a stage=fst_sig
 	#----------------------------------------------------------------------#
 	name = 'fto_urls'
 	basic = 'http://mnregaweb4.nic.in/netnrega/FTO/FTOReport.aspx?page=d&mode=B&flg=W&'
@@ -98,9 +101,6 @@ class FTOUrls(CrawlSpider):
 		
 		urls = response.xpath('*//a//@href').extract()
 		
-		block_urls = pd.DataFrame(urls, columns = ['url'])
-		block_urls.to_csv('block_urls.csv', index = False)
-
 		for url in urls:
 			if 'block_name' in url and self.stage + '&' in url:
 				yield(response.follow(url, self.parse_fto_list))
@@ -110,7 +110,6 @@ class FTOUrls(CrawlSpider):
 	# Parse URLs the FTO list
 	#----------------------------------------------------------------------#
 	def parse_fto_list(self, response):
-
 
 		#----------------------------------------------------------------------#
 		# Get the URLs
@@ -208,7 +207,8 @@ class FTOUrls(CrawlSpider):
 		
 		#----------------------------------------------------------------------#
 		# Store the district URLs
-		# Parse them to get the links to all FTOs which have been through the selected stage
+		# Parse them to get the links to all FTOs which have been through the 
+		# selected stage
 		#----------------------------------------------------------------------#
 		if self.block == 0:
 			
@@ -219,9 +219,6 @@ class FTOUrls(CrawlSpider):
 					print('Following URL....:' + url)
 					yield(response.follow(url, self.parse_fto_list))
 			
-			district_urls = pd.DataFrame(['http://mnregaweb4.nic.in/netnrega/FTO/' + url for url in district_urls],
-									  	  columns = ['url']).to_csv('district_urls.csv')
-
 		if self.block == 1:
 
 			for url in self.start_urls:
