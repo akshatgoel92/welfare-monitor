@@ -15,5 +15,6 @@ sqlalchemy=1.2.7=py36hb402a30_0
 twisted=17.5.0=py36_0
 python-crontab=2.3.4=py_0
 dropbox=9.0.0=py_0
+boto3=1.9.111=py_0
 
 
