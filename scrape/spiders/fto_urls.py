@@ -136,7 +136,6 @@ class FTOUrls(CrawlSpider):
 			item['transact_date'] = re.findall('fto_no=CH\d{7}_(.{6})', url)[0]
 			item['scrape_date'] = str(datetime.datetime.now().date())
 			item['scrape_time'] = str(datetime.datetime.now().time())
-			item['fto_stage'] = self.stage
 
 			yield(item)
 

@@ -8,6 +8,8 @@
 # Import scrapy
 import scrapy
 
+
+
 class NREGAItem(scrapy.Item):
     
     # Table fields
@@ -58,8 +60,6 @@ class FTONo(scrapy.Item):
 	# These are scraped FTO numbers
 	fto_no = scrapy.Field()
 	
-	fto_stage = scrapy.Field()
-	
 	state_code = scrapy.Field()
 	
 	district_code = scrapy.Field()
@@ -74,6 +74,8 @@ class FTONo(scrapy.Item):
 	scrape_date = scrapy.Field()
 	
 	scrape_time = scrapy.Field()
+
+
 
 	
 class FTOItem(scrapy.Item):
@@ -119,6 +121,8 @@ class FTOItem(scrapy.Item):
     
     scrape_time = scrapy.Field()
 
+
+
 class FTOOverviewItem(scrapy.Item):
     
     state = scrapy.Field()
@@ -144,6 +148,8 @@ class FTOOverviewItem(scrapy.Item):
     cr_processed_dt = scrapy.Field()
     
     cr_processed_dt_P = scrapy.Field()
+
+
 
 class FTOMaterialItem(scrapy.Item):
 
