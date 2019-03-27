@@ -160,7 +160,6 @@ def get_current_stage(fto_stages, stages):
 	fto_stages_dum = pd.get_dummies(fto_stages, columns = ['fto_stage'])
 	fto_stages_dum.drop(['fto_no'], inplace = True, axis = 1)
 	fto_stages = pd.concat([fto_stages, fto_stages_dum], axis = 1)
-	print(fto_stages.columns)
 
 	# Reshape the data-set
 	fto_stages['total'] = 1	
@@ -242,7 +241,6 @@ def put_fto_nos(table, engine, path, if_exists):
     fto_nos = pd.read_csv(path).drop_duplicates()
     fto_nos['done'] = 0
     fto_nos['fto_type'] = ''
-    print(fto_nos)
     fto_nos.to_sql(table, con = engine, index = False, if_exists = if_exists, chunksize = 1000)
 
     return
