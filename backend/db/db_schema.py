@@ -24,7 +24,6 @@ pymysql.install_as_MySQLdb()
 def create_bank_transactions(engine):
 	
 	metadata = MetaData()
-	
 	transactions = Table('transactions', metadata, 
 										Column('block_name', String(50)), 
 										Column('jcn', String(50)), 
@@ -54,7 +53,6 @@ def create_bank_transactions(engine):
 def create_branch_transactions(engine):
 	
 	metadata = MetaData()
-	
 	transactions = Table('transactions', metadata, 
 										Column('block_name', String(50)), 
 										Column('jcn', String(50)), 
@@ -81,7 +79,6 @@ def create_branch_transactions(engine):
 def create_wage_list(engine):
 
 	metadata = MetaData()
-
 	wage_list = Table('wage_lists', metadata, 
 										Column('wage_list_no', String(50), primary_key = True), 
 										Column('block_name', String(50)))
@@ -94,7 +91,6 @@ def create_wage_list(engine):
 def create_accounts(engine):
 	
 	metadata = MetaData()
-
 	accounts = Table('accounts', metadata, 
 										Column('jcn', String(50), primary_key = True), 
 										Column('acc_no', String(50), primary_key = True),
@@ -110,7 +106,6 @@ def create_accounts(engine):
 def create_banks(engine):
 	
 	metadata = MetaData()
-
 	banks = Table('banks', metadata, 
 										Column('ifsc_code', String(50), primary_key = True), 
 										Column('bank_code', String(30)))
@@ -124,9 +119,7 @@ def create_banks(engine):
 def create_stage(engine, stage):
 
 	tables = load_stage_table_names()
-
 	metadata = MetaData()
-
 	stage = Table(tables[stage], metadata, 
 						Column('state_code', BigInteger()),
 						Column('district_code', BigInteger()), 
@@ -146,7 +139,6 @@ def create_stage(engine, stage):
 def create_fto_queue(engine):
 
 	metadata = MetaData()
-
 	fto_queue = Table('fto_queue', metadata, 
 										Column('fto_no', String(50), primary_key = True),
 										Column('done', Integer()), 
@@ -164,7 +156,6 @@ def create_fto_queue(engine):
 def create_fto_current_stage(engine):
 
 	metadata = MetaData()
-
 	fto_stage = Table('fto_stage', metadata, 
 										Column('fto_no', String(50), primary_key = True),
 										Column('current_stage', Integer()),
@@ -177,7 +168,6 @@ def create_fto_current_stage(engine):
 def get_table_names(engine):
 
 	inspector = reflection.Inspector.from_engine(engine)
-	
 	tables = inspector.get_table_names()
 
 	return(tables)
@@ -201,9 +191,7 @@ def check_table_empty(conn, table):
 def anti_join(df_1, df_2, on):
 
 	df = pd.merge(df_1, df_2, how = 'outer', on = on, indicator = True)
-
 	df = df.loc[df['_merge'] == 'left_only']
-
 	df.drop(['_merge'], inplace = True, axis = 1)
 
 	return(df)
@@ -223,7 +211,6 @@ def make_primary_key(engine, table, key):
 def make_index(engine, table, col, name):
 
 	index = Index(name, table.c.col)
-	
 	index.create(engine)
 
 #-----------------------------------------------------------#
@@ -232,9 +219,7 @@ def make_index(engine, table, col, name):
 def select_data(engine, table, cols = ['*']):
 
 	cols = '.'.join(cols)
-
 	query = 'SELECT {} FROM {};'.format(cols, table)
-
 	result = pd.read_sql(query, con = engine)
 
 	return(result)
@@ -249,19 +234,13 @@ def insert_data(item, keys, table, unique = 0):
 	# Only insert fields which are both in the item and the table
 	#---------------------------------------------------------------------# 	
 	keys = get_keys(table) & item.keys()
-	
 	fields = u','.join(keys)
-	
 	qm = u','.join([u'%s'] * len(keys))
 	
 	sql = "INSERT INTO " + table + " (%s) VALUES (%s)"
-	
 	sql_unique = "INSERT IGNORE INTO " + table + " (%s) VALUES (%s)"
-	
 	insert = sql if unique == 0 else sql_unique
-	
 	sql = insert % (fields, qm)
-	
 	data = [item[k] for k in keys]
 
 	return(sql, data)
@@ -272,7 +251,6 @@ def insert_data(item, keys, table, unique = 0):
 def update_fto_type(fto_no, fto_type, table):
 
 	sql = "UPDATE " + table + " SET fto_type = %s WHERE fto_no = %s"
-	
 	data = [fto_type, fto_no]
 	
 	return(sql, data)
@@ -284,7 +262,6 @@ def update_fto_type(fto_no, fto_type, table):
 def send_keys_to_file(engine):
 	
 	inspector = reflection.Inspector.from_engine(engine)
-	
 	tables = dict.fromkeys(inspector.get_table_names(), '')
 
 	for table in tables:
@@ -304,7 +281,6 @@ def get_keys(table):
 	with open('./backend/db/table_keys.json') as file:
 		
 		tables = json.load(file)
-		
 		keys = tables[table]
 	
 	return(keys)
@@ -349,15 +325,11 @@ def db_create(engine, branch):
 		create_bank_transactions(engine)
 
 	create_wage_list(engine)
-
 	create_accounts(engine)
-
 	create_banks(engine)
-
+	
 	create_fto_queue(engine)
-
 	create_fto_current_stage(engine)
-
 	send_keys_to_file(engine)
 
 
