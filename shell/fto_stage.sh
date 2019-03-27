@@ -32,6 +32,3 @@ scrapy crawl fto_urls -a stage=P
 
 # Processed by bank
 scrapy crawl fto_urls -a stage=pb
-
-# Now we run the FTO tables constructor
-python fto_db/make.py
