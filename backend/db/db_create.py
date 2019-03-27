@@ -12,6 +12,7 @@ from common import helpers
 def stage_names_execute():
 
 	engine = helpers.db_engine()
+
 	db_schema.create_stage_table_names()
 
 	return
@@ -22,6 +23,7 @@ def stage_names_execute():
 def db_execute(branch = 1):
 
 	engine = helpers.db_engine()
+
 	db_schema.db_create(engine, branch)
 
 	return
@@ -32,8 +34,11 @@ def db_execute(branch = 1):
 def stage_tables_execute():
 
 	stages = db_schema.load_stage_table_names()
+
 	engine = helpers.db_engine() 
+
 	conn = engine.connect()
+	
 	trans = conn.begin()
 	
 	for stage in stages:
@@ -45,8 +50,11 @@ def stage_tables_execute():
 		except Exception as e:
 				
 			print(e)
+				
 			print('Error making the stage table for...:' + stage)
+				
 			trans.rollback()
+				
 			sys.exit()
 
 	trans.commit()
@@ -57,23 +65,24 @@ def stage_tables_execute():
 #---------------------------------------------------------------------# 
 # Create additional primary keys wherever needed
 #---------------------------------------------------------------------#
-def primary_key_execute(tables, keys):
+def primary_key_execute():
 
 	engine = helpers.db_engine()
-	for table in tables: 
-		for key in keys:
-			db_schema.make_primary_key(engine, table, key)
+
+	db_schema.make_primary_key(engine, 'banks', 'ifsc_code')
 
 	return
 
-#---------------------------------------------------------------------# 
-# Create additional primary keys wherever needed
-#---------------------------------------------------------------------#
+
 def main():
 
 	stage_names_execute()
+
 	db_execute()
+	
 	stage_tables_execute()
+
+
 
 
 #---------------------------------------------------------------------# 
