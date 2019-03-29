@@ -29,8 +29,8 @@ from scrapy.loader.processors import MapCompose, Join
 from scrapy.loader import ItemLoader
 from scrapy.http import Request
 from scrapy import Spider
-from scrapy.contrib.spiders import CrawlSpider
-from scrapy.contrib.spiders.crawl import Rule
+from scrapy.spiders import CrawlSpider
+from scrapy.spiders.crawl import Rule
 from scrapy.linkextractors import LinkExtractor
 from scrapy.loader.processors import MapCompose, Join
 from scrapy.loader import ItemLoader

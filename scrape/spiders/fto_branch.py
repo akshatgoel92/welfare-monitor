@@ -29,7 +29,7 @@ from scrapy.loader.processors import MapCompose, Join
 from scrapy.linkextractors import LinkExtractor
 from scrapy.loader import ItemLoader
 from scrapy.http import Request
-from scrapy.contrib.spiders import CrawlSpider, Rule
+from scrapy.spiders import CrawlSpider, Rule
 
 # Date and time sub-modules 
 from datetime import date, timedelta
