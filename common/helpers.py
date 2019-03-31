@@ -139,7 +139,10 @@ def delete_files(path='./output/', extension='.csv'):
 #---------------------------------------------------------------------# 
 # Send e-mail
 #---------------------------------------------------------------------# 
-def send_email(msg, subject, recipients):
+def send_email(msg, subject):
+
+	with open('./recipients.json') as r:
+		recipients = json.load(r)['recipients']
 
 	#---------------------------------------------------------------------# 
 	# Get credentials

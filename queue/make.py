@@ -69,14 +69,12 @@ def put_data_empty_tables(engine, empty_stages, stage_table_names):
 	
 		except pd.errors.EmptyDataError as e:
 			
-			print(e)
-			print('This {} .csv does not have any data....!'.format(stage))
+			send_email(e, "GMA Warning 1: This {} .csv does not have any data....!'.format(stage)")
 			continue
 
 		except Exception as e: 
 
-			print(e)
-			print('There was a failure creating one of the empty stage tables...exiting.')
+			send_email(e, 'GMA Error 1: There was a failure creating one of the empty stage tables...exiting.')
 			trans.rollback()
 			sys.exit()
 
@@ -103,20 +101,18 @@ def update_stage_tables(engine, stages, cols):
 			new_ftos = db_schema.anti_join(scraped_ftos, existing_ftos, on = ['fto_no'])
 			new_ftos.to_sql(stages[stage], con = conn, index = False, if_exists = 'append', chunksize = 1000)
 			
-			print('The no. of new FTOs is {} for stage {}'.format(str(len(new_ftos)), stage))
-			print('Done updating the following non-empty stage...:{}'.format(stage))
+			msg = 'Done updating the following non-empty stage...:{}'.format(stage)
+			send_email(msg, 'The no. of new FTOs is {} for stage {}'.format(str(len(new_ftos)), stage))
 			
 		except pd.errors.EmptyDataError as e:
 			
-			print(e)
-			print('This {} .csv does not have any data....!'.format(stage))
+			send_email(e, 'GMA Warning 1: This {} .csv does not have any data....!'.format(stage))
 			continue
 		
 		except Exception as e:
 			
-			print(e)
-			message = 'There was an uncaught error in the creation of the SQL table for stage: {}'
-			print(message.format(stage))
+			message = 'GMA Error 2: There was an error in the creation of the SQL table for stage: {}'
+			send_email(e, message.format(stage))
 			
 			trans.rollback()
 			sys.exit()
@@ -211,6 +207,7 @@ def update_current_stage_table(engine, fto_stages):
 	except Exception as e:
 
 		print(e)
+		send_email(e, "GMA Error 3: There was an error in the creation of the FTO current stage tracker!")
 		trans.rollback()
 		sys.exit()
 
