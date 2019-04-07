@@ -4,9 +4,10 @@
 	Contact: akshat.goel@ifmr.ac.in
 '''
 
-import schema
-import sys
+from backend.db import schema
 from common import helpers
+import sys
+
 
  
 def db_execute(branch):
@@ -15,16 +16,16 @@ def db_execute(branch):
 
 	engine = helpers.db_engine()
 
-	if branch == 1: create_branch_transactions(engine)
-	elif branch == 0: create_bank_transactions(engine)
+	if branch == 1: schema.create_branch_transactions(engine)
+	elif branch == 0: schema.create_bank_transactions(engine)
 
-	create_wage_list(engine)
-	create_accounts(engine)
-	create_banks(engine)
+	schema.create_wage_list(engine)
+	schema.create_accounts(engine)
+	schema.create_banks(engine)
 	
-	create_fto_queue(engine)
-	create_fto_current_stage(engine)
-	send_keys_to_file(engine)
+	schema.create_fto_queue(engine)
+	schema.create_fto_current_stage(engine)
+	schema.send_keys_to_file(engine)
 
 	return
 
@@ -75,15 +76,14 @@ def primary_key_execute():
 
 
 def main():
-	'''Call all the functions
+	'''Function calls here
 	'''
 
-	stage_names_execute()
 	db_execute()
+	stage_names_execute()
 	stage_tables_execute()
 
 	return
-
 
 
 if __name__ == '__main__':
