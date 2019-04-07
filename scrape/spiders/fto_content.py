@@ -68,7 +68,7 @@ class FtoContentSpider(scrapy.Spider):
 
 	# Get the target FTO nos.
 	conn, cursor = db_conn()
-	fto_nos = pd.read_sql("SELECT fto_no FROM fto_queue WHERE done = 0";, con = conn).values.tolist()
+	fto_nos = pd.read_sql("SELECT fto_no FROM fto_queue WHERE done = 0;", con = conn).values.tolist()
 	cursor.close()
 	conn.close()
 
