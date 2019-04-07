@@ -1,10 +1,8 @@
 '''
 	Author: Akshat Goel
-	Purpose: 
+	Purpose: Create MySQL database tables according to schema file
 	Contact: akshat.goel@ifmr.ac.in
 '''
-
-
 
 import schema
 import sys
@@ -51,9 +49,9 @@ def stage_tables_execute():
 	trans = conn.begin()
 	
 	for stage in stages:
-			
+		
 		try: schema.create_stage(conn, stage)
-			
+		
 		except Exception as e:
 				
 			print(e)
@@ -77,7 +75,7 @@ def primary_key_execute():
 
 
 def main():
-	'''This calls all the functions
+	'''Call all the functions
 	'''
 
 	stage_names_execute()
