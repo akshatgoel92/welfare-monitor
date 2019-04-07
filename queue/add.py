@@ -18,19 +18,19 @@ pymysql.install_as_MySQLdb()
 if __name__ == '__main__':
 
 	 # Create parser
-	parser = argparse.ArgumentParser(description='Parse the block')
-	parser.add_argument('block', 
+	parser = argparse.ArgumentParser(description='Parse the queue')
+	parser.add_argument('fto_queue', 
 						type=str,
-						help='Block name')
+						help='fto_queue')
 	parser.add_argument('if_exists',
 						 type = str, 
 						 help = 'Append or replace?')
 
 	# Parse arguments
 	args = parser.parse_args()
-	block = args.block
+	fto_queue = args.fto_queue
 	if_exists = args.if_exists
-	path = os.path.abspath('./output/' + block + '.csv')
+	path = os.path.abspath('./output/fto_queue.csv')
 	
     # Create the DB engine here
 	# Then create the data-base using the schema defined above
