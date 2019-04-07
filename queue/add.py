@@ -1,16 +1,15 @@
 # Imports
+from sqlalchemy import *
+from sqlalchemy.engine import reflection
+from common.helpers import sql_connect
+from make import put_fto_nos
 import sys
 import os
 import pandas as pd
 import numpy as np
 import pymysql
 import argparse
-from sqlalchemy import *
-from sqlalchemy.engine import reflection
 
-# Import item files
-from common.helpers import sql_connect
-from make import put_fto_nos
 
 # Install this as MySQLdb
 pymysql.install_as_MySQLdb()

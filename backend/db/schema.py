@@ -162,6 +162,24 @@ def create_fto_current_stage(engine):
 										Column('updated_at', String(20)))
 	metadata.create_all(engine)
 
+
+
+#-----------------------------------------------#
+# Make primary key
+#-----------------------------------------------#
+def create_primary_key(engine, table, key):
+
+	engine.execute('ALTER TABLE ' + table + ' ADD PRIMARY KEY(' + key + ')')
+
+
+#-----------------------------------------------#
+# Add an index
+#-----------------------------------------------#
+def make_index(engine, table, col, name):
+
+	index = Index(name, table.c.col)
+	index.create(engine)
+
 #----------------------------------#
 # Creates a list of the table names
 #----------------------------------#  
@@ -172,88 +190,28 @@ def get_table_names(engine):
 
 	return(tables)
 
-#----------------------------------------#
-# Check if a given table is empty
-# MySQL uses an arbitrary index 
-# Exists return 1 if the row exists else 0
-# We take that and store it in not_empty	
-#----------------------------------------#
-def check_table_empty(conn, table):
+def create_stage_table_names():
 
-	result = pd.read_sql('SELECT EXISTS ' + '(SELECT 1 FROM ' + table + ')', con = conn)
+	tables = {'fst_sig': 'fto_fst_sig', 'fst_sig_not': 'fto_fst_sig_not', 'sec_sig': 'fto_sec_sig', 
+						 'sec_sig_not': 'fto_sec_sig_not', 'sb': 'fto_sent_to_bank', 
+						 'pp': 'fto_partial_processed_bank', 'pb': 'fto_processed', 
+						 'P': 'fto_pending_bank'}
 
-	return(1 - result.iloc[0, 0])
+	with open('./backend/db/stage_table_names.json', 'w') as file:
 
-
-#-----------------------------------------------#
-# Return only those entries in df_1 not in df_2 	
-#-----------------------------------------------#
-def anti_join(df_1, df_2, on):
-
-	df = pd.merge(df_1, df_2, how = 'outer', on = on, indicator = True)
-	df = df.loc[df['_merge'] == 'left_only']
-	df.drop(['_merge'], inplace = True, axis = 1)
-
-	return(df)
+		json.dump(tables, file, sort_keys = True, indent = 4)
 
 
+#----------------------------------------------#
+# Create a .json file with stage table names
+#----------------------------------------------#
+def load_stage_table_names():
 
-#-----------------------------------------------#
-# Make primary key
-#-----------------------------------------------#
-def make_primary_key(engine, table, key):
+	with open('./backend/db/stage_table_names.json') as file:
+		
+		tables = json.load(file)
 
-	engine.execute('ALTER TABLE ' + table + ' ADD PRIMARY KEY(' + key + ')')
-
-#-----------------------------------------------#
-# Add an index
-#-----------------------------------------------#
-def make_index(engine, table, col, name):
-
-	index = Index(name, table.c.col)
-	index.create(engine)
-
-#-----------------------------------------------------------#
-# This function will get data from the columns that you want
-#-----------------------------------------------------------#
-def select_data(engine, table, cols = ['*']):
-
-	cols = '.'.join(cols)
-	query = 'SELECT {} FROM {};'.format(cols, table)
-	result = pd.read_sql(query, con = engine)
-
-	return(result)
-
-
-#---------------------------------------------------------------------# 
-# Insert a new item into the SQL data-base
-#---------------------------------------------------------------------# 	
-def insert_data(item, keys, table, unique = 0):
-
-	#---------------------------------------------------------------------# 
-	# Only insert fields which are both in the item and the table
-	#---------------------------------------------------------------------# 	
-	keys = get_keys(table) & item.keys()
-	fields = u','.join(keys)
-	qm = u','.join([u'%s'] * len(keys))
-	
-	sql = "INSERT INTO " + table + " (%s) VALUES (%s)"
-	sql_unique = "INSERT IGNORE INTO " + table + " (%s) VALUES (%s)"
-	insert = sql if unique == 0 else sql_unique
-	sql = insert % (fields, qm)
-	data = [item[k] for k in keys]
-
-	return(sql, data)
-
-#---------------------------------------------------------------------# 
-# Update FTO type
-#---------------------------------------------------------------------# 
-def update_fto_type(fto_no, fto_type, table):
-
-	sql = "UPDATE " + table + " SET fto_type = %s WHERE fto_no = %s"
-	data = [fto_type, fto_no]
-	
-	return(sql, data)
+	return(tables)
 
  
 #------------------------#
@@ -285,52 +243,8 @@ def get_keys(table):
 	
 	return(keys)
 
-#----------------------------------------------#
-# Create a .json file with stage table names
-#----------------------------------------------#
-def create_stage_table_names():
-
-	tables = {'fst_sig': 'fto_fst_sig', 'fst_sig_not': 'fto_fst_sig_not', 'sec_sig': 'fto_sec_sig', 
-						 'sec_sig_not': 'fto_sec_sig_not', 'sb': 'fto_sent_to_bank', 
-						 'pp': 'fto_partial_processed_bank', 'pb': 'fto_processed', 
-						 'P': 'fto_pending_bank'}
-
-	with open('./backend/db/stage_table_names.json', 'w') as file:
-
-		json.dump(tables, file, sort_keys = True, indent = 4)
 
 
-#----------------------------------------------#
-# Create a .json file with stage table names
-#----------------------------------------------#
-def load_stage_table_names():
-
-	with open('./backend/db/stage_table_names.json') as file:
-		
-		tables = json.load(file)
-
-	return(tables)
-
-#---------------------------------------------------------------------# 
-# Create data-base when called
-#---------------------------------------------------------------------# 
-def db_create(engine, branch):
-
-	if branch == 1:
-
-		create_branch_transactions(engine)
-
-	elif branch == 0:
-
-		create_bank_transactions(engine)
-
-	create_wage_list(engine)
-	create_accounts(engine)
-	create_banks(engine)
-	
-	create_fto_queue(engine)
-	create_fto_current_stage(engine)
-	send_keys_to_file(engine)
 
 
 

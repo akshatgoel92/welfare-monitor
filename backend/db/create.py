@@ -1,34 +1,49 @@
-#---------------------------------------------------------------------# 
-# Import packages
-#---------------------------------------------------------------------# 
-import db_schema
+'''
+	Author: Akshat Goel
+	Purpose: 
+	Contact: akshat.goel@ifmr.ac.in
+'''
+
+
+
+import schema
 import sys
 from common import helpers
 
-#---------------------------------------------------------------------# 
-# Send stage table names to file
-#---------------------------------------------------------------------# 
+ 
+def db_execute(branch):
+	'''Create the DB tables that are listed in the schema file.
+	'''
+
+	engine = helpers.db_engine()
+
+	if branch == 1: create_branch_transactions(engine)
+	elif branch == 0: create_bank_transactions(engine)
+
+	create_wage_list(engine)
+	create_accounts(engine)
+	create_banks(engine)
+	
+	create_fto_queue(engine)
+	create_fto_current_stage(engine)
+	send_keys_to_file(engine)
+
+	return
+
+
 def stage_names_execute():
+	'''Create the JSON which stores the stage table names.
+	'''
 
 	engine = helpers.db_engine()
 	db_schema.create_stage_table_names()
 
 	return
 
-#---------------------------------------------------------------------# 
-# Call the create data-base function
-#---------------------------------------------------------------------# 
-def db_execute(branch = 1):
 
-	engine = helpers.db_engine()
-	db_schema.db_create(engine, branch)
-
-	return
-
-#---------------------------------------------------------------------# 
-# Create the stage tables
-#---------------------------------------------------------------------#
 def stage_tables_execute():
+	'''Create stage wise tables.
+	'''
 
 	stages = db_schema.load_stage_table_names()
 	engine = helpers.db_engine() 
@@ -37,9 +52,7 @@ def stage_tables_execute():
 	
 	for stage in stages:
 			
-		try: 
-				
-			db_schema.create_stage(conn, stage)
+		try: schema.create_stage(conn, stage)
 			
 		except Exception as e:
 				
@@ -53,28 +66,31 @@ def stage_tables_execute():
 	return
 
 
-#---------------------------------------------------------------------# 
-# Create additional primary keys wherever needed
-#---------------------------------------------------------------------#
 def primary_key_execute():
+	'''This adds primary keys to the specified variables.
+	'''
 
 	engine = helpers.db_engine()
-	db_schema.make_primary_key(engine, 'banks', 'ifsc_code')
+	schema.make_primary_key(engine, 'banks', 'ifsc_code')
 
 	return
 
 
-#---------------------------------------------------------------------# 
-# Execute the database creation
-#---------------------------------------------------------------------#
 def main():
+	'''This calls all the functions
+	'''
 
 	stage_names_execute()
 	db_execute()
 	stage_tables_execute()
 
+	return
+
+
 
 if __name__ == '__main__':
+	'''Execute the code
+	'''
 
 	main()
 
