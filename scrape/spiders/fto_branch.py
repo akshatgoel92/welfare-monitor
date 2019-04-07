@@ -49,8 +49,6 @@ class FtoBranchSpider(CrawlSpider):
 
 	# Set globals
 	name = "fto_branch"
-
-	# Store the start URL
 	conn, cursor = db_conn()
 	start_urls = pd.read_sql("SELECT url FROM fto_queue WHERE done = 0;", con = conn).values.tolist()
 	cursor.close()
