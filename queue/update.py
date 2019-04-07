@@ -35,14 +35,9 @@ def get_target_ftos(engine):
 	return(target_ftos)
 
 
-def update_fto_nos(engine):
+def update_fto_nos(engine, scraped_ftos, target_ftos):
 	'''Update the FTO queue with the progress of the scrape.'''
 
-	
-	# Create the SQLalchemy engine
-	user, password, host, db = helpers.sql_connect().values()
-	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
-	
 	# Wrap this in a transaction so we can roll-back if needed
 	conn = engine.connect()
 	trans = conn.begin()
@@ -94,13 +89,25 @@ def get_progress(engine):
 		print(e)
 		print('There has been an error in the progress calculation...please check the calculation.')
 
+	return
+
 
 def main():
 	'''Put the function calls here.'''
+	
+	# Create the SQLalchemy engine
+	user, password, host, db = helpers.sql_connect().values()
+	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
+	
+	scraped_ftos=get_scraped_ftos(engine)
+	target_ftos=get_target_ftos(engine)
+
+	update_ftos(engine,scraped_ftos, target_ftos)
+	get_target_ftos(engine)
+	get_progress(engine)
 
 
 
-		
 if __name__ == '__main__':
 
 	# Call function
