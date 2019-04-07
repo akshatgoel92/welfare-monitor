@@ -43,9 +43,9 @@ from scrape.items import FTOMaterialItem
 from common.helpers import sql_connect
 from common.helpers import clean_item
 
-from backend.db.db_schema import insert_data
-from backend.db.db_schema import update_fto_type
-from backend.db.db_schema import get_keys 
+from backend.db.schema import insert_data
+from backend.db.schema import update_fto_type
+from backend.db.schema import get_keys 
 #---------------------------------------------------------------------# 
 # Twisted adbapi library for connection pools to SQL data-base
 #---------------------------------------------------------------------# 
