@@ -171,6 +171,8 @@ def create_primary_key(engine, table, key):
 
 	engine.execute('ALTER TABLE ' + table + ' ADD PRIMARY KEY(' + key + ')')
 
+	return
+
 
 #-----------------------------------------------#
 # Add an index
@@ -179,6 +181,8 @@ def make_index(engine, table, col, name):
 
 	index = Index(name, table.c.col)
 	index.create(engine)
+
+	return
 
 #----------------------------------#
 # Creates a list of the table names
@@ -200,6 +204,8 @@ def create_stage_table_names():
 	with open('./backend/db/stage_table_names.json', 'w') as file:
 
 		json.dump(tables, file, sort_keys = True, indent = 4)
+
+	return
 
 
 #----------------------------------------------#
@@ -230,18 +236,7 @@ def send_keys_to_file(engine):
 		
 		json.dump(tables, file, sort_keys = True, indent = 4)
 
-
-#---------------------------------------------------------------------# 
-# Get a table's keys
-#---------------------------------------------------------------------# 
-def get_keys(table):
-
-	with open('./backend/db/table_keys.json') as file:
-		
-		tables = json.load(file)
-		keys = tables[table]
-	
-	return(keys)
+	return
 
 
 
