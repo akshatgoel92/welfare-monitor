@@ -75,3 +75,16 @@ def update_fto_type(fto_no, fto_type, table):
 	data = [fto_type, fto_no]
 	
 	return(sql, data)
+
+
+def get_keys(table):
+	''' 
+	Get a table's keys
+	'''
+
+	with open('./backend/db/table_keys.json') as file:
+		
+		tables = json.load(file)
+		keys = tables[table]
+	
+	return(keys)
