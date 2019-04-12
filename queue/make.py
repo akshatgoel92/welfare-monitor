@@ -13,7 +13,7 @@ import numpy as np
 
 from sqlalchemy import *
 from common import helpers
-from backend.db import db_schema
+from backend.db import schema
 
 pymysql.install_as_MySQLdb()
 
@@ -233,12 +233,12 @@ def get_new_ftos(engine, file_to):
 #-------------------------------------------------#
 # Get the new FTOs which have not been scraped yet
 #-------------------------------------------------#
-def put_fto_nos(table, engine, path, if_exists):
+def put_fto_nos(engine, path, if_exists):
 
     fto_nos = pd.read_csv(path).drop_duplicates()
     fto_nos['done'] = 0
     fto_nos['fto_type'] = ''
-    fto_nos.to_sql(table, con = engine, index = False, if_exists = if_exists, chunksize = 1000)
+    fto_nos.to_sql('fto_queue', con = engine, index = False, if_exists = if_exists, chunksize = 100)
 
     return
 
