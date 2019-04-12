@@ -26,6 +26,8 @@ if __name__ == '__main__':
 	# Parse arguments
 	args = parser.parse_args()
 	if_exists = args.if_exists
+	print(if_exists)
+	print(type(if_exists))
 	path = os.path.abspath('./output/fto_queue.csv')
 	
     # Create the DB engine here

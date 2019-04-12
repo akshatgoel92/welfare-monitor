@@ -6,7 +6,6 @@ import dropbox
 import pymysql
 import smtplib
 import argparse
-import helpers
 import pandas as pd
 import numpy as np
 from sqlalchemy import *
@@ -20,7 +19,7 @@ def get_scraped_ftos(engine):
 	a list of FTOs already scraped.'''
 
 	get_scraped_ftos="SELECT DISTINCT fto_no FROM transactions;"
-	scraped_ftos=pd.read_sql(get_scraped_ftos, con = conn)
+	scraped_ftos=pd.read_sql(get_scraped_ftos, con = engine)
 
 	return(scraped_ftos)
 
@@ -30,12 +29,12 @@ def get_target_ftos(engine):
 	from the FTO queue.'''
 
 	get_target_ftos="SELECT * FROM fto_queue;"
-	target_ftos=pd.read_sql(get_target_ftos, con = conn)
+	target_ftos=pd.read_sql(get_target_ftos, con = engine)
 
 	return(target_ftos)
 
 
-def update_fto_nos(engine, scraped_ftos, target_ftos):
+def update_ftos(engine, scraped_ftos, target_ftos):
 	'''Update the FTO queue with the progress of the scrape.'''
 
 	# Wrap this in a transaction so we can roll-back if needed
@@ -57,7 +56,7 @@ def update_fto_nos(engine, scraped_ftos, target_ftos):
 		all_ftos.loc[(all_ftos['fto_type'] == 'Material'), 'done'] = 1
 
 		# Write to the SQL table
-		all_ftos.to_sql(block, con = conn, index = False, if_exists = 'replace')
+		all_ftos.to_sql('fto_queue', con = conn, index = False, if_exists = 'replace', chunksize=100)
 
 		# Commit the changes and close the connection
 		trans.commit()
@@ -70,18 +69,18 @@ def update_fto_nos(engine, scraped_ftos, target_ftos):
 		trans.rollback()
 		conn.close()
 
-	return
+	total=len(all_ftos)
+	done=len(all_ftos.loc[all_ftos['done'] == 1])
+
+	return(total, done)
 
 
-def get_progress(engine):
+def get_progress(total, done):
 	'''This function calculates the progress of the code.'''
 	
 	try: 
 		
-		total=len(all_ftos)
-		done=len(all_ftos.loc[all_ftos['done'] == 1])
 		progress = done/total
-		
 		print('''There are a total of {} FTOs. The code has done {} FTOs. The code is {} done'''.format(total, done, progress))
 	
 	except Exception as e:
@@ -102,9 +101,8 @@ def main():
 	scraped_ftos=get_scraped_ftos(engine)
 	target_ftos=get_target_ftos(engine)
 
-	update_ftos(engine,scraped_ftos, target_ftos)
-	get_target_ftos(engine)
-	get_progress(engine)
+	total, done = update_ftos(engine,scraped_ftos, target_ftos)
+	get_progress(total, done)
 
 
 

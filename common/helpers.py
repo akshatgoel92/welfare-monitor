@@ -75,9 +75,16 @@ def db_engine():
 #---------------------------------------------------------------------# 
 # Upload file to S3
 #---------------------------------------------------------------------# 
-def upload_file_s3(file_from, file_to, bucket_name):
+def upload_s3(file_from, file_to):
 
-	s3 = boto3.client('s3')
+	with open('./gma_secrets.json') as secrets:
+		s3_access = json.load(secrets)['s3']
+
+	access_key_id=s3_access['access_key_id']
+	secret_access_key=s3_access['secret_access_key']
+	bucket_name=s3_access['default_bucket']
+		
+	s3 = boto3.client('s3', aws_access_key_id=access_key_id, aws_secret_access_key=secret_access_key)
 	s3.upload_file(file_from, bucket_name, file_to)
 
 #---------------------------------------------------------------------# 
@@ -188,7 +195,7 @@ def send_email(msg, subject):
 #---------------------------------------------------------------------# 
 # Upload file to Dropbox
 #---------------------------------------------------------------------# 	
-def dropbox_upload(file_from, file_to):
+def upload_dropbox(file_from, file_to):
 
 	with open('./gma_secrets.json') as data_file:
 		credentials = json.load(data_file)
