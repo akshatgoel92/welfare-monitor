@@ -28,7 +28,8 @@ def check_table_empty(conn, table):
 
 
 def anti_join(df_1, df_2, on):
-	'''Return only those entries in df_1 not in df_2 	
+	'''
+	Return only those entries in df_1 not in df_2 	
 	'''
 
 	df = pd.merge(df_1, df_2, how = 'outer', on = on, indicator = True)
@@ -39,7 +40,8 @@ def anti_join(df_1, df_2, on):
 
 
 def select_data(engine, table, cols = ['*']):
-	'''Get data from the specified columns of
+	'''
+	Get data from the specified columns of
 	the specified table.
 	'''
 
@@ -51,7 +53,8 @@ def select_data(engine, table, cols = ['*']):
 
  	
 def insert_data(item, keys, table, unique = 0):
-	'''Insert a new item into the SQL database.
+	'''
+	Insert a new item into the SQL database.
 	'''
 
 	# Only insert fields which are both in the item and tha table	
@@ -69,7 +72,9 @@ def insert_data(item, keys, table, unique = 0):
 
 
 def update_fto_type(fto_no, fto_type, table):
-	'''Update FTO type in fto_queue SQL table as scrape runs.'''
+	'''
+	Update FTO type in fto_queue SQL table as scrape runs.
+	'''
 
 	sql = "UPDATE " + table + " SET fto_type = %s WHERE fto_no = %s"
 	data = [fto_type, fto_no]

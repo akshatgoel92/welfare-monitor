@@ -1,6 +1,3 @@
-#------------------------#
-# Import packages
-#------------------------#
 import os
 import json 
 import pandas as pd
@@ -13,14 +10,9 @@ from sqlalchemy.schema import Index
 from datetime import datetime
 from common import helpers
 
-#------------------------#
-# Use PyMySQL
-#------------------------# 
 pymysql.install_as_MySQLdb()
 
-#---------------------------------------------------#
-# Creates the bank account source transactions table
-#---------------------------------------------------#
+
 def create_bank_transactions(engine):
 	
 	metadata = MetaData()
@@ -46,12 +38,9 @@ def create_bank_transactions(engine):
 	metadata.create_all(engine)
 
 
-#-------------------------------------------------#
-# Creates the transactions table for branch scrape
-# The branch scrape does not have bank account numbers
-#-------------------------------------------------#
 def create_branch_transactions(engine):
 	
+	# The branch scrape does not have bank account numbers
 	metadata = MetaData()
 	transactions = Table('transactions', metadata, 
 										Column('block_name', String(50)), 
@@ -73,9 +62,7 @@ def create_branch_transactions(engine):
 
 	metadata.create_all(engine)
 
-#-----------------------------#
-# Creates the wage list table
-#-----------------------------#
+
 def create_wage_list(engine):
 
 	metadata = MetaData()
@@ -85,9 +72,7 @@ def create_wage_list(engine):
 
 	metadata.create_all(engine)
 
-#---------------------------#
-# Creates the accounts table
-#---------------------------#
+
 def create_accounts(engine):
 	
 	metadata = MetaData()
@@ -100,9 +85,6 @@ def create_accounts(engine):
 	metadata.create_all(engine)
 
 
-#------------------------#
-# Create the banks table
-#------------------------#
 def create_banks(engine):
 	
 	metadata = MetaData()
@@ -113,9 +95,6 @@ def create_banks(engine):
 	metadata.create_all(engine)
 
 
-#------------------------#
-# Create the stage table
-#------------------------#
 def create_stage(engine, stage):
 
 	tables = load_stage_table_names()
@@ -133,9 +112,6 @@ def create_stage(engine, stage):
 	metadata.create_all(engine)
 
 
-#----------------------------#
-# Creates the FTO queue table
-#----------------------------#
 def create_fto_queue(engine):
 
 	metadata = MetaData()
@@ -150,9 +126,6 @@ def create_fto_queue(engine):
 	metadata.create_all(engine)
 
 
-#------------------------------------#
-# Creates the FTO current stage table
-#------------------------------------#
 def create_fto_current_stage(engine):
 
 	metadata = MetaData()
@@ -163,10 +136,6 @@ def create_fto_current_stage(engine):
 	metadata.create_all(engine)
 
 
-
-#-----------------------------------------------#
-# Make primary key
-#-----------------------------------------------#
 def create_primary_key(engine, table, key):
 
 	engine.execute('ALTER TABLE ' + table + ' ADD PRIMARY KEY(' + key + ')')
@@ -174,9 +143,6 @@ def create_primary_key(engine, table, key):
 	return
 
 
-#-----------------------------------------------#
-# Add an index
-#-----------------------------------------------#
 def make_index(engine, table, col, name):
 
 	index = Index(name, table.c.col)
@@ -184,15 +150,14 @@ def make_index(engine, table, col, name):
 
 	return
 
-#----------------------------------#
-# Creates a list of the table names
-#----------------------------------#  
+
 def get_table_names(engine):
 
 	inspector = reflection.Inspector.from_engine(engine)
 	tables = inspector.get_table_names()
 
 	return(tables)
+
 
 def create_stage_table_names():
 
@@ -208,9 +173,6 @@ def create_stage_table_names():
 	return
 
 
-#----------------------------------------------#
-# Create a .json file with stage table names
-#----------------------------------------------#
 def load_stage_table_names():
 
 	with open('./backend/db/stage_table_names.json') as file:
@@ -220,9 +182,6 @@ def load_stage_table_names():
 	return(tables)
 
  
-#------------------------#
-# Send keys to file
-#------------------------#
 def send_keys_to_file(engine):
 	
 	inspector = reflection.Inspector.from_engine(engine)
@@ -237,9 +196,3 @@ def send_keys_to_file(engine):
 		json.dump(tables, file, sort_keys = True, indent = 4)
 
 	return
-
-
-
-
-
-

@@ -1,4 +1,3 @@
-# Import packages
 import argparse
 import os
 from common import helpers
@@ -6,7 +5,9 @@ from datetime import datetime
 
 
 def process_log():
-	'''Upload Scrapy log files to S3 and Dropbox.'''
+	'''
+	Upload Scrapy log files to Dropbox and S3.
+	'''
 
 	# Create the parser and add the arguments
 	parser = argparse.ArgumentParser(description='Dropbox upload parser')
@@ -18,10 +19,9 @@ def process_log():
 	file_from = args.file_from
 	file_to = args.file_to + '_' + str(datetime.today()) + '.csv'
 	
-	# Send to Dropbox
-	helpers.dropbox_upload(log_file_from, log_file_to)
-	
-	# Send to S3 [...]
+	# Send to Dropbox and S3
+	helpers.upload_dropbox(file_from, file_to)
+	helpers.upload_s3(file_from, file_to)
 
 	# Delete file
 	os.unlink(log_file_from)
