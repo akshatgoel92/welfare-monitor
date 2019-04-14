@@ -1,6 +1,3 @@
-#---------------------------------------------------------------------# 
-# Import packages
-#---------------------------------------------------------------------# 
 import os
 import json
 import sys
@@ -21,26 +18,22 @@ from sqlalchemy import *
 
 pymysql.install_as_MySQLdb()
 
-#---------------------------------------------------------------------# 
-# Connect to AWS RDB
-# Open the secrets file
-# This gets credentials
-#---------------------------------------------------------------------# 
+
 def sql_connect():
+	'''Open the secrets file and get credentials. 
+	Then return credentials for SQL access.
+	'''
 	
 	with open('./gma_secrets.json') as secrets:
 		sql_access = json.load(secrets)['mysql']
 	
 	return(sql_access)
 
-#---------------------------------------------------------------------# 
-# Create connection to MySQL data-base
-#---------------------------------------------------------------------# 
+
 def db_conn():
+	'''Return a SQL connection object.
+	'''
 	
-	#---------------------------------------------------------------------# 
-	# Store credentials
-	#---------------------------------------------------------------------# 
 	with open('./gma_secrets.json') as secrets:
 		sql_access = json.load(secrets)['mysql']
 	
@@ -48,22 +41,18 @@ def db_conn():
 	password = sql_access['password']
 	host = sql_access['host']
 	db = sql_access['db']
-	
-	#---------------------------------------------------------------------# 
-	# Create connection
-	#---------------------------------------------------------------------# 	
+		
 	conn = pymysql.connect(host, user, 
 							password, db, 
 							charset="utf8", 
 							use_unicode=True)
 	cursor = conn.cursor()
 	
-	#---------------------------------------------------------------------# 
-	# Return connection and cursor
-	#---------------------------------------------------------------------# 
 	return(conn, cursor)
 
 def db_engine():
+	'''Return a SQL engine object.
+	'''
 
 	user, password, host, db = sql_connect().values()
 	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
@@ -72,10 +61,9 @@ def db_engine():
 
 
 
-#---------------------------------------------------------------------# 
-# Upload file to S3
-#---------------------------------------------------------------------# 
 def upload_s3(file_from, file_to):
+	'''Upload a file from a specified location to S3.
+	'''
 
 	with open('./gma_secrets.json') as secrets:
 		s3_access = json.load(secrets)['s3']
@@ -84,13 +72,14 @@ def upload_s3(file_from, file_to):
 	secret_access_key=s3_access['secret_access_key']
 	bucket_name=s3_access['default_bucket']
 		
-	s3 = boto3.client('s3', aws_access_key_id=access_key_id, aws_secret_access_key=secret_access_key)
+	s3 = boto3.client('s3', aws_access_key_id=access_key_id, 
+							aws_secret_access_key=secret_access_key)
 	s3.upload_file(file_from, bucket_name, file_to)
 
-#---------------------------------------------------------------------# 
-# Download file from S3
-#---------------------------------------------------------------------# 
+
 def download_file_s3(file_from, file_to, bucket_name):
+	'''Download a file from S3.
+	'''
 
 	s3 = boto3.resource('s3')
 
@@ -105,35 +94,27 @@ def download_file_s3(file_from, file_to, bucket_name):
 		else:
 			raise
 	
-#---------------------------------------------------------------------# 
-# Clean each item that goes through the pipeline
-#---------------------------------------------------------------------# 
+
 def clean_item(item, title_fields):
+	'''Clean each item that goes through the pipeline given an 
+	item and a list of fields in that item which are supposed
+	to be in title case.
+	'''
 	
-	#---------------------------------------------------------------------# 
-	# Iterate over the keys
-	#---------------------------------------------------------------------# 
 	for field in item.keys():
 		
-		#---------------------------------------------------------------------# 
-		# Get rid of surrounding white-space for string variables
-		#---------------------------------------------------------------------# 
 		if type(item[field]) == str:
 			item[field] = item[field].strip()
 
-		#---------------------------------------------------------------------# 	
-		# Convert whatever fields that we can into title-case
-		#---------------------------------------------------------------------# 
 		if field in title_fields:
 			item[field] = item[field].title()
 	
 	return(item)
 
 
-#---------------------------------------------------------------------# 	
-# Convert whatever fields that we can into title-case
-#---------------------------------------------------------------------# 
 def delete_files(path='./output/', extension='.csv'):
+	'''Delete files with a given path and extension.
+	'''
 
 	for filename in os.listdir(path):
 		print(filename)
@@ -142,47 +123,32 @@ def delete_files(path='./output/', extension='.csv'):
 
 	return
 
-
-#---------------------------------------------------------------------# 
-# Send e-mail
-#---------------------------------------------------------------------# 
+ 
 def send_email(msg, subject):
+	'''Send e-mail.
+	'''
 
 	with open('./recipients.json') as r:
 		recipients = json.load(r)['recipients']
 
-	#---------------------------------------------------------------------# 
-	# Get credentials
-	#---------------------------------------------------------------------# 
+
 	with open('./gma_secrets.json') as secrets:
 		credentials = json.load(secrets)['smtp']
-	
-	#---------------------------------------------------------------------# 
-	# Unpack credentials
-	#---------------------------------------------------------------------# 
+	 
 	user = credentials['user']
 	password = credentials['password']
 	region = credentials['region']
 	
-	#---------------------------------------------------------------------# 
-	# SMTP server details
-	#---------------------------------------------------------------------# 
 	smtp_server = 'email-smtp.' + region + '.amazonaws.com'
 	smtp_port = 587
 	sender = 'akshat.goel@ifmr.ac.in'
 	text_subtype = 'html'
 	
-	#---------------------------------------------------------------------# 
-	# Compose message
-	#---------------------------------------------------------------------# 
 	msg = MIMEText(msg, text_subtype)
 	msg['Subject']= subject
 	msg['From'] = sender
 	msg['To'] = ', '.join(recipients)
 	
-	#---------------------------------------------------------------------# 
-	# Connection
-	#---------------------------------------------------------------------# 
 	conn = SMTP(smtp_server, smtp_port)
 	conn.set_debuglevel(1)
 	conn.ehlo()
@@ -192,10 +158,10 @@ def send_email(msg, subject):
 	conn.sendmail(sender, recipients, msg.as_string())
 	conn.close()
 
-#---------------------------------------------------------------------# 
-# Upload file to Dropbox
-#---------------------------------------------------------------------# 	
+	
 def upload_dropbox(file_from, file_to):
+	'''Upload a file to Dropbox.
+	'''
 
 	with open('./gma_secrets.json') as data_file:
 		credentials = json.load(data_file)
