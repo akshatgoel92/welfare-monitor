@@ -10,9 +10,7 @@ import sys
 
 
 def db_execute(branch):
-	'''
-	Create the DB tables that are listed in the schema file.
-	'''
+	# Create the DB tables that are listed in the schema file.
 
 	engine = helpers.db_engine()
 
@@ -31,9 +29,7 @@ def db_execute(branch):
 
 
 def stage_names_execute():
-	'''
-	Create the JSON which stores the stage table names.
-	'''
+	# Create the JSON which stores the stage table names.
 
 	engine = helpers.db_engine()
 	db_schema.create_stage_table_names()
@@ -42,9 +38,7 @@ def stage_names_execute():
 
 
 def stage_tables_execute():
-	'''
-	Create stage wise tables.
-	'''
+	# Create stage wise tables.
 
 	stages = db_schema.load_stage_table_names()
 	engine = helpers.db_engine() 
@@ -68,9 +62,7 @@ def stage_tables_execute():
 
 
 def primary_key_execute():
-	'''
-	This adds primary keys to the specified variables.
-	'''
+	# This adds primary keys to the specified variables.
 
 	engine = helpers.db_engine()
 	schema.make_primary_key(engine, 'banks', 'ifsc_code')
@@ -79,9 +71,6 @@ def primary_key_execute():
 
 
 def main():
-	'''
-	Function calls here
-	'''
 
 	db_execute()
 	stage_names_execute()
@@ -91,7 +80,5 @@ def main():
 
 
 if __name__ == '__main__':
-	'''Execute the code
-	'''
 
 	main()

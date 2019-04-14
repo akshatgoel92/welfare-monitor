@@ -5,9 +5,7 @@ from datetime import datetime
 
 
 def process_log():
-	'''
-	Upload Scrapy log files to Dropbox and S3.
-	'''
+	# Upload Scrapy log files to Dropbox and S3.
 
 	# Create the parser and add the arguments
 	parser = argparse.ArgumentParser(description='Dropbox upload parser')
@@ -28,6 +26,5 @@ def process_log():
 
 
 if __name__ == '__main__':
-	'''Function calls go here.'''
 	
 	process_log()
