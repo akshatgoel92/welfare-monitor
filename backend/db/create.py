@@ -8,8 +8,6 @@ from backend.db import schema
 from common import helpers
 
 
-
-# Create the DB tables that are listed in the schema file
 def db_execute(branch):
 	
 	engine = helpers.db_engine()
@@ -26,7 +24,6 @@ def db_execute(branch):
 	schema.send_keys_to_file(engine)
 
 
-# Create the JSON which stores the stage table names
 def stage_names_execute():
 	
 	engine = helpers.db_engine()
