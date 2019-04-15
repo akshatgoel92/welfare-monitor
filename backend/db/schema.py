@@ -148,7 +148,7 @@ def create_primary_key(engine, table, key):
 	return
 
 
-def make_index(engine, table, col, name):
+def create_index(engine, table, col, name):
 
 	index = Index(name, table.c.col)
 	index.create(engine)

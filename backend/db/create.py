@@ -24,8 +24,6 @@ def db_execute(branch):
 	schema.create_fto_current_stage(engine)
 	schema.send_keys_to_file(engine)
 
-	return
-
 
 # Create the JSON which stores the stage table names
 def stage_names_execute():
@@ -33,16 +31,12 @@ def stage_names_execute():
 	engine = helpers.db_engine()
 	db_schema.create_stage_table_names()
 
-	return
-
 
 # Call the functions
 def main():
 
 	db_execute()
 	stage_names_execute()
-
-	return
 
 
 if __name__ == '__main__':

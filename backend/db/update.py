@@ -59,7 +59,6 @@ def select_data(engine, table, cols = ['*']):
 # The pipelines file will use string formatting to substitute the data values into [%s, %s]
 def insert_data(item, keys, table, unique = 0):
 	
-	
 	keys = get_keys(table) & item.keys()
 	fields = u','.join(keys)
 	qm = u','.join([u'%s'] * len(keys))
