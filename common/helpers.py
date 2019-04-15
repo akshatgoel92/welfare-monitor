@@ -34,7 +34,6 @@ def sql_connect():
 	return(sql_access)
 
 
-# Return a SQL connection object
 def db_conn():
 	
 	with open('./gma_secrets.json') as secrets:
@@ -51,7 +50,6 @@ def db_conn():
 	return(conn, cursor)
 
 
-# Return a SQL engine object
 def db_engine():
 	
 	user, password, host, db = sql_connect().values()
@@ -59,8 +57,7 @@ def db_engine():
 
 	return(engine)
 
-
-# Upload a file to Dropbox	
+	
 def upload_dropbox(file_from, file_to):
 	
 	with open('./gma_secrets.json') as data_file:
@@ -73,7 +70,6 @@ def upload_dropbox(file_from, file_to):
 		dbx.files_upload(f.read(), file_to, mode = dropbox.files.WriteMode.overwrite)
 
 
-# Upload a file from a specified location to S3
 def upload_s3(file_from, file_to):
 	
 	with open('./gma_secrets.json') as secrets:
@@ -87,13 +83,11 @@ def upload_s3(file_from, file_to):
 	s3.upload_file(file_from, bucket_name, file_to)
 
 
-# Download a file from S3
 def download_file_s3(file_from, file_to, bucket_name):
 	
 	s3 = boto3.resource('s3')
 
-	try:
-		s3.Bucket(bucket_name).download_file(file_from, file_to)
+	try: s3.Bucket(bucket_name).download_file(file_from, file_to)
 
 	except botocore.exceptions.ClientError as e:
 
@@ -121,15 +115,13 @@ def clean_item(item, title_fields):
 
 
 # Delete files with a given path and extension
-def delete_files(path='./output/', extension='.csv'):
+def delete_files(path = './output/', extension = '.csv'):
 	
 	for filename in os.listdir(path):
 		if filename.endswith(extension): 
-
 			os.unlink(path + filename)
 
 
-# Send e-mail 
 def send_email(msg, subject):
 
 	with open('./recipients.json') as r:
