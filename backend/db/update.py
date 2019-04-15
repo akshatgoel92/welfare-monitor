@@ -23,8 +23,9 @@ from common import helpers
 def check_table_empty(conn, table):
 	
 	result = pd.read_sql('SELECT EXISTS ' + '(SELECT 1 FROM ' + table + ')', con = conn)
+	is_empty = result.iloc[0, 0]
 
-	return(1 - result.iloc[0, 0])
+	return(is_empty)
 
 
 # Return only those entries in df_1 not in df_2
@@ -47,16 +48,25 @@ def select_data(engine, table, cols = ['*']):
 	return(result)
 
 
-# Insert a new item into the SQL database 	
+# Insert a new item into the SQL database
+# First get fields which are both in the item and tha table
+# Then join them in a list with the following format: [field1, field2, ...]
+# Then create a list of data types qm with the following format: [%s, %s, ...]
+# Then create the SQL queries
+# Then construct the final query depending on the kind of insert
+# The final query has the following format: "INSERT (IGNORE) INTO table_name [field1, field2] VALUES [%s, %s] "
+# Then get the data from the item 
+# The pipelines file will use string formatting to substitute the data values into [%s, %s]
 def insert_data(item, keys, table, unique = 0):
 	
-	# Only insert fields which are both in the item and tha table	
+	
 	keys = get_keys(table) & item.keys()
 	fields = u','.join(keys)
 	qm = u','.join([u'%s'] * len(keys))
 	
 	sql = "INSERT INTO " + table + " (%s) VALUES (%s)"
 	sql_unique = "INSERT IGNORE INTO " + table + " (%s) VALUES (%s)"
+	
 	insert = sql if unique == 0 else sql_unique
 	sql = insert % (fields, qm)
 	data = [item[k] for k in keys]
@@ -65,6 +75,8 @@ def insert_data(item, keys, table, unique = 0):
 
 
 # Update FTO type in fto_queue SQL table as scrape runs
+# There are multiple types of FTOs
+# The two main types are wage FTOs for NREGA workers and materials FTOs for vendors
 def update_fto_type(fto_no, fto_type, table):
 	
 	sql = "UPDATE " + table + " SET fto_type = %s WHERE fto_no = %s"
@@ -74,6 +86,7 @@ def update_fto_type(fto_no, fto_type, table):
 
 
 # Get a table's keys
+# This is used by the pipelines file to decide where each field will should be sent
 def get_keys(table):
 	
 	with open('./backend/db/table_keys.json') as file:
