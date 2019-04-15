@@ -37,6 +37,7 @@ def get_transactions():
 	get_accounts = "SELECT * from accounts;"
 
 	try: 
+		
 		transactions = pd.read_sql(get_transactions, con = conn)
 		banks = pd.read_sql(get_banks, con = conn)
 		accounts = pd.read_sql(get_accounts, con = conn)
@@ -45,6 +46,7 @@ def get_transactions():
 		conn.close()
 
 	except Exception as e:
+		
 		print(e)
 		conn.close()
 
