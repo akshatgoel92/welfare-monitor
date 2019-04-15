@@ -28,7 +28,7 @@ pymysql.install_as_MySQLdb()
 # Then return credentials for SQL access
 def sql_connect():
 
-	with open('./gma_secrets.json') as secrets:
+	with open('./gma_secrets.json') as secrets: 
 		sql_access = json.load(secrets)['mysql']
 	
 	return(sql_access)
@@ -45,8 +45,7 @@ def db_conn():
 	host = sql_access['host']
 	db = sql_access['db']
 		
-	conn = pymysql.connect(host, user, password, db, 
-						   charset="utf8", use_unicode=True)
+	conn = pymysql.connect(host, user, password, db, charset="utf8", use_unicode=True)
 	cursor = conn.cursor()
 	
 	return(conn, cursor)
@@ -71,9 +70,7 @@ def upload_dropbox(file_from, file_to):
 	dbx = dropbox.Dropbox(access_token)
 
 	with open(file_from, 'rb') as f:
-		dbx.files_upload(f.read(),
-						file_to,
-						mode = dropbox.files.WriteMode.overwrite)
+		dbx.files_upload(f.read(), file_to, mode = dropbox.files.WriteMode.overwrite)
 
 
 # Upload a file from a specified location to S3
@@ -86,8 +83,7 @@ def upload_s3(file_from, file_to):
 	secret_access_key=s3_access['secret_access_key']
 	bucket_name=s3_access['default_bucket']
 		
-	s3 = boto3.client('s3', aws_access_key_id=access_key_id, 
-							aws_secret_access_key=secret_access_key)
+	s3 = boto3.client('s3', aws_access_key_id = access_key_id, aws_secret_access_key = secret_access_key)
 	s3.upload_file(file_from, bucket_name, file_to)
 
 
@@ -128,11 +124,9 @@ def clean_item(item, title_fields):
 def delete_files(path='./output/', extension='.csv'):
 	
 	for filename in os.listdir(path):
-		print(filename)
-		if filename.endswith(extension):
-			os.unlink(path + filename)
+		if filename.endswith(extension): 
 
-	return
+			os.unlink(path + filename)
 
 
 # Send e-mail 
@@ -140,7 +134,6 @@ def send_email(msg, subject):
 
 	with open('./recipients.json') as r:
 		recipients = json.load(r)['recipients']
-
 
 	with open('./gma_secrets.json') as secrets:
 		credentials = json.load(secrets)['smtp']
