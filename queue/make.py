@@ -25,16 +25,16 @@ def prep_csv(stage):
 	
 	try: 
 		
-		df=pd.read_csv('./output/{}.csv'.format(stage))
+		df = pd.read_csv('./output/{}.csv'.format(stage))
 
 	except pd.errors.EmptyDataError as e:
 
 		print(e)
 		print(stage)
 
-		cols=['block_code', 'district_code', 'fto_no', 'scrape_date', 'scrape_time', 
+		cols = ['block_code', 'district_code', 'fto_no', 'scrape_date', 'scrape_time', 
 			  'state_code', 'transact_date', 'url']
-		df=pd.DataFrame([], columns=cols)
+		df = pd.DataFrame([], columns=cols)
 
 	return(df)
 
@@ -82,7 +82,7 @@ def prep_queue_for_insert(fto_stages, stages, missing_stages):
 	# Allocate the current stage
 	for stage in stages: fto_stages.loc[fto_stages[stage] == 1, 'current_stage'] = stage
 
-	fto_stages=fto_stages(['fto_no','current_stage'], axis=1)
+	fto_stages = fto_stages(['fto_no','current_stage'], axis=1)
 	
 	return(fto_stages)
 

@@ -45,22 +45,19 @@ def update_ftos(engine, scraped_ftos, target_ftos):
 	
 	try: 
 		
+		# The code block below proceeds as follows
 		# Use a right join to exclude all FTOs in transactions table from previous districts/blocks
-		all_ftos = pd.merge(scraped_ftos, target_ftos, how = 'right', on = ['fto_no'], indicator = True)
-		
 		# Update the tracker for the FTOs which are transactions
-		all_ftos.loc[(all_ftos['_merge'] == 'both'), 'done'] = 1
-
 		# Drop the merge variable
+		# Update the materials FTOs because there are no transactions scraped from these in the wage-list scrape
+		# Write to the SQL table
+		all_ftos = pd.merge(scraped_ftos, target_ftos, how = 'right', on = ['fto_no'], indicator = True)
+		all_ftos.loc[(all_ftos['_merge'] == 'both'), 'done'] = 1
 		all_ftos.drop(['_merge'], axis = 1, inplace = True)
 
-		# Update the materials FTOs because there are no transactions scraped from these
 		all_ftos.loc[(all_ftos['fto_type'] == 'Material'), 'done'] = 1
-
-		# Write to the SQL table
 		all_ftos.to_sql('fto_queue', con = conn, index = False, if_exists = 'replace', chunksize=100)
 
-		# Commit the changes and close the connection
 		trans.commit()
 		conn.close()
 
@@ -70,10 +67,11 @@ def update_ftos(engine, scraped_ftos, target_ftos):
 		trans.rollback()
 		conn.close()
 
-	total=len(all_ftos)
-	done=len(all_ftos.loc[all_ftos['done'] == 1])
+	total = len(all_ftos)
+	done = len(all_ftos.loc[all_ftos['done'] == 1])
 
 	return(total, done)
+
 
 # This function calculates the progress of the code
 def get_progress(total, done):
@@ -81,12 +79,14 @@ def get_progress(total, done):
 	try: 
 		
 		progress = done/total
-		print('''There are a total of {} FTOs. The code has done {} FTOs. The code is {} done'''.format(total, done, progress))
+		msg = 'There are a total of {} FTOs. The code has done {} FTOs. The code is {} done'
+		print(msg.format(total, done, progress))
 	
 	except Exception as e:
 		
 		print(e)
-		print('There has been an error in the progress calculation...please check the calculation.')
+		msg = 'There has been an error in the progress calculation...please check the calculation.'
+		print(msg)
 
 	return
 
@@ -97,8 +97,8 @@ def main():
 	user, password, host, db = helpers.sql_connect().values()
 	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
 	
-	scraped_ftos=get_scraped_ftos(engine)
-	target_ftos=get_target_ftos(engine)
+	scraped_ftos = get_scraped_ftos(engine)
+	target_ftos = get_target_ftos(engine)
 
 	total, done = update_ftos(engine,scraped_ftos, target_ftos)
 	get_progress(total, done)

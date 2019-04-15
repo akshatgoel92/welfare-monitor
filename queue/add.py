@@ -20,7 +20,7 @@ pymysql.install_as_MySQLdb()
 if __name__ == '__main__':
 
 	 # Create parser
-	parser = argparse.ArgumentParser(description='Append to or replace the queue?')
+	parser = argparse.ArgumentParser(description = 'Append to or replace the queue?')
 	parser.add_argument('if_exists',
 						 type = str, 
 						 help = 'Append or replace?')

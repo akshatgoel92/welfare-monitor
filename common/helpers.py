@@ -1,3 +1,8 @@
+#--------------------------------------------------------#
+# Author: Akshat Goel
+# Purpose: All common helper functions go here
+# Contact: akshat.goel@ifmr.ac.in
+#--------------------------------------------------------#
 import os
 import json
 import sys
@@ -19,9 +24,10 @@ from sqlalchemy import *
 pymysql.install_as_MySQLdb()
 
 
+# Open the secrets file and get credentials 
+# Then return credentials for SQL access
 def sql_connect():
-	# Open the secrets file and get credentials. 
-	# Then return credentials for SQL access.
+
 	
 	with open('./gma_secrets.json') as secrets:
 		sql_access = json.load(secrets)['mysql']
@@ -29,8 +35,9 @@ def sql_connect():
 	return(sql_access)
 
 
+# Return a SQL connection object
 def db_conn():
-	# Return a SQL connection object.
+	
 	
 	with open('./gma_secrets.json') as secrets:
 		sql_access = json.load(secrets)['mysql']
@@ -40,16 +47,16 @@ def db_conn():
 	host = sql_access['host']
 	db = sql_access['db']
 		
-	conn = pymysql.connect(host, user, 
-							password, db, 
-							charset="utf8", 
-							use_unicode=True)
+	conn = pymysql.connect(host, user, password, db, 
+						   charset="utf8", use_unicode=True)
 	cursor = conn.cursor()
 	
 	return(conn, cursor)
 
+
+# Return a SQL engine object
 def db_engine():
-	# Return a SQL engine object.
+	
 
 	user, password, host, db = sql_connect().values()
 	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
@@ -57,10 +64,9 @@ def db_engine():
 	return(engine)
 
 
-
+# Upload a file from a specified location to S3
 def upload_s3(file_from, file_to):
-	# Upload a file from a specified location to S3.
-
+	
 	with open('./gma_secrets.json') as secrets:
 		s3_access = json.load(secrets)['s3']
 
@@ -73,9 +79,9 @@ def upload_s3(file_from, file_to):
 	s3.upload_file(file_from, bucket_name, file_to)
 
 
+# Download a file from S3
 def download_file_s3(file_from, file_to, bucket_name):
-	# Download a file from S3.
-
+	
 	s3 = boto3.resource('s3')
 
 	try:
@@ -90,10 +96,10 @@ def download_file_s3(file_from, file_to, bucket_name):
 			raise
 	
 
+# Clean each item that goes through the pipeline given an 
+# item and a list of fields in that item which are supposed
+# to be in title case
 def clean_item(item, title_fields):
-	# Clean each item that goes through the pipeline given an 
-	# item and a list of fields in that item which are supposed
-	# to be in title case.
 	
 	for field in item.keys():
 		
@@ -106,8 +112,9 @@ def clean_item(item, title_fields):
 	return(item)
 
 
+# Delete files with a given path and extension
 def delete_files(path='./output/', extension='.csv'):
-	# Delete files with a given path and extension.
+	
 
 	for filename in os.listdir(path):
 		print(filename)
@@ -116,9 +123,10 @@ def delete_files(path='./output/', extension='.csv'):
 
 	return
 
- 
+
+# Send e-mail 
 def send_email(msg, subject):
-	# Send e-mail.
+	
 
 	with open('./recipients.json') as r:
 		recipients = json.load(r)['recipients']
@@ -150,10 +158,10 @@ def send_email(msg, subject):
 	conn.sendmail(sender, recipients, msg.as_string())
 	conn.close()
 
-	
-def upload_dropbox(file_from, file_to):
-	# Upload a file to Dropbox.
 
+# Upload a file to Dropbox	
+def upload_dropbox(file_from, file_to):
+	
 	with open('./gma_secrets.json') as data_file:
 		credentials = json.load(data_file)
 
