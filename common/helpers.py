@@ -98,23 +98,6 @@ def download_file_s3(file_from, file_to, bucket_name):
 			raise
 	
 
-# Clean each item that goes through the pipeline given an 
-# item and a list of fields in that item which are supposed
-# to be in title case
-def clean_item(item, title_fields):
-	
-	for field in item.keys():
-		
-		if type(item[field]) == str:
-			item[field] = item[field].strip()
-
-		if field in title_fields:
-			item[field] = item[field].title()
-	
-	return(item)
-
-
-# Delete files with a given path and extension
 def delete_files(path = './output/', extension = '.csv'):
 	
 	for filename in os.listdir(path):
@@ -152,3 +135,19 @@ def send_email(msg, subject):
 	conn.login(user, password)
 	conn.sendmail(sender, recipients, msg.as_string())
 	conn.close()
+
+
+# Clean each item that goes through the pipeline given an 
+# item and a list of fields in that item which are supposed
+# to be in title case
+def clean_item(item, title_fields):
+	
+	for field in item.keys():
+		
+		if type(item[field]) == str:
+			item[field] = item[field].strip()
+
+		if field in title_fields:
+			item[field] = item[field].title()
+	
+	return(item)
