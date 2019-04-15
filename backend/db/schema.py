@@ -166,12 +166,18 @@ def get_table_names(engine):
 
 def create_stage_table_names():
 
-	tables = {'fst_sig': 'fto_fst_sig', 'fst_sig_not': 'fto_fst_sig_not', 'sec_sig': 'fto_sec_sig', 
-						 'sec_sig_not': 'fto_sec_sig_not', 'sb': 'fto_sent_to_bank', 
-						 'pp': 'fto_partial_processed_bank', 'pb': 'fto_processed', 
-						 'P': 'fto_pending_bank'}
+	# fst_sig: First sign
+	# fst_sig_not: First sign pending 
+	# sec_sig: Second sign 
+	# sec_sig_not: Second sign pending 
+	# sb: Send to bank 
+	# pp: Partially processed by bank 
+	# pb: Processed by bank 
+	# P: Pending bank
 
-	with open('./backend/db/stage_table_names.json', 'w') as file:
+	tables = ['fst_sig_not', 'fst_sig', 'sec_sig_not', 'sec_sig', 'sb', 'pp', 'pb', 'P']
+
+	with open('./backend/db/stage_names.json', 'w') as file:
 
 		json.dump(tables, file, sort_keys = True, indent = 4)
 
