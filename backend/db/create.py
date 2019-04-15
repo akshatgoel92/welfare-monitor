@@ -30,7 +30,6 @@ def db_execute(branch):
 # Create the JSON which stores the stage table names
 def stage_names_execute():
 	
-
 	engine = helpers.db_engine()
 	db_schema.create_stage_table_names()
 

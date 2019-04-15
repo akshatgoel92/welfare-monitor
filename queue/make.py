@@ -23,7 +23,6 @@ pymysql.install_as_MySQLdb()
 # Prepare the stage wise data for insert into data-base
 def prep_csv(stage):
 	
-
 	try: 
 		
 		df=pd.read_csv('./output/{}.csv'.format(stage))
@@ -39,10 +38,10 @@ def prep_csv(stage):
 
 	return(df)
 
+
 # Create a list of all FTOs by stage	
 def get_csv(stages):
 	
-
 	scraped_ftos = pd.concat(map(prep_stage, stages))
 	unique_stages = fto_stages['stage'].unique().tolist()
 	missing_stages = [stage for stage in stages if stage not in unique_stages]
@@ -64,10 +63,10 @@ def get_pivoted_stage(fto_stages):
 
 	return(fto_stages)
 
+
 # Prep the queue for insert
 def prep_queue_for_insert(fto_stages, stages, missing_stages):
 	
-
 	# Create the missing columns columns
 	for col in missing_stages:
 		fto_stages[col] = 0
@@ -91,7 +90,6 @@ def prep_queue_for_insert(fto_stages, stages, missing_stages):
 # Now we get the new FTOs along with their current stage
 def get_new_ftos(engine, fto_stages, file_to):
 	
-
 	fto_queue = db_schema.select_data(engine, 'fto_queue', cols = ['fto_no'])
 	new_ftos = db_schema.anti_join(fto_stages, fto_queue, on = ['fto_no'])
 	new_ftos.to_csv(file_to, index = False)
@@ -102,7 +100,6 @@ def get_new_ftos(engine, fto_stages, file_to):
 # Put the net FTO nos. in the queue
 def put_fto_nos(engine, path, if_exists):
 	
-
     fto_nos = pd.read_csv(path).drop_duplicates()
     fto_nos['done'] = 0
     fto_nos['fto_type'] = ''

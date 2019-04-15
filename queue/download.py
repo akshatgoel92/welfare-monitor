@@ -28,7 +28,6 @@ pymysql.install_as_MySQLdb()
 # Get the scraped transactions data
 def get_transactions():
 	
-
 	user, password, host, db = helpers.sql_connect().values()
 	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
 	conn = engine.connect()
@@ -59,7 +58,6 @@ def get_transactions():
 # Merge transactions, bank codes, and bank account data-sets
 def merge_transactions(transactions, banks, accounts, file_from='./output/transactions.csv'):
 	
-
 	user, password, host, db = helpers.sql_connect().values()
 	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
 	conn = engine.connect()
@@ -92,7 +90,6 @@ def merge_transactions(transactions, banks, accounts, file_from='./output/transa
 # Download data to .csv
 def download_transactions(transactions, to_dropbox, to_s3, file_to, file_from='./output/transactions.csv'):
 	
-
 	user, password, host, db = helpers.sql_connect().values()
 	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
 	conn = engine.connect()
@@ -109,7 +106,6 @@ def download_transactions(transactions, to_dropbox, to_s3, file_to, file_from='.
 # Function calls go here
 def main():
 	
-
 	# Create parser
 	parser = argparse.ArgumentParser(description='Parse the data for download')
 	parser.add_argument('to_dropbox', type=int, help='Whether to write to Dropbox')

@@ -78,7 +78,6 @@ def update_ftos(engine, scraped_ftos, target_ftos):
 # This function calculates the progress of the code
 def get_progress(total, done):
 	
-	
 	try: 
 		
 		progress = done/total
@@ -95,7 +94,6 @@ def get_progress(total, done):
 # Function calls
 def main():
 	
-	
 	user, password, host, db = helpers.sql_connect().values()
 	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
 	
@@ -104,7 +102,6 @@ def main():
 
 	total, done = update_ftos(engine,scraped_ftos, target_ftos)
 	get_progress(total, done)
-
 
 
 if __name__ == '__main__':

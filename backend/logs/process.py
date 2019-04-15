@@ -12,7 +12,6 @@ from datetime import datetime
 # Upload Scrapy log files to Dropbox and S3
 def process_log():
 	
-
 	# Create the parser and add the arguments
 	parser = argparse.ArgumentParser(description='Dropbox upload parser')
 	parser.add_argument('file_from', type=str, help='Source file path')
