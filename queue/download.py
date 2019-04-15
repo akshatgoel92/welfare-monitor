@@ -59,20 +59,20 @@ def merge_transactions(transactions, banks, accounts, file_from = './output/tran
 	conn = engine.connect()
 	
 	try: 
-		transactions = pd.merge(transactions, banks, how = 'left', on = ['ifsc_code'], 
-								indicator = 'banks_merge')
 		
-		transactions = pd.merge(transactions, accounts, how = 'left', 
-								on = ['jcn', 'acc_no', 'ifsc_code'], indicator = 'accounts_merge')
+		transactions = pd.merge(transactions, banks, how = 'left', on = ['ifsc_code'], indicator = 'banks_merge')
+		transactions = pd.merge(transactions, accounts, how = 'left', on = ['jcn', 'acc_no', 'ifsc_code'], 
+								indicator = 'accounts_merge')
 
 	except Exception as e: 
+		
 		print(e)
 		print('Merge failed...please check the merge.')
 
-	try: 
-		transactions.to_csv(file_from, index = False)
+	try: transactions.to_csv(file_from, index = False)
 	
 	except Exception as e:
+		
 		print(e) 
 		print('Sending data to .csv failed...please check the .csv upload.')
 
@@ -89,8 +89,7 @@ def download_transactions(transactions, to_dropbox, to_s3, file_to, file_from = 
 		file_to = os.path.join('./Female Mobile Phones Phase I/Phase II/CHiPS/Data/mis_scrapes/', file_to)
 		helpers.upload_dropbox(file_from, file_to)
 
-	if to_s3 == 1:
-		helpers.upload_s3(file_from, file_to)
+	if to_s3 == 1: helpers.upload_s3(file_from, file_to)
 
 
 # Function calls go here

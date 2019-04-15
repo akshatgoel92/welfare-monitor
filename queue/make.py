@@ -68,8 +68,7 @@ def get_pivoted_stage(fto_stages):
 def prep_queue_for_insert(fto_stages, stages, missing_stages):
 	
 	# Create the missing columns columns
-	for col in missing_stages:
-		fto_stages[col] = 0
+	for col in missing_stages: fto_stages[col] = 0
 
 	# Store the stages in order because it matters here
 	# This will go in a .config file

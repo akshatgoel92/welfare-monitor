@@ -22,8 +22,8 @@ pymysql.install_as_MySQLdb()
 # Treat this as a list of FTOs already scraped
 def get_scraped_ftos(engine):
 
-	get_scraped_ftos="SELECT DISTINCT fto_no FROM transactions;"
-	scraped_ftos=pd.read_sql(get_scraped_ftos, con = engine)
+	get_scraped_ftos = "SELECT DISTINCT fto_no FROM transactions;"
+	scraped_ftos = pd.read_sql(get_scraped_ftos, con = engine)
 
 	return(scraped_ftos)
 
@@ -31,8 +31,8 @@ def get_scraped_ftos(engine):
 # Get the target FTOs that we wanted to scrape from the FTO queue
 def get_target_ftos(engine):
 
-	get_target_ftos="SELECT * FROM fto_queue;"
-	target_ftos=pd.read_sql(get_target_ftos, con = engine)
+	get_target_ftos = "SELECT * FROM fto_queue;"
+	target_ftos = pd.read_sql(get_target_ftos, con = engine)
 
 	return(target_ftos)
 
