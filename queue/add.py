@@ -1,4 +1,8 @@
-# Import packages
+#--------------------------------------------------------#
+# Author: Akshat Goel
+# Purpose: Add FTO nos. to scraping queue manually
+# Contact: akshat.goel@ifmr.ac.in
+#--------------------------------------------------------#
 from sqlalchemy import *
 from sqlalchemy.engine import reflection
 from common.helpers import sql_connect
@@ -10,8 +14,6 @@ import numpy as np
 import pymysql
 import argparse
 
-
-# Install this as MySQLdb
 pymysql.install_as_MySQLdb()
 
 
@@ -26,8 +28,6 @@ if __name__ == '__main__':
 	# Parse arguments
 	args = parser.parse_args()
 	if_exists = args.if_exists
-	print(if_exists)
-	print(type(if_exists))
 	path = os.path.abspath('./output/fto_queue.csv')
 	
     # Create the DB engine here

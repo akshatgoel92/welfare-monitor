@@ -1,4 +1,8 @@
-# Import packages
+#-------------------------------------------------------------------#
+# Author: Akshat Goel
+# Purpose: Merge and download scraped FTO data to Dropbox every day
+# Contact: akshat.goel@ifmr.ac.in
+#-------------------------------------------------------------------#
 import os
 import json
 import sys
@@ -13,10 +17,10 @@ from common import helpers
 pymysql.install_as_MySQLdb()
 
 
+# Get the FTO nos. which have at least one distinct transaction 
+# associated with them from the transactions table 
+# Treat this as a list of FTOs already scraped
 def get_scraped_ftos(engine):
-	'''Get the FTO nos. which have at least one distinct transaction
-	associated with them from the transactions table. Treat this as
-	a list of FTOs already scraped.'''
 
 	get_scraped_ftos="SELECT DISTINCT fto_no FROM transactions;"
 	scraped_ftos=pd.read_sql(get_scraped_ftos, con = engine)
@@ -24,9 +28,8 @@ def get_scraped_ftos(engine):
 	return(scraped_ftos)
 
 
+# Get the target FTOs that we wanted to scrape from the FTO queue
 def get_target_ftos(engine):
-	'''Get the target FTOs that we wanted to scrape 
-	from the FTO queue.'''
 
 	get_target_ftos="SELECT * FROM fto_queue;"
 	target_ftos=pd.read_sql(get_target_ftos, con = engine)
@@ -34,10 +37,9 @@ def get_target_ftos(engine):
 	return(target_ftos)
 
 
+# Update the FTO queue with the progress of the scrape
 def update_ftos(engine, scraped_ftos, target_ftos):
-	'''Update the FTO queue with the progress of the scrape.'''
-
-	# Wrap this in a transaction so we can roll-back if needed
+	
 	conn = engine.connect()
 	trans = conn.begin()
 	
@@ -64,7 +66,6 @@ def update_ftos(engine, scraped_ftos, target_ftos):
 
 	except Exception as e: 
 		
-		# Roll back the transaction and make no change if there's a problem
 		print(e)
 		trans.rollback()
 		conn.close()
@@ -74,9 +75,9 @@ def update_ftos(engine, scraped_ftos, target_ftos):
 
 	return(total, done)
 
-
+# This function calculates the progress of the code
 def get_progress(total, done):
-	'''This function calculates the progress of the code.'''
+	
 	
 	try: 
 		
@@ -91,10 +92,10 @@ def get_progress(total, done):
 	return
 
 
+# Function calls
 def main():
-	'''Put the function calls here.'''
 	
-	# Create the SQLalchemy engine
+	
 	user, password, host, db = helpers.sql_connect().values()
 	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
 	

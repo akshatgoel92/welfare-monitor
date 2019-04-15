@@ -1,17 +1,16 @@
-'''
-	Author: Akshat Goel
-	Purpose: Create MySQL database tables according to schema file
-	Contact: akshat.goel@ifmr.ac.in
-'''
-
+#--------------------------------------------------------#
+# Author: Akshat Goel
+# Purpose: Create database tables according to schema
+# Contact: akshat.goel@ifmr.ac.in
+#--------------------------------------------------------#
 from backend.db import schema
 from common import helpers
 import sys
 
 
+# Create the DB tables that are listed in the schema file
 def db_execute(branch):
-	# Create the DB tables that are listed in the schema file.
-
+	
 	engine = helpers.db_engine()
 
 	if branch == 1: schema.create_branch_transactions(engine)
@@ -28,8 +27,9 @@ def db_execute(branch):
 	return
 
 
+# Create the JSON which stores the stage table names
 def stage_names_execute():
-	# Create the JSON which stores the stage table names.
+	
 
 	engine = helpers.db_engine()
 	db_schema.create_stage_table_names()
@@ -37,44 +37,11 @@ def stage_names_execute():
 	return
 
 
-def stage_tables_execute():
-	# Create stage wise tables.
-
-	stages = db_schema.load_stage_table_names()
-	engine = helpers.db_engine() 
-	conn = engine.connect()
-	trans = conn.begin()
-	
-	for stage in stages:
-		
-		try: schema.create_stage(conn, stage)
-		
-		except Exception as e:
-				
-			print(e)
-			print('Error making the stage table for...:' + stage)
-			trans.rollback()
-			sys.exit()
-
-	trans.commit()
-
-	return
-
-
-def primary_key_execute():
-	# This adds primary keys to the specified variables.
-
-	engine = helpers.db_engine()
-	schema.make_primary_key(engine, 'banks', 'ifsc_code')
-
-	return
-
-
+# Call the functions
 def main():
 
 	db_execute()
 	stage_names_execute()
-	stage_tables_execute()
 
 	return
 

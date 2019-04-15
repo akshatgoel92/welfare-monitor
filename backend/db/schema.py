@@ -1,3 +1,8 @@
+#--------------------------------------------------------#
+# Author: Akshat Goel
+# Purpose: Define database schema and associated files
+# Contact: akshat.goel@ifmr.ac.in
+#--------------------------------------------------------#
 import os
 import json 
 import pandas as pd

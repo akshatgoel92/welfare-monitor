@@ -1,3 +1,8 @@
+#--------------------------------------------------------#
+# Author: Akshat Goel
+# Purpose: Create database tables according to schema
+# Contact: akshat.goel@ifmr.ac.in
+#--------------------------------------------------------#
 import os
 import json 
 import pandas as pd
@@ -11,22 +16,20 @@ from datetime import datetime
 from common import helpers
 
 
-
+# Check if a given table is empty
+# MySQL uses an arbitrary index 
+# Exists return 1 if the row exists else 0
+# We take that and store it in not_empty
 def check_table_empty(conn, table):
-	# Check if a given table is empty
-	# MySQL uses an arbitrary index 
-	# Exists return 1 if the row exists else 0
-	# We take that and store it in not_empty	
 	
 	result = pd.read_sql('SELECT EXISTS ' + '(SELECT 1 FROM ' + table + ')', con = conn)
 
 	return(1 - result.iloc[0, 0])
 
 
-
+# Return only those entries in df_1 not in df_2
 def anti_join(df_1, df_2, on):
-	# Return only those entries in df_1 not in df_2
-
+	
 	df = pd.merge(df_1, df_2, how = 'outer', on = on, indicator = True)
 	df = df.loc[df['_merge'] == 'left_only']
 	df.drop(['_merge'], inplace = True, axis = 1)
@@ -34,9 +37,8 @@ def anti_join(df_1, df_2, on):
 	return(df)
 
 
+# Get data from the specified columns of the specified table
 def select_data(engine, table, cols = ['*']):
-	# Get data from the specified columns of
-	# the specified table.
 
 	cols = '.'.join(cols)
 	query = 'SELECT {} FROM {};'.format(cols, table)
@@ -44,10 +46,10 @@ def select_data(engine, table, cols = ['*']):
 
 	return(result)
 
- 	
-def insert_data(item, keys, table, unique = 0):
-	# Insert a new item into the SQL database.
 
+# Insert a new item into the SQL database 	
+def insert_data(item, keys, table, unique = 0):
+	
 	# Only insert fields which are both in the item and tha table	
 	keys = get_keys(table) & item.keys()
 	fields = u','.join(keys)
@@ -62,18 +64,18 @@ def insert_data(item, keys, table, unique = 0):
 	return(sql, data)
 
 
+# Update FTO type in fto_queue SQL table as scrape runs
 def update_fto_type(fto_no, fto_type, table):
-	# Update FTO type in fto_queue SQL table as scrape runs.
-
+	
 	sql = "UPDATE " + table + " SET fto_type = %s WHERE fto_no = %s"
 	data = [fto_type, fto_no]
 	
 	return(sql, data)
 
 
+# Get a table's keys
 def get_keys(table):
-	# Get a table's keys
-
+	
 	with open('./backend/db/table_keys.json') as file:
 		
 		tables = json.load(file)

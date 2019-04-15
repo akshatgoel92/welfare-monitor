@@ -1,6 +1,8 @@
-#-------------------------#
-# Import packages
-#-------------------------#
+#-------------------------------------------------------------------#
+# Author: Akshat Goel
+# Purpose: Merge and download scraped FTO data to Dropbox every day
+# Contact: akshat.goel@ifmr.ac.in
+#-------------------------------------------------------------------#
 import os
 import json
 import sys
@@ -18,8 +20,9 @@ from backend.db import schema
 pymysql.install_as_MySQLdb()
 
 
+# Prepare the stage wise data for insert into data-base
 def prep_csv(stage):
-	'''Prepare the stage wise data for insert into data-base.'''
+	
 
 	try: 
 		
@@ -36,9 +39,9 @@ def prep_csv(stage):
 
 	return(df)
 
-	
+# Create a list of all FTOs by stage	
 def get_csv(stages):
-	'''Create a list of all FTOs by stage.'''
+	
 
 	scraped_ftos = pd.concat(map(prep_stage, stages))
 	unique_stages = fto_stages['stage'].unique().tolist()
@@ -47,9 +50,8 @@ def get_csv(stages):
 	return(scraped_ftos, missing_stages)
 
 
+# Calculate the current stage
 def get_pivoted_stage(fto_stages):
-	'''Calculate the current stage.'''
-
 	
 	# Create dummy variables to get numeric values
 	fto_stages_dum = pd.get_dummies(fto_stages, columns = ['stage'])
@@ -62,9 +64,9 @@ def get_pivoted_stage(fto_stages):
 
 	return(fto_stages)
 
-
+# Prep the queue for insert
 def prep_queue_for_insert(fto_stages, stages, missing_stages):
-	'''Prep the queue for inserting here.'''
+	
 
 	# Create the missing columns columns
 	for col in missing_stages:
@@ -86,9 +88,9 @@ def prep_queue_for_insert(fto_stages, stages, missing_stages):
 	return(fto_stages)
 
 
-
+# Now we get the new FTOs along with their current stage
 def get_new_ftos(engine, fto_stages, file_to):
-	'''Now we get the new FTOs along with their current stage.'''
+	
 
 	fto_queue = db_schema.select_data(engine, 'fto_queue', cols = ['fto_no'])
 	new_ftos = db_schema.anti_join(fto_stages, fto_queue, on = ['fto_no'])
@@ -97,8 +99,9 @@ def get_new_ftos(engine, fto_stages, file_to):
 	return
 
 
+# Put the net FTO nos. in the queue
 def put_fto_nos(engine, path, if_exists):
-	'''Put the net FTO nos. in the queue.'''
+	
 
     fto_nos = pd.read_csv(path).drop_duplicates()
     fto_nos['done'] = 0
@@ -116,12 +119,10 @@ def main():
 	user, password, host, db = helpers.sql_connect().values()
 	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
 	
-	# Update the current stage table
 	fto_stages = clean_fto_stage(engine, stages)
 	fto_stages = get_current_stage(fto_stages, stages)	
 	update_current_stage_table(engine, fto_stages)
 	
-	# Get the new FTOs and put them in the FTO queue
 	get_new_ftos(engine, './output/fto_queue.csv')
 	put_fto_nos('fto_queue', engine, './output/fto_queue.csv', 'append')
 

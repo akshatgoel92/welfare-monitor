@@ -1,11 +1,17 @@
+#--------------------------------------------------------#
+# Author: Akshat Goel
+# Purpose: Process and upload the log file
+# Contact: akshat.goel@ifmr.ac.in
+#--------------------------------------------------------#
 import argparse
 import os
 from common import helpers
 from datetime import datetime
 
 
+# Upload Scrapy log files to Dropbox and S3
 def process_log():
-	# Upload Scrapy log files to Dropbox and S3.
+	
 
 	# Create the parser and add the arguments
 	parser = argparse.ArgumentParser(description='Dropbox upload parser')

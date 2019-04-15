@@ -1,10 +1,8 @@
-'''
-Author: Akshat Goel
-Purpose: Merge and download scraped FTO data to S3 and Dropbox every day
-Contact: akshat.goel@ifmr.ac.in
-'''
-
-# Import packages
+#-------------------------------------------------------------------#
+# Author: Akshat Goel
+# Purpose: Merge and download scraped FTO data to Dropbox every day
+# Contact: akshat.goel@ifmr.ac.in
+#-------------------------------------------------------------------#
 import os
 import json
 import sys
@@ -27,8 +25,9 @@ from sqlalchemy import *
 pymysql.install_as_MySQLdb()
 
 
+# Get the scraped transactions data
 def get_transactions():
-	'''Get the scraped transactions data.'''
+	
 
 	user, password, host, db = helpers.sql_connect().values()
 	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
@@ -57,8 +56,9 @@ def get_transactions():
 	return(transactions, banks, accounts)
 
 
+# Merge transactions, bank codes, and bank account data-sets
 def merge_transactions(transactions, banks, accounts, file_from='./output/transactions.csv'):
-	'''Merge transactions, bank codes, and bank account data-sets.'''
+	
 
 	user, password, host, db = helpers.sql_connect().values()
 	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
@@ -89,9 +89,9 @@ def merge_transactions(transactions, banks, accounts, file_from='./output/transa
 		print(e) 
 		print('Sending data to .csv failed...please check the .csv upload.')
 
-
+# Download data to .csv
 def download_transactions(transactions, to_dropbox, to_s3, file_to, file_from='./output/transactions.csv'):
-	'''Download data to .csv'''
+	
 
 	user, password, host, db = helpers.sql_connect().values()
 	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
@@ -106,8 +106,9 @@ def download_transactions(transactions, to_dropbox, to_s3, file_to, file_from='.
 		helpers.upload_s3(file_from, file_to)
 
 
+# Function calls go here
 def main():
-	'''Function calls go here.'''
+	
 
 	# Create parser
 	parser = argparse.ArgumentParser(description='Parse the data for download')
