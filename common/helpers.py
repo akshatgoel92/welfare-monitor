@@ -28,7 +28,6 @@ pymysql.install_as_MySQLdb()
 # Then return credentials for SQL access
 def sql_connect():
 
-	
 	with open('./gma_secrets.json') as secrets:
 		sql_access = json.load(secrets)['mysql']
 	
@@ -37,7 +36,6 @@ def sql_connect():
 
 # Return a SQL connection object
 def db_conn():
-	
 	
 	with open('./gma_secrets.json') as secrets:
 		sql_access = json.load(secrets)['mysql']
@@ -57,11 +55,25 @@ def db_conn():
 # Return a SQL engine object
 def db_engine():
 	
-
 	user, password, host, db = sql_connect().values()
 	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
 
 	return(engine)
+
+
+# Upload a file to Dropbox	
+def upload_dropbox(file_from, file_to):
+	
+	with open('./gma_secrets.json') as data_file:
+		credentials = json.load(data_file)
+
+	access_token = credentials['dropbox']['access_token']
+	dbx = dropbox.Dropbox(access_token)
+
+	with open(file_from, 'rb') as f:
+		dbx.files_upload(f.read(),
+						file_to,
+						mode = dropbox.files.WriteMode.overwrite)
 
 
 # Upload a file from a specified location to S3
@@ -115,7 +127,6 @@ def clean_item(item, title_fields):
 # Delete files with a given path and extension
 def delete_files(path='./output/', extension='.csv'):
 	
-
 	for filename in os.listdir(path):
 		print(filename)
 		if filename.endswith(extension):
@@ -126,7 +137,6 @@ def delete_files(path='./output/', extension='.csv'):
 
 # Send e-mail 
 def send_email(msg, subject):
-	
 
 	with open('./recipients.json') as r:
 		recipients = json.load(r)['recipients']
@@ -157,19 +167,3 @@ def send_email(msg, subject):
 	conn.login(user, password)
 	conn.sendmail(sender, recipients, msg.as_string())
 	conn.close()
-
-
-# Upload a file to Dropbox	
-def upload_dropbox(file_from, file_to):
-	
-	with open('./gma_secrets.json') as data_file:
-		credentials = json.load(data_file)
-
-	access_token = credentials['dropbox']['access_token']
-	dbx = dropbox.Dropbox(access_token)
-
-	with open(file_from, 'rb') as f:
-		dbx.files_upload(f.read(),
-						file_to,
-						mode = dropbox.files.WriteMode.overwrite)
-
