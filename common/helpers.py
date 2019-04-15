@@ -24,8 +24,6 @@ from sqlalchemy import *
 pymysql.install_as_MySQLdb()
 
 
-# Open the secrets file and get credentials 
-# Then return credentials for SQL access
 def sql_connect():
 
 	with open('./gma_secrets.json') as secrets: 
