@@ -75,9 +75,9 @@ def upload_s3(file_from, file_to):
 	with open('./gma_secrets.json') as secrets:
 		s3_access = json.load(secrets)['s3']
 
-	access_key_id=s3_access['access_key_id']
-	secret_access_key=s3_access['secret_access_key']
-	bucket_name=s3_access['default_bucket']
+	access_key_id = s3_access['access_key_id']
+	secret_access_key = s3_access['secret_access_key']
+	bucket_name = s3_access['default_bucket']
 		
 	s3 = boto3.client('s3', aws_access_key_id = access_key_id, aws_secret_access_key = secret_access_key)
 	s3.upload_file(file_from, bucket_name, file_to)
