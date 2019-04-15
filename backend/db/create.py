@@ -30,7 +30,6 @@ def stage_names_execute():
 	db_schema.create_stage_table_names()
 
 
-# Call the functions
 def main():
 
 	db_execute()
