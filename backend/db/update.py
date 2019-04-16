@@ -83,6 +83,20 @@ def update_fto_type(fto_no, fto_type, table):
 	
 	return(sql, data)
 
+# Insert data into table
+# On finding a duplicate key update.
+def upsert_data(table, update_keys):
+
+	keys = get_keys(table)
+	fields = ','.join(keys)
+	qm = ','.join(['%s'] * len(keys))
+	update = ','.join([key + '=%s' for key in update_keys])
+	
+	sql = "INSERT INTO" + table + "(%s) VALUES (%s) ON DUPLICATE KEY UPDATE (%s);"
+	sql = sql % (fields, qm, update)
+
+	return(sql)
+
 
 # Get a table's keys
 # This is used by the pipelines file to decide where each field will should be sent
