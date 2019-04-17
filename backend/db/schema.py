@@ -123,7 +123,8 @@ def create_fto_queue(engine):
 	fto_queue = Table('fto_queue', metadata, 
 										Column('fto_no', String(50), primary_key = True),
 										Column('done', Integer()), 
-										Column('fto_type', String(20)), 
+										Column('fto_type', String(20)),
+										Column('current_stage', String(20)), 
 										Column('scrape_date', String(20)), 
 										Column('scrape_time', String(20)))
 
@@ -186,7 +187,7 @@ def create_stage_table_names():
 
 def load_stage_table_names():
 
-	with open('./backend/db/stage_table_names.json') as file:
+	with open('./backend/db/stage_names.json') as file:
 		
 		tables = json.load(file)
 
