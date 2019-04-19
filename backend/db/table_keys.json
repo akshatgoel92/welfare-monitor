@@ -9,6 +9,10 @@
         "ifsc_code",
         "bank_code"
     ],
+    "fto_current_stage": [
+        "fto_no",
+        "current_stage"
+    ],
     "fto_fst_sig": [
         "state_code",
         "district_code",
@@ -64,7 +68,8 @@
         "done",
         "fto_type",
         "scrape_date",
-        "scrape_time"
+        "scrape_time",
+        "current_stage"
     ],
     "fto_sec_sig": [
         "state_code",
@@ -108,6 +113,7 @@
         "transact_date",
         "app_name",
         "wage_list_no",
+        "acc_no",
         "ifsc_code",
         "credit_amt_due",
         "credit_amt_actual",
