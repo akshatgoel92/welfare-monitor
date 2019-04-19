@@ -171,12 +171,12 @@ def create_stage_table_names():
 	# fst_sig_not: First sign pending 
 	# sec_sig: Second sign 
 	# sec_sig_not: Second sign pending 
-	# sb: Send to bank 
+	# sb: Sent to bank 
 	# pp: Partially processed by bank 
 	# pb: Processed by bank 
-	# P: Pending bank
+	# P: Pending for bank bank
 
-	tables = ['fst_sig_not', 'fst_sig', 'sec_sig_not', 'sec_sig', 'sb', 'pp', 'pb', 'P']
+	tables = ['fst_sig_not', 'fst_sig', 'sec_sig_not', 'sec_sig', 'sb', 'P', 'pp', 'pb']
 
 	with open('./backend/db/stage_names.json', 'w') as file:
 
