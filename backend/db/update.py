@@ -99,6 +99,21 @@ def upsert_data(table, update_keys):
 	return(sql)
 
 
+def create_primary_key(engine, table, key):
+
+	engine.execute('ALTER TABLE ' + table + ' ADD PRIMARY KEY(' + key + ')')
+
+	return
+
+
+def create_index(engine, table, col, name):
+
+	index = Index(name, table.c.col)
+	index.create(engine)
+
+	return
+
+
 # Get a table's keys
 # This is used by the pipelines file to decide where each field will should be sent
 def get_keys(table):

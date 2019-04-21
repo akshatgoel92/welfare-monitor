@@ -142,21 +142,6 @@ def create_fto_current_stage(engine):
 	metadata.create_all(engine)
 
 
-def create_primary_key(engine, table, key):
-
-	engine.execute('ALTER TABLE ' + table + ' ADD PRIMARY KEY(' + key + ')')
-
-	return
-
-
-def create_index(engine, table, col, name):
-
-	index = Index(name, table.c.col)
-	index.create(engine)
-
-	return
-
-
 def get_table_names(engine):
 
 	inspector = reflection.Inspector.from_engine(engine)
