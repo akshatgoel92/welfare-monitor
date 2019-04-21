@@ -112,7 +112,8 @@ def insert_ftos(engine, fto_stages):
 	trans = conn.begin()
 
 	try: 
-
+		
+		i=0
 		for row in fto_stages:
 			conn.execute(sql, row)
 			print(i)
@@ -120,10 +121,10 @@ def insert_ftos(engine, fto_stages):
 
 		trans.commit()
 
-	except: 
+	except Exception as e: 
 
-		trans.rollback()
 		print(e)
+		trans.rollback()
 		sys.exit()
 
 
