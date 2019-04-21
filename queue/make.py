@@ -113,11 +113,8 @@ def insert_ftos(engine, fto_stages):
 
 	try: 
 		
-		i=0
 		for row in fto_stages:
 			conn.execute(sql, row)
-			print(i)
-			i+=1
 
 		trans.commit()
 
