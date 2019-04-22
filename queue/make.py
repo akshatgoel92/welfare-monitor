@@ -88,7 +88,8 @@ def prep_stages_for_insert(fto_stages, stages, missing_stages):
 	fto_stages['scrape_time'] = ''
 	
 	fto_stages['stage'] = fto_stages['current_stage']
-	fto_stages = fto_stages[['fto_no', 'done', 'fto_type', 'scrape_date', 'scrape_time', 'current_stage', 'stage']]
+	fto_stages = fto_stages[['fto_no', 'done', 'fto_type', 'scrape_date', 'scrape_time', 
+							 'current_stage', 'stage']]
 	
 	fto_stages = fto_stages.values.tolist()
 	fto_stages = [tuple(row) for row in fto_stages]
@@ -123,6 +124,15 @@ def insert_ftos(engine, fto_stages):
 		print(e)
 		trans.rollback()
 		sys.exit()
+
+	try: 
+
+		update.create_primary_key(engine, 'fto_queue', ['fto_no'])
+
+	except Exception as e:
+
+		print(e)
+		pass
 
 
 # Now we get the new FTOs along with their current stage
