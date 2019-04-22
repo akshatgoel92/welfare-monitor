@@ -11,7 +11,7 @@ cd /home/ec2-user/fto-scrape/
 scrapy crawl fto_content
 
 # Then execute the branch spider 
-scrapy crawl fto_branch  
+# scrapy crawl fto_branch  
 
 # Then update the queue in the SQL database 
 python ./common/update_ftos.py fto_queue
