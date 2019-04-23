@@ -19,4 +19,4 @@ python ./queue/update.py
 # Then update the log
 python ./backend/logs/process.py './output/log.csv' 'logs/log'
 
-# python ./queue/download.py 1 1 './output/transactions.csv' 'tests'
+python ./queue/download.py 1 1 './output/transactions.csv' 'tests/transactions'

@@ -13,6 +13,7 @@ import argparse
 import pandas as pd
 import numpy as np
 
+from datetime import datetime
 from common import helpers
 from smtplib import SMTP
 from email.mime.text import MIMEText
@@ -54,7 +55,7 @@ def get_transactions():
 
 
 # Merge transactions, bank codes, and bank account data-sets
-def merge_transactions(transactions, banks, accounts, file_from = './output/transactions.csv'):
+def merge_transactions(transactions, banks, accounts, file_from):
 	
 	user, password, host, db = helpers.sql_connect().values()
 	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
@@ -80,7 +81,7 @@ def merge_transactions(transactions, banks, accounts, file_from = './output/tran
 
 
 # Download data to .csv
-def download_transactions(transactions, to_dropbox, to_s3, file_to, file_from = './output/transactions.csv'):
+def download_transactions(transactions, to_dropbox, to_s3, file_to, file_from):
 	
 	user, password, host, db = helpers.sql_connect().values()
 	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
@@ -88,7 +89,6 @@ def download_transactions(transactions, to_dropbox, to_s3, file_to, file_from = 
 
 	if to_dropbox == 1:
 		
-		file_to = os.path.join('./Female Mobile Phones Phase I/Phase II/CHiPS/Data/mis_scrapes/', file_to)
 		helpers.upload_dropbox(file_from, file_to)
 
 	if to_s3 == 1: helpers.upload_s3(file_from, file_to)
@@ -101,18 +101,20 @@ def main():
 	parser = argparse.ArgumentParser(description = 'Parse the data for download')
 	parser.add_argument('to_dropbox', type = int, help = 'Whether to write to Dropbox')
 	parser.add_argument('to_s3', type = int, help ='Whether to write to S3')
+	parser.add_argument('file_from', type = str, help = 'Append or replace?')
 	parser.add_argument('file_to', type = str, help = 'Append or replace?')
-
+	
     # Parse arguments
 	args = parser.parse_args()
 	to_dropbox = args.to_dropbox
 	to_s3 = args.to_s3
-	file_to = args.file_to
-
+	file_from = args.file_from
+	file_to = args.file_to + '_' + str(datetime.today()) + '.csv'
+	
     # Execute function calls
 	transactions, banks, accounts = get_transactions()
-	merge_transactions(transactions, banks, accounts)
-	download_transactions(transactions, to_dropbox, to_s3, file_to)
+	merge_transactions(transactions, banks, accounts, file_from)
+	download_transactions(transactions, to_dropbox, to_s3, file_to, file_from)
 
 
 if __name__ == '__main__':
