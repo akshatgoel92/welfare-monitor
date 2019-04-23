@@ -14,7 +14,9 @@ scrapy crawl fto_content
 # scrapy crawl fto_branch  
 
 # Then update the queue in the SQL database 
-python ./common/update_ftos.py fto_queue
+python ./queue/update.py
 
 # Then update the log
-python ./common/process_log.py './output/log.csv' '/Female Mobile Phones Phase I/Data/Secondary Data/MIS Scrapes/Logs/log'
+python ./backend/logs/process.py './output/log.csv' 'logs/log'
+
+# python ./queue/download.py 1 1 './output/transactions.csv' 'tests'

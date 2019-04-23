@@ -9,7 +9,7 @@ from common import helpers
 from datetime import datetime
 
 
-# Upload Scrapy log files to Dropbox and S3
+# Upload Scrapy log files to Dropbox and S3 and delete after
 def process_log():
 	
 	parser = argparse.ArgumentParser(description='Dropbox upload parser')
@@ -23,7 +23,7 @@ def process_log():
 	helpers.upload_dropbox(file_from, file_to)
 	helpers.upload_s3(file_from, file_to)
 
-	os.unlink(log_file_from)
+	os.unlink(file_from)
 
 
 if __name__ == '__main__':
