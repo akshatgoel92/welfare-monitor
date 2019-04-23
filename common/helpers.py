@@ -64,6 +64,10 @@ def upload_dropbox(file_from, file_to):
 	access_token = credentials['dropbox']['access_token']
 	dbx = dropbox.Dropbox(access_token)
 
+	# Prepend the project Dropbox path to the folder
+	file_to_dropbox='/Female Mobile Phones Phase I/Phase II/CHiPS/Data/mis_scrapes/'
+	file_to=os.path.join(file_to_dropbox, file_to)
+
 	with open(file_from, 'rb') as f:
 		dbx.files_upload(f.read(), file_to, mode = dropbox.files.WriteMode.overwrite)
 
