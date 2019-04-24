@@ -7,6 +7,9 @@ export PATH=/home/ec2-user/anaconda3/bin:$PATH
 # Switch to the working directory
 cd /home/ec2-user/fto-scrape/
 
+# Make sure that project directory is in Python path for imports
+export PYTHONPATH=.
+
 # Then execute the content spider
 scrapy crawl fto_content
 
