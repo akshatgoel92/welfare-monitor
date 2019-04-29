@@ -87,9 +87,7 @@ def download_transactions(transactions, to_dropbox, to_s3, file_to, file_from):
 	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
 	conn = engine.connect()
 
-	if to_dropbox == 1:
-		
-		helpers.upload_dropbox(file_from, file_to)
+	if to_dropbox == 1: helpers.upload_dropbox(file_from, file_to)
 
 	if to_s3 == 1: helpers.upload_s3(file_from, file_to)
 
