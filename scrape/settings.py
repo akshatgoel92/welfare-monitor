@@ -78,14 +78,14 @@ ITEM_PIPELINES = {
 
 
 # Log defaults
-LOG_ENABLED = False
+LOG_ENABLED = True
 LOG_ENCODING = 'utf-8'
 LOG_FORMATTER = 'scrapy.logformatter.LogFormatter'
 LOG_FORMAT = '%(name)s, %(lineno)s, %(exc_info)s, %(asctime)s, %(filename)s, %(funcName)s, %(levelno)s, %(message)100s'
 LOG_DATEFORMAT = '%Y-%m-%d %H:%M:%S'
 LOG_STDOUT = True
 LOG_LEVEL = 'INFO'
-LOG_FILE =  './backend/logs/logs.csv'
+# LOG_FILE =  './backend/logs/log.csv'
 LOG_SHORT_NAMES = True
 
 CLOSESPIDER_ERRORCOUNT = 0

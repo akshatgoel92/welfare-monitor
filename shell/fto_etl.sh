@@ -20,6 +20,6 @@ scrapy crawl fto_content
 python ./queue/update.py
 
 # Then update the log
-python ./backend/logs/process.py './output/log.csv' 'logs/log'
+python ./backend/logs/process.py './backend/logs/log.csv' 'logs/log'
 
 python ./queue/download.py 1 1 './output/transactions.csv' 'tests/transactions'
