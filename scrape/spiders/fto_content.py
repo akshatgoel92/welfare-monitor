@@ -62,8 +62,8 @@ class FtoContentSpider(scrapy.Spider):
 	output_dir = os.path.abspath(".")
 	
 	# Set Path to Chrome driver
-	user = 'ec2'
-	path = "./../software/chromedriver/" if user == 'local' else "/home/ec2-user/chromedriver/"
+	user = "local"
+	path = "./../software/chromedriver/" if user == "local" else "/home/ec2-user/chromedriver/"
 	path_to_chrome_driver = os.path.abspath(path)
 
 	# Get the target FTO nos.
@@ -100,6 +100,7 @@ class FtoContentSpider(scrapy.Spider):
 								errback = self.error_handling, 
 								dont_filter = True))
 
+	
 	# This takes as input a Twisted failure object
 	# It returns as output a representation of this object
 	# to the log file
@@ -108,6 +109,7 @@ class FtoContentSpider(scrapy.Spider):
 	def error_handling(self, failure):
 		self.logger.error('Downloader error')
 
+	
 	# Get selector object for file
 	def get_source(self, response, driver):
 		
@@ -145,7 +147,7 @@ class FtoContentSpider(scrapy.Spider):
 			source = self.get_source(response, self.driver)
 		
 		except Exception as e:
-			self.logger.error('Get source error: %s', response.url)
+			self.logger.error('Get source error on {}: {}'.format(response.url, e))
 			return
 
 		try: 
