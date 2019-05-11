@@ -155,8 +155,7 @@ def put_fto_nos(engine, path, if_exists):
 def main(): 
 
 	stages = schema.load_stage_table_names()
-	user, password, host, db = helpers.sql_connect().values()
-	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
+	engine = helpers.db_engine()
 	
 	fto_stages, missing_stages = get_csv(stages)
 	fto_stages_dum = get_pivoted_stage(fto_stages)	

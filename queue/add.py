@@ -5,7 +5,7 @@
 #--------------------------------------------------------#
 from sqlalchemy import *
 from sqlalchemy.engine import reflection
-from common.helpers import sql_connect
+from common import helpers
 from make import put_fto_nos
 import sys
 import os
@@ -28,8 +28,7 @@ def main():
 	if_exists = args.if_exists
 	path = os.path.abspath('./output/fto_queue.csv')
 	
-	user, password, host, db = sql_connect().values()
-	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
+	engine = helpers.db_engine()
 	put_fto_nos(engine, path, if_exists)
 
 if __name__ == '__main__':

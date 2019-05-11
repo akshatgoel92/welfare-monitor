@@ -29,8 +29,7 @@ pymysql.install_as_MySQLdb()
 # Get the scraped transactions data
 def get_transactions():
 	
-	user, password, host, db = helpers.sql_connect().values()
-	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
+	engine = helpers.db_engine()
 	conn = engine.connect()
 	
 	get_transactions = "SELECT * FROM transactions where fto_no in (SELECT fto_no from fto_queue);"
@@ -57,8 +56,7 @@ def get_transactions():
 # Merge transactions, bank codes, and bank account data-sets
 def merge_transactions(transactions, banks, accounts, file_from):
 	
-	user, password, host, db = helpers.sql_connect().values()
-	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
+	engine = helpers.db_engine()
 	conn = engine.connect()
 	
 	try: 
@@ -83,8 +81,7 @@ def merge_transactions(transactions, banks, accounts, file_from):
 # Download data to .csv
 def download_transactions(transactions, to_dropbox, to_s3, file_to, file_from):
 	
-	user, password, host, db = helpers.sql_connect().values()
-	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
+	engine = helpers.db_engine()
 	conn = engine.connect()
 
 	if to_dropbox == 1: 

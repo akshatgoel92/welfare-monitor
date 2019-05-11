@@ -94,8 +94,7 @@ def get_progress(total, done):
 # Function calls
 def main():
 	
-	user, password, host, db = helpers.sql_connect().values()
-	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
+	engine = helpers.db_engine()
 	
 	scraped_ftos = get_scraped_ftos(engine)
 	target_ftos = get_target_ftos(engine)
