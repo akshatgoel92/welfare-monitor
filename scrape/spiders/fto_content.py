@@ -4,13 +4,6 @@
 # Author: Akshat Goel
 # Date: 8th August 2018
 # Python version: 3.6.3
-# Dependencies:
-
-# [Only modules outside Python standard listed]
-# 1) scrapy 
-# 2) pandas 
-# 3) numpy 
-# 4) Selenium
 #------------------------------------------------------------------#
 
 # Scraping and cleaning modules
@@ -53,7 +46,6 @@ from common.helpers import *
 # FTO scraper
 class FtoContentSpider(scrapy.Spider):
 
-	# Set globals
 	name = "fto_content"
 	basic = "http://mnregaweb4.nic.in/netnrega/fto/fto_status_dtl.aspx?"
 	fin_year = "2018-2019"
@@ -61,52 +53,35 @@ class FtoContentSpider(scrapy.Spider):
 	block = "fto_queue"
 	output_dir = os.path.abspath(".")
 	
-	# Set Path to Chrome driver
 	user = "ec2"
 	path = "./../software/chromedriver/" if user == "local" else "/home/ec2-user/chromedriver/"
 	path_to_chrome_driver = os.path.abspath(path)
 
-	# Get the target FTO nos.
 	conn, cursor = db_conn()
 	fto_nos = pd.read_sql("SELECT fto_no FROM fto_queue WHERE done = 0;", con = conn).values.tolist()
 	cursor.close()
 	conn.close()
 
-	# Store target FTO nos.
 	fto_nos = [fto_no[0] for fto_no in fto_nos]
-	
-	# Store start URLs here	
 	start_urls = []
 
-	# Construct URL for each FTO no
 	for fto_no in fto_nos:
 		url = basic + "fto_no=" + fto_no + "&fin_year=" + fin_year + "&state_code=" + state_code
 		start_urls.append(url)
 
-	# Create options object for Chrome driver
-	# Set option to run headless
 	options = Options()
 	options.add_argument('--headless')
 
-	# Create driver object
-	driver = webdriver.Chrome(path_to_chrome_driver, 
-								chrome_options = options)
+	driver = webdriver.Chrome(path_to_chrome_driver, chrome_options = options)
 
 	def start_requests(self):
 
 		for url in self.start_urls:
-			yield(scrapy.Request(url, 
-								callback = self.parse, 
-								errback = self.error_handling, 
-								dont_filter = True))
+			yield(scrapy.Request(url, callback = self.parse, 
+								 errback = self.error_handling, dont_filter = True))
 
-	
-	# This takes as input a Twisted failure object
-	# It returns as output a representation of this object
-	# to the log file
-	# This ensures that all errors are logged in case we
-	# want to do anything with them later
 	def error_handling(self, failure):
+		
 		self.logger.error('Downloader error')
 
 	
@@ -169,8 +144,7 @@ class FtoContentSpider(scrapy.Spider):
 						for item in row if item.strip() != ''][1::2]
 
 		except Exception as e:
-			self.logger.error('Parse error on overview table: %s', 
-							response.url)
+			self.logger.error('Parse error on overview table: %s', response.url)
 			return
 		
 		try:
@@ -194,6 +168,7 @@ class FtoContentSpider(scrapy.Spider):
 			yield(overview_item)
 
 		except Exception as e:
+			
 			print(e)
 			self.logger.error('Item parse error on overview table: %s', 
 								response.url)
@@ -246,7 +221,5 @@ class FtoContentSpider(scrapy.Spider):
 				yield(item)
 			
 		except Exception as e:
-				
-				# Log the exception first 
-				# Then move on 
+				 
 				self.logger.error('Parse error on transactions table: %s', response.url)

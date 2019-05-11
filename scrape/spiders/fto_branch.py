@@ -4,15 +4,7 @@
 # Author: Akshat Goel
 # Date: 8th August 2018
 # Python version: 3.6.3
-# Dependencies:
-
-# [Only modules outside Python standard listed]
-# 1) scrapy 
-# 2) pandas 
-# 3) numpy 
-# 4) Selenium
 #------------------------------------------------------------------#
-
 # Scraping and cleaning modules
 import scrapy
 import datetime
@@ -47,14 +39,13 @@ from common.helpers import *
 # FTO scraper
 class FtoBranchSpider(CrawlSpider):
 
-	# Set globals
 	name = "fto_branch"
 	conn, cursor = db_conn()
 	start_urls = pd.read_sql("SELECT fto_no FROM fto_queue WHERE done = 0;", con = conn).values.tolist()
 	cursor.close()
 	conn.close()
 	
-	# Parse function 
+
 	def parse(self, response):
 		
 		# Now go through each hyperlink on the table
@@ -63,14 +54,14 @@ class FtoBranchSpider(CrawlSpider):
 		for url in self.start_urls:
 				yield(response.follow(url, self.parse_fto_content))
 
+	
 	# This takes as input a Twisted failure object
-	# It returns as output a representation of this object
-	# to the log file
-	# This ensures that all errors are logged in case we
-	# want to do anything with them later
+	# It returns as output a representation of this object to the log file
+	# This ensures that all errors are logged 
 	def error_handling(self, failure):
 		self.logger.error('Downloader error')
 
+	
 	def parse_fto_content(self, response):
 		
 		# Get all the tables on the web-page
@@ -116,7 +107,6 @@ class FtoBranchSpider(CrawlSpider):
 				yield(item)
 			
 		except Exception as e:
+				
 				print(e)
-				# Log the exception first 
-				# Then move on 
 				self.logger.error('Parse error on transactions table: %s', response.url)
