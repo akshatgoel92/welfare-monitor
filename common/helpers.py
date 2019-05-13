@@ -107,10 +107,10 @@ def delete_files(path = './output/', extension = '.csv'):
 			os.unlink(path + filename)
 
 
-def send_email(msg, subject):
+def send_email(subject, msg):
 
 	with open('./recipients.json') as r:
-		recipients = json.load(r)['recipients']
+		recipients = json.load(r)
 
 	with open('./gma_secrets.json') as secrets:
 		credentials = json.load(secrets)['smtp']
