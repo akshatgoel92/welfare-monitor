@@ -19,7 +19,8 @@ scrapy crawl fto_content
 # Then update the queue in the SQL database 
 python ./queue/update.py
 
-# Then update the log
+# Then update and upload the log
 python ./backend/logs/process.py './backend/logs/log.csv' 'logs/log'
 
+# Then download the data
 python ./queue/download.py 0 1 './output/transactions.csv' 'tests/transactions'
