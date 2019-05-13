@@ -1,5 +1,5 @@
 import json
-import helpers
+from common import helpers
 
 
 def output_error(subj, msg):
