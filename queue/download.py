@@ -32,7 +32,7 @@ def get_transactions():
 	engine = helpers.db_engine()
 	conn = engine.connect()
 	
-	get_transactions = "SELECT * FROM transactions where fto_no in (SELECT fto_no from fto_queue);"
+	get_transactions = "SELECT * FROM transactions;"
 	get_banks = "SELECT * FROM banks;"
 	get_accounts = "SELECT * from accounts;"
 
@@ -41,13 +41,11 @@ def get_transactions():
 		transactions = pd.read_sql(get_transactions, con = conn)
 		banks = pd.read_sql(get_banks, con = conn)
 		accounts = pd.read_sql(get_accounts, con = conn)
-		print('Got transactions')
-
 		conn.close()
 
 	except Exception as e:
 		
-		print(e)
+		er.handle_error(error_code ='5', data = {'traceback': e})
 		conn.close()
 
 	return(transactions, banks, accounts)
@@ -55,27 +53,18 @@ def get_transactions():
 
 # Merge transactions, bank codes, and bank account data-sets
 def merge_transactions(transactions, banks, accounts, file_from):
-	
-	engine = helpers.db_engine()
-	conn = engine.connect()
-	
+		
 	try: 
 		
 		transactions = pd.merge(transactions, banks, how = 'left', on = ['ifsc_code'], indicator = 'banks_merge')
 		transactions = pd.merge(transactions, accounts, how = 'left', on = ['jcn', 'acc_no', 'ifsc_code'], 
 								indicator = 'accounts_merge')
 
-	except Exception as e: 
+	except Exception as e: er.handle_error(error_code ='6', data = {'traceback': e})
 		
-		print(e)
-		print('Merge failed...please check the merge.')
-
 	try: transactions.to_csv(file_from, index = False)
 	
-	except Exception as e:
-		
-		print(e) 
-		print('Sending data to .csv failed...please check the .csv upload.')
+	except Exception as e: er.handle_error(error_code ='7', data = {'traceback': e})
 
 
 # Download data to .csv
@@ -86,13 +75,13 @@ def download_transactions(transactions, to_dropbox, to_s3, file_to, file_from):
 
 	if to_dropbox == 1: 
 
-		helpers.upload_dropbox(file_from, file_to)
-		print('Dropbox upload successful')
+		try: helpers.upload_dropbox(file_from, file_to)
+		except Exception as e: er.handle_error(error_code ='8', data = {'traceback': e})
 
 	if to_s3 == 1: 
 
-		helpers.upload_s3(file_from, file_to)
-		print('Cyberduck upload successful')
+		try: helpers.upload_s3(file_from, file_to)
+		except Exception as e: er.handle_error(error_code ='9', data = {'traceback': e})
 
 
 # Function calls go here
