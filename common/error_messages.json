@@ -1,128 +1,48 @@
 [
 	{
 		"1": {
-			"subj":"Error 1: GMA Data Warning: There is an uncaught error in the code.",
+			"subj":"GMA Error 1: There is an uncaught error in the code.",
 			"msg":"There is an uncaught error in the code. Akshat should work on a fix as soon as possible. The traceback is given below: \n\n{traceback}'
 		},
 		"2": {
-			"subj":"Error 2: GMA Data Warning: There is an error preparing the .csv for inserting into the database.",
-			"msg":"There is an error preparing the .csv for the database. Akshat should work on a fix as soon as possible. The traceback is given below:\n\n{traceback}"
+			"subj":"GMA Error 2: There are no FTOs found by the scrape at stage {stage}.",
+			"msg":"There is no action required from the field team. The code should continue to run normally."
 		},
 		"3": {
-			"subj":"Error 3: GMA Data Warning: Invalid Filename",
-			"msg":"Found a new file but the filename is invalid:\nFilename: {filename}"
+			"subj":"GMA Error 3: There was an error in adding the new FTO nos. in the FTO queue.",
+			"msg":"In case this happens 2 days in a row, the Akshat, Anwesha, or Tanya should manually update the FTO queue."
 		},
 		"4": {
-			"subj":"Error 4: GMA Data Warning: Received Old File",
-			"msg":"There were one or more new files found in today's data pull (ie, files that were not present in the file tracker). However, the filename date of the most recent of these files is older than the filename date of the most recent file in the file tracker. The new files were added to the file tracker but the transactions they contain have been ignored.\nNew file(s):\n{new_files}\nMost recent file in file tracker:\n{last_file}"
+			"subj":"GMA Error 4: There was an error creating the primary key after the FTO queue update.",
+			"msg":"Akshat should log in to the database and manually create the new key."
 		},
 		"5": {
-			"subj":"Error 5: GMA Data Warning: Name and Content Matches Old File",
-			"msg":"There is an error with today’s transaction file. The filename and content match a file we've already seen, meaning this is an old file that was re-uploaded to S3. Please do a manual inspection of the S3 bucket and check with the SBI team to rectify this error.\nFilename:\n{filename}"
+			"subj":"GMA Error 5: There was an error in the SQL queries which get the scraped data from the database.",
+			"msg":"If this happens 2 days in a row, Akshat, Anwesha or Tanya should get the data manually."
 		},
 		"6": {
-			"subj":"Error 6: GMA Data Warning: Name Matched but Content is Different",
-			"msg":"There is an error with today’s transaction file. The filename matches a file we've already seen but the content of the file is new. Someone may have uploaded a file to S3 using an old filename but with new content. It’s also possible that someone deleted an old file from S3 and uploaded a file with the same old filename but new content. Please do a manual inspection of the S3 bucket and check with the SBI team to rectify this error.\nFilename:\n{filename}"
+			"subj":"GMA Error 6: There was an error merging the transactions data with the banks and accounts tables.",
+			"msg":"If this happens 2 days in a row, Akshat, Anwesha or Tanya should get the data manually."
 		},
 		"7": {
-			"subj":"Error 7: GMA Data Warning: Same Name and Same Upload Time",
-			"msg":"There is an error with today's transaction file. The filename and upload timestamp match a file we've already seen but the content of the file is new. Please note that this is a highly unlikely edge case that Eric should investigate.\nFilename:\n{filename}"
+			"subj":"GMA Error 7: There was an error sending the scraped and merged data to a .csv file on the cloud computer.",
+			"msg":"Akshat should send the transactions data to a .csv file manually."
 		},
 		"8": {
-			"subj":"Error 8: GMA Data Warning: File Content Has Reverted to an Old File",
-			"msg":"There is an error with today's transaction file. The content is the same as a previous file but doesn't match the content of the file in the tracker with the most recent filename date. It looks like the file content has reverted back to a previous version, which should not happen. Please check with the SBI team to rectify this error.\nFilename for today:{filename}\nPrevious filename with matched content:\n{matched_filename}"
+			"subj":"GMA Error 8: There was an error uploading the transactions .csv file to Dropbox.",
+			"msg":"If this happens 2 days in a row, Akshat, Anwesha, or Tanya should rerun the Dropbox data upload manually."
 		},
 		"9": {
-			"subj":"Error 9: GMA Data Warning: File with Same Content and Same Upload Time",
-			"msg":"There is an error with today’s transaction file. The content and upload timestamp match a file we’ve already seen but the filename of the file is new. Please note that this is an extreme edge case that Eric should investigate.\nFilename:\n{filename}"
+			"subj":"GMA Error 9: There was an error uploading the transactions .csv file to AWS S3 on Cyberduck.",
+			"msg":"If this happens 2 days in a row, Akshat, Anwesha, or Tanya should rerun the Dropbox data upload manually."
 		},
 		"10": {
-			"subj":"Error 10: GMA Data Warning: Can't Download New File",
-			"msg":"There was an error downloading the new transaction file. Please do a manual inspection of the file in the S3 bucket to rectify this error.\nFilename:\n{filename}\nError:\n{error_text}"
+			"subj":"GMA Error 10: There was an error updating the FTO types in the FTO tracker.",
+			"msg":"Akshat should manually run the update on the same day as this error happens."
 		},
 		"11": {
-			"subj":"Error 11: IVRS Data Warning: Can't Read New File",
-			"msg":"There was an error trying to read the new transaction file. Please do a manual inspection of the file and check with the SBI team to rectify this error.\nFilename:\n{filename}\nError:\n{error_text}"
-		},
-		"12": {
-			"subj":"Error 12: IVRS Data Warning: Headers are Different",
-			"msg":"There was an error in the formatting of today's file. The column headers of the file were different than the expected column headers. Please do a manual inspection of the file and check with the SBI team to rectify this error.\nFilename:\n{filename}\nFile headers:\n{actual_headers}\nExpected headers:\n{expected_headers}"
-		},
-		"13": {
-			"subj":"Error 13: IVRS Data Warning: File Contains Missing Values",
-			"msg":"There was an error in today's file. The file contains missing values. Please do a manual inspection of the file and check with the SBI team to rectify this error.\nFilename:\n{filename}"
-		},
-		"14": {
-			"subj":"Error 14: IVRS Data Warning: File Contains Duplicate Transactions",
-			"msg":"There was an error in today's file. The file contains duplicate transactions. Please do a manual inspection of the file and check with the SBI team to rectify this error.\nFilename:\n{filename}"
-		},
-		"15": {
-			"subj":"Error 15: IVRS Data Warning: Account Number in Data is not 11 Digit",
-			"msg":"There was an error found with today's file. At least one value in the ACCOUNT_NO column was not exactly 11 characters long. Please do a manual inspection of the file and check with the SBI team to rectify this error.\nFilename:\n{filename}"
-		},
-		"16": {
-			"subj":"Error 16: IVRS Data Warning: Can't Connect to Google Sheets",
-			"msg":"There was an error logging into Google Sheets. Please contact Eric to investigate this issue.\nError:\n{error_text}"
-		},
-		"17": {
-			"subj":"Error 17: IVRS Data Warning: Can't Open {sheet_name} Sheet",
-			"msg":"There was an error opening the {sheet_name} Google Sheet.\nError:\n{error_text}"
-		},
-		"18": {
-			"subj":"Error 18: IVRS Data Warning: {sheet_name} Sheet Empty",
-			"msg":"There was an error found with the {sheet_name} Google Sheet. The sheet doesn't contain any row data."
-		},
-		"19": {
-			"subj":"Error 19: IVRS Data Warning: {sheet_name} Sheet Headers are Different",
-			"msg":"There was an error found with the {sheet_name} Google Sheet. The column headers for the sheet are incorrect or have been modified.\nSheet headers:\n{actual_headers}\nExpected headers:\n{expected_headers}"
-		},
-		"20": {
-			"subj":"Error 20: IVRS Data Warning: {sheet_name} Sheet \"treatment\" Column has Non-Integer Values",
-			"msg":"There was an error found with the {sheet_name} Google Sheet. At least one value in the \"treatment\" column could not be parsed to an integer."
-		},
-		"21": {
-			"subj":"Error 21: IVRS Data Warning: {sheet_name} Sheet Has Missing Values",
-			"msg":"There was an error found with the {sheet_name} Google Sheet. At least one value in the \"account_no\" or \"Customer ID\" columns among treatment users was missing."
-		},
-		"22": {
-			"subj":"Error 22: IVRS Data Warning: Account Number in {sheet_name} Sheet is Not 11 Digit Long",
-			"msg":"There was an error found with the {sheet_name} Google Sheet. At least one value in the \"account_no\" column was not exactly 11 characters long."
-		},
-		"23": {
-			"subj":"Error 23: IVRS Data Warning: {sheet_name} Sheet Customer ID Column has Non-Integer Values",
-			"msg":"There was an error found with the {sheet_name} Google Sheet. At least one value in the \"Customer ID\" column among treatment users could not be parsed to an integer."
-		},
-		"24": {
-			"subj":"Error 24: IVRS Data Warning: {sheet_name} Sheet Customer ID Has Duplicate Values",
-			"msg":"There was an error found with the {sheet_name} Google Sheet. The file contains duplicate values on the Customer ID column."
-		},
-		"25": {
-			"subj":"Error 25: IVRS Data Warning: {sheet_name} Sheet Account_No Has Duplicate Values",
-			"msg":"There was an error found with the {sheet_name} Google Sheet. The file contains duplicate values on the account_no column"
-		},
-		"26": {
-			"subj":"Error 26: IVRS Data Warning: No Transactions in New File",
-			"msg":"The most recent new file found for today did not contain any transaction data for any accounts. The file tracker has been updated for the new file(s) found today.\nFilename:\n{filename}"
-		},
-		"27": {
-			"subj":"Error 27: IVRS Data Warning: Missing Transaction(s)",
-			"msg":"Checking the transaction sum against the starting and ending balances in today's file showed that transactions are missing for {account_count} account(s)."
-		},
-		"28": {
-			"subj":"Error 28: IVRS Data Warning: Filename Date Not Valid",
-			"msg":"Found a new file with a correctly formatted filename but the filename date could not be parsed.\nFilename:\n{filename}"
-		},
-		"29": {
-			"subj":"Error 29: IVRS Data Warning: {sheet_name} Sheet Has Empty ID Value",
-			"msg":"There was an error found with the {sheet_name} Google Sheet. The sheet contains an empty ID value."
-		},
-		"30": {
-			"subj":"Error 30: IVRS Data Warning: {sheet_name} Sheet Non-integer ID Value",
-			"msg":"There was an error found with the {sheet_name} Google Sheet. The sheet contains a non-integer ID value."
-		},
-		"31": {
-			"subj":"Error 31: IVRS Data Warning: Missing balance information for weekly no transaction calls",
-			"msg":"There was an error found while running the weekly no transaction check. Account balance data could not be found for {no_balance_count} account(s) that require the weekly no transaction IVR call."
-		}
+			"subj":"GMA Error 11: There was an error in the daily progress calculator.",
+			"msg":"There is no action required from the team. Everything should continue to work normally in the next run."
+
 	}
 ]

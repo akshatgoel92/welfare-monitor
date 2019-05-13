@@ -63,7 +63,7 @@ def update_ftos(engine, scraped_ftos, target_ftos):
 
 	except Exception as e: 
 		
-		print(e)
+		er.handle_error(error_code ='10', data = {})
 		trans.rollback()
 		conn.close()
 
@@ -80,13 +80,10 @@ def get_progress(total, done):
 		
 		progress = done/total
 		msg = 'There are a total of {} FTOs. The code has done {} FTOs. The code is {} done'
-		print(msg.format(total, done, progress))
+		subject = 'GMA FTO Scrape: Progress Report'
+		helpers.send_mail(subject, msg.format(total, done, progress))
 	
-	except Exception as e:
-		
-		print(e)
-		msg = 'There has been an error in the progress calculation...please check the calculation.'
-		print(msg)
+	except Exception as e: er.handle_error(error_code ='11', data = {})
 
 	return
 
@@ -95,10 +92,8 @@ def get_progress(total, done):
 def main():
 	
 	engine = helpers.db_engine()
-	
 	scraped_ftos = get_scraped_ftos(engine)
 	target_ftos = get_target_ftos(engine)
-
 	total, done = update_ftos(engine,scraped_ftos, target_ftos)
 	get_progress(total, done)
 

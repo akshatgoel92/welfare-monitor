@@ -17,6 +17,7 @@ from sqlalchemy import *
 from common import helpers
 from backend.db import schema
 from backend.db import update
+from common import errors as er
 
 pymysql.install_as_MySQLdb()
 
@@ -31,12 +32,10 @@ def prep_csv(stage):
 
 	except pd.errors.EmptyDataError as e:
 
-		print(e)
-		print(stage)
-
+		er.handle_error(error_code ='2', data = {'stage': stage})
 		cols = ['block_code', 'district_code', 'fto_no', 'scrape_date', 'scrape_time', 
-			  'state_code', 'transact_date', 'url', 'stage']
-		df = pd.DataFrame([], columns=cols)
+				'state_code', 'transact_date', 'url', 'stage']
+		df = pd.DataFrame([], columns = cols)
 
 	return(df)
 
@@ -105,10 +104,7 @@ def prep_stages_for_insert(fto_stages, stages, missing_stages):
 # 2) case where connection to database drops during insert 
 def insert_ftos(engine, fto_stages):
 
-	sql = update.upsert_data('fto_queue', ['current_stage'])
-	print('The update command is:')
-	print(sql)
-	
+	sql = update.upsert_data('fto_queue', ['current_stage'])	
 	conn = engine.connect()
 	trans = conn.begin()
 
@@ -121,7 +117,7 @@ def insert_ftos(engine, fto_stages):
 
 	except Exception as e: 
 
-		print(e)
+		er.handle_error(error_code ='3', data = {})
 		trans.rollback()
 		sys.exit()
 
@@ -131,7 +127,7 @@ def insert_ftos(engine, fto_stages):
 
 	except Exception as e:
 
-		print(e)
+		er.handle_error(error_code ='4', data = {})
 		pass
 
 
@@ -143,7 +139,7 @@ def get_new_ftos(engine, fto_stages, file_to):
 	new_ftos.to_csv(file_to, index = False)
 
 
-# Put the net FTO nos. in the queue
+# Put the new FTO nos. in the queue
 def put_fto_nos(engine, path, if_exists):
 	
     fto_nos = pd.read_csv(path).drop_duplicates()
@@ -154,6 +150,7 @@ def put_fto_nos(engine, path, if_exists):
 
 def main(): 
 
+	manual = 0
 	stages = schema.load_stage_table_names()
 	engine = helpers.db_engine()
 	
@@ -163,11 +160,10 @@ def main():
 
 	insert_ftos(engine, fto_stages_dum)
 	
-	# new_ftos = get_new_ftos(engine, fto_stages_dum, './output/fto_queue.csv')
-	# new_ftos = prep_new_ftos() 
-	# put_fto_nos('fto_queue', engine, './output/fto_queue.csv', 'append')
+	if manual == 1:
+		new_ftos = get_new_ftos(engine, fto_stages_dum, './output/fto_queue.csv') 
+		put_fto_nos('fto_queue', engine, './output/fto_queue.csv', 'append')
 
 
 if __name__ == "__main__": 
-
 	main()

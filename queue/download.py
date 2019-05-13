@@ -45,7 +45,7 @@ def get_transactions():
 
 	except Exception as e:
 		
-		er.handle_error(error_code ='5', data = {'traceback': e})
+		er.handle_error(error_code ='5', data = {})
 		conn.close()
 
 	return(transactions, banks, accounts)
@@ -60,11 +60,11 @@ def merge_transactions(transactions, banks, accounts, file_from):
 		transactions = pd.merge(transactions, accounts, how = 'left', on = ['jcn', 'acc_no', 'ifsc_code'], 
 								indicator = 'accounts_merge')
 
-	except Exception as e: er.handle_error(error_code ='6', data = {'traceback': e})
+	except Exception as e: er.handle_error(error_code ='6', data = {})
 		
 	try: transactions.to_csv(file_from, index = False)
 	
-	except Exception as e: er.handle_error(error_code ='7', data = {'traceback': e})
+	except Exception as e: er.handle_error(error_code ='7', data = {})
 
 
 # Download data to .csv
@@ -76,12 +76,12 @@ def download_transactions(transactions, to_dropbox, to_s3, file_to, file_from):
 	if to_dropbox == 1: 
 
 		try: helpers.upload_dropbox(file_from, file_to)
-		except Exception as e: er.handle_error(error_code ='8', data = {'traceback': e})
+		except Exception as e: er.handle_error(error_code ='8', data = {})
 
 	if to_s3 == 1: 
 
 		try: helpers.upload_s3(file_from, file_to)
-		except Exception as e: er.handle_error(error_code ='9', data = {'traceback': e})
+		except Exception as e: er.handle_error(error_code ='9', data = {})
 
 
 # Function calls go here
