@@ -14,6 +14,8 @@ import pandas as pd
 import numpy as np
 from sqlalchemy import *
 from common import helpers
+from common import errors as er
+
 pymysql.install_as_MySQLdb()
 
 
