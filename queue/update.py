@@ -83,7 +83,7 @@ def get_progress(total, done):
 		progress = done/total
 		msg = 'There are a total of {} FTOs. The code has done {} FTOs. The code is {} done'
 		subject = 'GMA FTO Scrape: Progress Report'
-		helpers.send_mail(subject, msg.format(total, done, progress))
+		helpers.send_email(subject, msg.format(total, done, progress))
 	
 	except Exception as e: er.handle_error(error_code ='11', data = {})
 
