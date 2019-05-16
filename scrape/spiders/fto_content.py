@@ -71,15 +71,16 @@ class FtoContentSpider(scrapy.Spider):
 
 	options = Options()
 	options.add_argument('--headless')
-
 	driver = webdriver.Chrome(path_to_chrome_driver, chrome_options = options)
 
+	
 	def start_requests(self):
 
 		for url in self.start_urls:
 			yield(scrapy.Request(url, callback = self.parse, 
 								 errback = self.error_handling, dont_filter = True))
 
+	
 	def error_handling(self, failure):
 		
 		self.logger.error('Downloader error')
@@ -111,6 +112,7 @@ class FtoContentSpider(scrapy.Spider):
 
 		return(page_source)
 
+	
 	def parse(self, response):
 		
 		# Create FTO content item
@@ -195,6 +197,8 @@ class FtoContentSpider(scrapy.Spider):
 				item['transact_ref_no'] = row.xpath('td[3]//text()').extract_first()
 
 				item['transact_date'] = row.xpath('td[4]//text()').extract_first()
+				item['transact_date'] = str(datetime.strptime(item['transact_date'], '%d/%m/%Y').date())
+				
 				item['app_name'] = row.xpath('td[5]//text()').extract_first()
 				item['prmry_acc_holder_name'] = row.xpath('td[6]//text()').extract_first()
 
