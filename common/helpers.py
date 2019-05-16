@@ -12,6 +12,7 @@ import smtplib
 import boto3
 import pandas as pd
 import numpy as np
+import datetime
 
 from smtplib import SMTP
 from email.mime.text import MIMEText
@@ -153,3 +154,12 @@ def clean_item(item, title_fields):
 			item[field] = item[field].title()
 	
 	return(item)
+
+
+# Input: End date in format 2018-12-31 (Year-Month-Day)
+def get_time_window(end_date, window_length):
+
+	time_window = datetime.timedelta(days = window_length)
+	start_date = str(datetime.datetime.strptime(end_date, '%Y-%m-%d').date() - time_window)
+
+	return(start_date)
