@@ -27,9 +27,16 @@ def run_test(func):
 	def test(*args, **kwargs):
 		
 		success = 1
-		try: func(*args, **kwargs)
-		except Exception as e: success = 0
 		
+		try: 
+
+			func(*args, **kwargs)
+		
+		except Exception as e: 
+
+			success = 0
+			er.handle_error(error_code ='0', data = {'traceback': e})
+
 		return(success)
 	
 	return(test)
@@ -86,8 +93,9 @@ def test_s3(test_file_source, test_file_dest):
 @run_test
 def test_error_handling():
 
-	er.handle_error(error_code ='29', data = {'sheet_name': 'Test'})
-
+	msg = 'This is a test. If you see this the test has passed.'
+	er.handle_error(error_code ='0', data = {'traceback': msg})
+	
 
 @run_test
 def test_queue_add():
