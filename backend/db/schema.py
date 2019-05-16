@@ -124,11 +124,8 @@ def create_fto_queue(engine):
 										Column('fto_no', String(50), primary_key = True),
 										Column('done', Integer()), 
 										Column('fto_type', String(20)),
-										Column('current_stage', String(20)), 
-										Column('scrape_date', String(20)), 
-										Column('scrape_time', String(20)))
-
-
+										Column('current_stage', String(20)))
+	
 	metadata.create_all(engine)
 
 
