@@ -94,7 +94,7 @@ def test_s3(test_file_source, test_file_dest):
 def test_error_handling():
 
 	msg = 'This is a test. If you see this the test has passed.'
-	er.handle_error(error_code ='0', data = {'traceback': msg})
+	er.handle_error(error_code ='1', data = {'traceback': msg})
 	
 
 @run_test

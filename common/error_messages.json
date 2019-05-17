@@ -2,7 +2,7 @@
 	{
 		"1": {
 			"subj":"GMA Error 1: There is an uncaught error in the code.",
-			"msg":"There is an uncaught error in the code. Akshat should work on a fix as soon as possible. The traceback is given below: \n\n{traceback}"
+			"msg":"There is an uncaught error in the code. Akshat should work on a fix as soon as possible. The traceback is given below:{traceback}"
 		},
 		"2": {
 			"subj":"GMA Error 2: There are no FTOs found by the scrape at stage {stage}.",
