@@ -156,7 +156,8 @@ def clean_item(item, title_fields):
 	return(item)
 
 
-# Input: End date in format 2018-12-31 (Year-Month-Day)
+# Input: * End date in format 2018-12-31 (Year-Month-Day), 
+# 		 * Length in days of time window
 def get_time_window(end_date, window_length):
 
 	time_window = datetime.timedelta(days = window_length)
