@@ -33,7 +33,7 @@ def get_transactions(start_date, end_date):
 	engine = helpers.db_engine()
 	conn = engine.connect()
 	
-	get_transactions = "SELECT * FROM transactions where transact_date between {} and {};".format(start_date, end_date)
+	get_transactions = "SELECT * FROM transactions WHERE transact_date BETWEEN '{}' AND '{}';".format(start_date, end_date)
 	get_banks = "SELECT * FROM banks;"
 	get_accounts = "SELECT * from accounts;"
 
