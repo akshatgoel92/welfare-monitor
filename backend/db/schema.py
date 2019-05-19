@@ -139,6 +139,51 @@ def create_fto_current_stage(engine):
 	metadata.create_all(engine)
 
 
+def create_audit_trigger(trigger_name, old_table_action, old_table, audit_table):
+
+	create_trigger = '''
+	
+	CREATE TRIGGER {} BEFORE {} ON {}
+	FOR EACH ROW BEGIN
+	INSERT INTO {} () VALUES ();
+	END; '''.format(trigger_name, old_table_action, old_table, audit_table)
+	
+	return(create_trigger)
+
+
+def create_audit_table(engine, old_table):
+
+	audit_table = old_table + '_history'
+	create_table = "CREATE TABLE {} LIKE {};".format(audit_table, old_table)
+	drop_old_primary_key = "ALTER TABLE {} DROP PRIMARY KEY;".format(audit_table)
+	add_id_column = "ALTER TABLE {} ADD COLUMN {} INT UNSIGNED NOT NULL;".format(audit_table, 'history_id')
+	add_primary_key = "ALTER TABLE {} ADD CONSTRAINT PRIMARY KEY {};".format(audit_table, 'history_id')
+	make_auto_increment = "ALTER TABLE {} MODIFY {} INT UNSIGNED NOT NULL AUTO_INCREMENT;".format(audit_table, 'history_id')
+
+	conn = engine.connect()
+	trans = conn.begin()
+
+	try: 
+
+		conn.execute(create_table)
+		conn.execute(drop_old_primary_key)
+		conn.execute(add_id_column)
+		
+		conn.execute(add_primary_key)
+		conn.execute(make_auto_increment)
+		conn.execute(add_trigger)
+		
+		trans.commit()
+
+	except Exception as e:
+		
+		trans.rollback()		
+		print(e)
+		conn.close()
+
+	return(transactions, banks, accounts)
+
+
 def get_table_names(engine):
 
 	inspector = reflection.Inspector.from_engine(engine)
