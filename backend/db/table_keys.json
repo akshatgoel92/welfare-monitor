@@ -67,8 +67,6 @@
         "fto_no",
         "done",
         "fto_type",
-        "scrape_date",
-        "scrape_time",
         "current_stage"
     ],
     "fto_sec_sig": [

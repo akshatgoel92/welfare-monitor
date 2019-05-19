@@ -9,7 +9,6 @@
 import scrapy
 
 
-
 class NREGAItem(scrapy.Item):
     
     # Table fields
@@ -70,14 +69,8 @@ class FTONo(scrapy.Item):
 	
 	# Housekeeping fields
 	url = scrapy.Field()
-	
-	scrape_date = scrapy.Field()
-	
-	scrape_time = scrapy.Field()
 
 
-
-	
 class FTOItem(scrapy.Item):
     
     # Data fields

@@ -33,8 +33,7 @@ def prep_csv(stage):
 	except pd.errors.EmptyDataError as e:
 
 		er.handle_error(error_code ='2', data = {'stage': stage})
-		cols = ['block_code', 'district_code', 'fto_no', 'scrape_date', 'scrape_time', 
-				'state_code', 'transact_date', 'url', 'stage']
+		cols = ['block_code', 'district_code', 'fto_no', 'state_code', 'transact_date', 'url', 'stage']
 		df = pd.DataFrame([], columns = cols)
 
 	return(df)
@@ -66,7 +65,7 @@ def get_pivoted_stage(fto_stages):
 
 
 # Prep the queue for insert
-# Create the missing columns columns
+# Create the missing columns
 # Create a current stage column
 # Iterate through the data-set and create the current stage variable
 # Return the data-frame ready to be merged with the original data-set
@@ -83,12 +82,9 @@ def prep_stages_for_insert(fto_stages, stages, missing_stages):
 
 	fto_stages['done'] = '0'
 	fto_stages['fto_type'] = ''
-	fto_stages['scrape_date'] = ''
-	fto_stages['scrape_time'] = ''
 	
 	fto_stages['stage'] = fto_stages['current_stage']
-	fto_stages = fto_stages[['fto_no', 'done', 'fto_type', 'scrape_date', 'scrape_time', 
-							 'current_stage', 'stage']]
+	fto_stages = fto_stages[['fto_no', 'done', 'fto_type', 'current_stage', 'stage']]
 	
 	fto_stages = fto_stages.values.tolist()
 	fto_stages = [tuple(row) for row in fto_stages]
@@ -116,7 +112,7 @@ def insert_ftos(engine, fto_stages):
 		trans.commit()
 
 	except Exception as e: 
-
+		
 		er.handle_error(error_code ='3', data = {})
 		trans.rollback()
 		sys.exit()
