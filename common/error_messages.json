@@ -9,8 +9,8 @@
 			"msg":"There is no action required from the field team. The code should continue to run normally."
 		},
 		"3": {
-			"subj":"GMA Error 3: There was an error in adding the new FTO nos. in the FTO queue.",
-			"msg":"In case this happens 2 days in a row, the Akshat, Anwesha, or Tanya should manually update the FTO queue."
+			"subj":"GMA Error 3: There was an error adding the new FTO nos. in the FTO queue.",
+			"msg":"In case this happens 2 days in a row, Akshat, Anwesha, or Tanya should manually update the FTO queue."
 		},
 		"4": {
 			"subj":"GMA Error 4: There was an error creating the primary key after the FTO queue update.",
