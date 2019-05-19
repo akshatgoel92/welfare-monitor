@@ -64,11 +64,12 @@ class FTOUrls(CrawlSpider):
 				   	   "page=s&mode=B&flg=W&state_name=CHHATTISGARH&state_code" 
 				       "=33&fin_year=2018-2019&dstyp=B&source=national&"
 				       "Digest=UdEewHqde6mcn4hhpT93Qg")]
+	
 	if block == 1:
-		start_urls = [("http://mnregaweb4.nic.in/netnrega/FTO/FTOReport.aspx?"
-					   "page=d&mode=B&lflag=&flg=W&state_name=CHHATTISGARH&state_code"
-					   "=33&district_name=RAIPUR&district_code=3316&fin_year=2018-2019"
-					   "&dstyp=B&source=national&Digest=y12oPa482OVLnSqnCc3NKQ")] 
+		start_urls = [("http://mnregaweb4.nic.in/netnrega/FTO/FTOReport.aspx?page=d"
+					   "&mode=B&lflag=&flg=W&state_name=CHHATTISGARH&state_code=33&" 
+					   "district_name=RAIPUR&district_code=3316&fin_year=2019-2020&dstyp=B"
+					   "&source=national&Digest=8EcA8mQek9YptIB2JguAaQ")] 
 
 
 	# Parse the block page
@@ -102,8 +103,6 @@ class FTOUrls(CrawlSpider):
 			item['district_code'] = re.findall('district_code=(.+)&district_name', url)[0]
 			item['block_code'] = re.findall('block_code=(.+)&block_name', url)[0]
 			item['transact_date'] = re.findall('fto_no=CH\d{7}_(.{6})', url)[0]
-			item['scrape_date'] = str(datetime.datetime.now().date())
-			item['scrape_time'] = str(datetime.datetime.now().time())
 
 			yield(item)
 
@@ -112,7 +111,7 @@ class FTOUrls(CrawlSpider):
 	def select_check_box(self, response):
 		
 		# Store the response URL
-		user = 'local'
+		user = 'ec2'
 		path = "./../software/chromedriver/" if user == 'local' else "/home/ec2-user/chromedriver/"
 		path_to_chrome_driver = os.path.abspath(path)
 
