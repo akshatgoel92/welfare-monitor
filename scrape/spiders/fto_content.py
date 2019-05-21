@@ -226,4 +226,4 @@ class FtoContentSpider(scrapy.Spider):
 			
 		except Exception as e:
 				 
-				self.logger.error('Parse error on transactions table: %s', response.url)
+				self.logger.error('Parse error on transactions table: The url is: {}, the error is: {}', response.url, e)
