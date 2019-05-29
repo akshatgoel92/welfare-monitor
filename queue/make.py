@@ -135,18 +135,8 @@ def get_new_ftos(engine, fto_stages, file_to):
 	new_ftos.to_csv(file_to, index = False)
 
 
-# Put the new FTO nos. in the queue
-def put_fto_nos(engine, path, if_exists):
-	
-    fto_nos = pd.read_csv(path).drop_duplicates()
-    fto_nos['done'] = 0
-    fto_nos['fto_type'] = ''
-    fto_nos.to_sql('fto_queue', con = engine, index = False, if_exists = if_exists, chunksize = 100)
-
-
 def main(): 
 
-	manual = 0
 	stages = schema.load_stage_table_names()
 	engine = helpers.db_engine()
 	
@@ -155,10 +145,6 @@ def main():
 	fto_stages_dum = prep_stages_for_insert(fto_stages_dum, stages, missing_stages)
 
 	insert_ftos(engine, fto_stages_dum)
-	
-	if manual == 1:
-		new_ftos = get_new_ftos(engine, fto_stages_dum, './output/fto_queue.csv') 
-		put_fto_nos('fto_queue', engine, './output/fto_queue.csv', 'append')
 
 
 if __name__ == "__main__": 

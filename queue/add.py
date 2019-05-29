@@ -16,13 +16,19 @@ import argparse
 
 pymysql.install_as_MySQLdb()
 
+# Put the new FTO nos. in the queue
+def put_fto_nos(engine, path, if_exists):
+	
+    fto_nos = pd.read_csv(path).drop_duplicates()
+    fto_nos['done'] = 0
+    fto_nos['fto_type'] = ''
+    fto_nos.to_sql('fto_queue', con = engine, index = False, if_exists = if_exists, chunksize = 100)
+
 
 def main():
 
 	parser = argparse.ArgumentParser(description = 'Append to or replace the queue?')
-	parser.add_argument('if_exists',
-						 type = str, 
-						 help = 'Append or replace?')
+	parser.add_argument('if_exists', type = str, help = 'Append or replace?')
 
 	args = parser.parse_args()
 	if_exists = args.if_exists
