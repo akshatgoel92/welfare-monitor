@@ -119,7 +119,7 @@ def insert_ftos(engine, fto_stages):
 
 	try: 
 
-		update.create_primary_key(engine, 'fto_queue', ['fto_no'])
+		update.create_primary_key(engine, 'fto_queue', ['fto_no'], is_string = 1)
 
 	except Exception as e:
 
