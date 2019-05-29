@@ -31,7 +31,7 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.chrome.options import Options
 
 # Date and time sub-modules 
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 
 # Twisted errors
 from twisted.internet.error import DNSLookupError
@@ -124,7 +124,8 @@ class FtoContentSpider(scrapy.Spider):
 			source = self.get_source(response, self.driver)
 		
 		except Exception as e:
-			self.logger.error('Get source error on {}: {}'.format(response.url, e))
+			self.logger.error('Get source error: %s', e)
+			self.logger.error('This error happened on: %s', response.url)
 			return
 
 		try: 
