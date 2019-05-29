@@ -1,14 +1,18 @@
-# Import packages
-# Install SQL connector as MySQLDb to ensure
-# backward compatability
+#--------------------------------------------------------#
+# Author: Akshat Goel
+# Purpose: All common helper functions go here
+# Contact: akshat.goel@ifmr.ac.in
+#--------------------------------------------------------#
 import os
 import json
 import sys
 import dropbox
 import pymysql
 import smtplib
+import boto3
 import pandas as pd
 import numpy as np
+import datetime
 
 from smtplib import SMTP
 from email.mime.text import MIMEText
@@ -21,21 +25,16 @@ from sqlalchemy import *
 pymysql.install_as_MySQLdb()
 
 
-# Connect to AWS RDB
-# Open the secrets file
-# This gets credentials
 def sql_connect():
-	
-	with open('./gma_secrets.json') as secrets:
+
+	with open('./gma_secrets.json') as secrets: 
 		sql_access = json.load(secrets)['mysql']
 	
 	return(sql_access)
 
 
-# Create connection to MySQL data-base
 def db_conn():
 	
-	# Store credentials
 	with open('./gma_secrets.json') as secrets:
 		sql_access = json.load(secrets)['mysql']
 	
@@ -43,96 +42,94 @@ def db_conn():
 	password = sql_access['password']
 	host = sql_access['host']
 	db = sql_access['db']
-	
-	# Create connection	
-	conn = pymysql.connect(host, user, 
-							password, db, 
-							charset="utf8", 
-							use_unicode=True)
+		
+	conn = pymysql.connect(host, user, password, db, charset="utf8", use_unicode=True)
 	cursor = conn.cursor()
 	
-	# Return connection and cursor
 	return(conn, cursor)
-	
 
-# Clean each item that goes through the pipeline
-def clean_item(item, title_fields):
+
+def db_engine():
 	
-	# Iterate over the keys
-	for field in item.keys():
+	user, password, host, db = sql_connect().values()
+	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
+
+	return(engine)
+
+	
+def upload_dropbox(file_from, file_to):
+	
+	with open('./gma_secrets.json') as data_file:
+		credentials = json.load(data_file)
+
+	access_token = credentials['dropbox']['access_token']
+	dbx = dropbox.Dropbox(access_token)
+
+	# Prepend the project Dropbox path to the folder
+	file_to_dropbox='/Female Mobile Phones Phase I/Phase II/CHiPS/Data/mis_scrapes/'
+	file_to=os.path.join(file_to_dropbox, file_to)
+
+	with open(file_from, 'rb') as f:
+		dbx.files_upload(f.read(), file_to, mode = dropbox.files.WriteMode.overwrite)
+
+
+def upload_s3(file_from, file_to):
+	
+	with open('./gma_secrets.json') as secrets:
+		s3_access = json.load(secrets)['s3']
+
+	access_key_id = s3_access['access_key_id']
+	secret_access_key = s3_access['secret_access_key']
+	bucket_name = s3_access['default_bucket']
 		
-		# Get rid of surrounding white-space for string variables
-		if type(item[field]) == str:
-			item[field] = item[field].strip()
+	s3 = boto3.client('s3', aws_access_key_id = access_key_id, aws_secret_access_key = secret_access_key)
+	s3.upload_file(file_from, bucket_name, file_to)
 
-		# Convert whatever fields that we can into title-case
-		if field in title_fields:
-			item[field] = item[field].title()
+
+def download_file_s3(file_from, file_to, bucket_name):
 	
-	return(item)
+	s3 = boto3.resource('s3')
 
+	try: s3.Bucket(bucket_name).download_file(file_from, file_to)
 
-# Get a table's keys
-def get_keys(table):
+	except botocore.exceptions.ClientError as e:
 
-	with open('./backend/db/table_keys.json') as file:
-		tables = json.load(file)
-		keys = tables[table]
+		if e.response['Error']['Code'] == "404":
+			print("The object does not exist.")
+
+		else:
+			raise
 	
-	return(keys)
 
-
-# Insert a new item into the SQL data-base	
-def insert_data(item, keys, table, unique = 0):
-
-	# Only insert fields which are both in the item and the table	
-	keys = get_keys(table) & item.keys()
-	fields = u','.join(keys)
+def delete_files(path = './output/', extension = '.csv'):
 	
-	qm = u','.join([u'%s'] * len(keys))
-	sql = "INSERT INTO " + table + " (%s) VALUES (%s)"
-	sql_unique = "INSERT IGNORE INTO " + table + " (%s) VALUES (%s)"
-	
-	insert = sql if unique == 0 else sql_unique
-	sql = insert % (fields, qm)
-	data = [item[k] for k in keys]
-
-	return(sql, data)
+	for filename in os.listdir(path):
+		if filename.endswith(extension): 
+			os.unlink(path + filename)
 
 
-# Update FTO type
-def update_fto_type(fto_no, fto_type, table):
+def send_email(subject, msg):
 
-	sql = "UPDATE " + table + " SET fto_type = %s WHERE fto_no = %s"
-	data = [fto_type, fto_no]
-	return(sql, data)
+	with open('./recipients.json') as r:
+		recipients = json.load(r)
 
-
-# Send e-mail
-def send_email(msg, subject, recipients):
-
-	# Get credentials
 	with open('./gma_secrets.json') as secrets:
 		credentials = json.load(secrets)['smtp']
-	
-	# Unpack credentials
+	 
 	user = credentials['user']
 	password = credentials['password']
 	region = credentials['region']
 	
-	# SMTP server details
 	smtp_server = 'email-smtp.' + region + '.amazonaws.com'
 	smtp_port = 587
 	sender = 'akshat.goel@ifmr.ac.in'
 	text_subtype = 'html'
 	
-	# Compose message
 	msg = MIMEText(msg, text_subtype)
 	msg['Subject']= subject
 	msg['From'] = sender
 	msg['To'] = ', '.join(recipients)
 	
-	# Connection
 	conn = SMTP(smtp_server, smtp_port)
 	conn.set_debuglevel(1)
 	conn.ehlo()
@@ -142,17 +139,28 @@ def send_email(msg, subject, recipients):
 	conn.sendmail(sender, recipients, msg.as_string())
 	conn.close()
 
-# Upload file to Dropbox	
-def dropbox_upload(file_from, file_to):
 
-	with open('./gma_secrets.json') as data_file:
-		credentials = json.load(data_file)
+# Clean each item that goes through the pipeline given an 
+# item and a list of fields in that item which are supposed
+# to be in title case
+def clean_item(item, title_fields):
+	
+	for field in item.keys():
+		
+		if type(item[field]) == str:
+			item[field] = item[field].strip()
 
-	access_token = credentials['dropbox']['access_token']
-	dbx = dropbox.Dropbox(access_token)
+		if field in title_fields:
+			item[field] = item[field].title()
+	
+	return(item)
 
-	with open(file_from, 'rb') as f:
-		dbx.files_upload(f.read(),
-						file_to,
-						mode = dropbox.files.WriteMode.overwrite)
 
+# Input: * End date in format 2018-12-31 (Year-Month-Day), 
+# 		 * Length in days of time window
+def get_time_window(end_date, window_length):
+
+	time_window = datetime.timedelta(days = window_length)
+	start_date = str(datetime.datetime.strptime(end_date, '%Y-%m-%d').date() - time_window)
+
+	return(start_date)

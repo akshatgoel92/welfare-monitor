@@ -117,17 +117,22 @@ def get_ftos(soup, link):
 		
 		# Scrape the table
 		for row in table.find_all('tr')[1:]:
+			
 			cols = row.find_all('td')[1:]
+			
 			col_text = [col.get_text().strip() for col in cols]
 		
 			# We don't want any rows with the word Total in them
 			if 'Total' not in col_text:
+				
 				fto_nos.append(col_text)
 
 	except Exception as e:
 		
 		print(e)
+		
 		print('There is a table scrape error....exiting program!')
+		
 		sys.exit()
 	
 	# Convert the lists into a data-frame
@@ -211,6 +216,7 @@ def get_current_stage_table(stage_tables, engine):
 	for stage, fto_nos in stage_tables.items():
 		
 		fto_nos['stage'] = stages[stage]
+		
 		fto_nos = fto_nos[['fto_no', 'stage']]
 		
 	fto_current_stage = pd.concat(stage_tables.values())

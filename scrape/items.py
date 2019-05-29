@@ -8,6 +8,7 @@
 # Import scrapy
 import scrapy
 
+
 class NREGAItem(scrapy.Item):
     
     # Table fields
@@ -58,24 +59,18 @@ class FTONo(scrapy.Item):
 	# These are scraped FTO numbers
 	fto_no = scrapy.Field()
 	
-	fto_stage = scrapy.Field()
-	
 	state_code = scrapy.Field()
 	
 	district_code = scrapy.Field()
 	
 	block_code = scrapy.Field()
 	
-	process_date = scrapy.Field()
+	transact_date = scrapy.Field()
 	
 	# Housekeeping fields
 	url = scrapy.Field()
-	
-	scrape_date = scrapy.Field()
-	
-	scrape_time = scrapy.Field()
 
-	
+
 class FTOItem(scrapy.Item):
     
     # Data fields
@@ -119,6 +114,8 @@ class FTOItem(scrapy.Item):
     
     scrape_time = scrapy.Field()
 
+
+
 class FTOOverviewItem(scrapy.Item):
     
     state = scrapy.Field()
@@ -144,4 +141,50 @@ class FTOOverviewItem(scrapy.Item):
     cr_processed_dt = scrapy.Field()
     
     cr_processed_dt_P = scrapy.Field()
+
+
+
+class FTOMaterialItem(scrapy.Item):
+
+    sr_no = scrapy.Field()
+    
+    block_name = scrapy.Field()
+    
+    transact_ref_no = scrapy.Field()
+
+    transact_date = scrapy.Field()
+    
+    vendor_name = scrapy.Field()
+    
+    vendor_id = scrapy.Field()
+                
+    voucher_no = scrapy.Field()
+
+    prmry_acc_holder_name = scrapy.Field()
+    
+    bank_code = scrapy.Field()
+
+    ifsc_code = scrapy.Field()
+    
+    credit_amt_due = scrapy.Field()
+    
+    credit_amt_actual = scrapy.Field()
+            
+    status = scrapy.Field()
+    
+    processed_date = scrapy.Field()
+                
+    utr_no = scrapy.Field()
+            
+    rejection_reason = scrapy.Field()
+                
+    server = scrapy.Field()
+                
+    fto_no = scrapy.Field()
+            
+    scrape_date = scrapy.Field()
+    
+    scrape_time = scrapy.Field()
+    
+
 

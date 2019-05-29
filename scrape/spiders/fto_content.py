@@ -4,13 +4,6 @@
 # Author: Akshat Goel
 # Date: 8th August 2018
 # Python version: 3.6.3
-# Dependencies:
-
-# [Only modules outside Python standard listed]
-# 1) scrapy 
-# 2) pandas 
-# 3) numpy 
-# 4) Selenium
 #------------------------------------------------------------------#
 
 # Scraping and cleaning modules
@@ -45,69 +38,54 @@ from twisted.internet.error import DNSLookupError
 from twisted.internet.error import TimeoutError, TCPTimedOutError
 
 # Item class
-from nrega_scrape.items import FTOItem
-from nrega_scrape.items import FTOOverviewItem
+from scrape.items import FTOItem
+from scrape.items import FTOOverviewItem
 from common.helpers import *
 
 
 # FTO scraper
 class FtoContentSpider(scrapy.Spider):
 
-	# Set globals
 	name = "fto_content"
 	basic = "http://mnregaweb4.nic.in/netnrega/fto/fto_status_dtl.aspx?"
-	fin_year = "2018-2019"
+	fin_year = "2019-2020"
 	state_code = "33"
 	block = "fto_queue"
 	output_dir = os.path.abspath(".")
 	
-	# Set Path to Chrome driver
-	user = 'ec2-user'
-	path = "./../software/chromedriver/" if user == 'local' else "/home/ec2-user/chromedriver/"
+	user = "ec2"
+	path = "./../software/chromedriver/" if user == "local" else "/home/ec2-user/chromedriver/"
 	path_to_chrome_driver = os.path.abspath(path)
 
-	# Get the target FTO nos.
 	conn, cursor = db_conn()
-	fto_nos = pd.read_sql("SELECT fto_no FROM " + block + " WHERE done = 0;", con = conn).values.tolist()
+	fto_nos = pd.read_sql("SELECT fto_no FROM fto_queue WHERE done = 0;", con = conn).values.tolist()
 	cursor.close()
 	conn.close()
 
-	# Store target FTO nos.
 	fto_nos = [fto_no[0] for fto_no in fto_nos]
-	
-	# Store start URLs here	
 	start_urls = []
 
-	# Construct URL for each FTO no
 	for fto_no in fto_nos:
 		url = basic + "fto_no=" + fto_no + "&fin_year=" + fin_year + "&state_code=" + state_code
 		start_urls.append(url)
 
-	# Create options object for Chrome driver
-	# Set option to run headless
 	options = Options()
 	options.add_argument('--headless')
+	driver = webdriver.Chrome(path_to_chrome_driver, chrome_options = options)
 
-	# Create driver object
-	driver = webdriver.Chrome(path_to_chrome_driver, 
-								chrome_options = options)
-
+	
 	def start_requests(self):
 
 		for url in self.start_urls:
-			yield(scrapy.Request(url, 
-								callback = self.parse, 
-								errback = self.error_handling, 
-								dont_filter = True))
+			yield(scrapy.Request(url, callback = self.parse, 
+								 errback = self.error_handling, dont_filter = True))
 
-	# This takes as input a Twisted failure object
-	# It returns as output a representation of this object
-	# to the log file
-	# This ensures that all errors are logged in case we
-	# want to do anything with them later
+	
 	def error_handling(self, failure):
+		
 		self.logger.error('Downloader error')
 
+	
 	# Get selector object for file
 	def get_source(self, response, driver):
 		
@@ -134,6 +112,7 @@ class FtoContentSpider(scrapy.Spider):
 
 		return(page_source)
 
+	
 	def parse(self, response):
 		
 		# Create FTO content item
@@ -145,7 +124,7 @@ class FtoContentSpider(scrapy.Spider):
 			source = self.get_source(response, self.driver)
 		
 		except Exception as e:
-			self.logger.error('Get source error: %s', response.url)
+			self.logger.error('Get source error on {}: {}'.format(response.url, e))
 			return
 
 		try: 
@@ -167,8 +146,7 @@ class FtoContentSpider(scrapy.Spider):
 						for item in row if item.strip() != ''][1::2]
 
 		except Exception as e:
-			self.logger.error('Parse error on overview table: %s', 
-							response.url)
+			self.logger.error('Parse error on overview table: %s', response.url)
 			return
 		
 		try:
@@ -192,6 +170,7 @@ class FtoContentSpider(scrapy.Spider):
 			yield(overview_item)
 
 		except Exception as e:
+			
 			print(e)
 			self.logger.error('Item parse error on overview table: %s', 
 								response.url)
@@ -218,6 +197,8 @@ class FtoContentSpider(scrapy.Spider):
 				item['transact_ref_no'] = row.xpath('td[3]//text()').extract_first()
 
 				item['transact_date'] = row.xpath('td[4]//text()').extract_first()
+				item['transact_date'] = str(datetime.strptime(item['transact_date'], '%d/%m/%Y').date())
+				
 				item['app_name'] = row.xpath('td[5]//text()').extract_first()
 				item['prmry_acc_holder_name'] = row.xpath('td[6]//text()').extract_first()
 
@@ -244,7 +225,5 @@ class FtoContentSpider(scrapy.Spider):
 				yield(item)
 			
 		except Exception as e:
-				
-				# Log the exception first 
-				# Then move on 
-				self.logger.error('Parse error on transactions table: %s', response.url)
+				 
+				self.logger.error('Parse error on transactions table: The url is: {}, the error is: {}', response.url, e)

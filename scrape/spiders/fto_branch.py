@@ -4,15 +4,7 @@
 # Author: Akshat Goel
 # Date: 8th August 2018
 # Python version: 3.6.3
-# Dependencies:
-
-# [Only modules outside Python standard listed]
-# 1) scrapy 
-# 2) pandas 
-# 3) numpy 
-# 4) Selenium
 #------------------------------------------------------------------#
-
 # Scraping and cleaning modules
 import scrapy
 import datetime
@@ -29,7 +21,7 @@ from scrapy.loader.processors import MapCompose, Join
 from scrapy.linkextractors import LinkExtractor
 from scrapy.loader import ItemLoader
 from scrapy.http import Request
-from scrapy.contrib.spiders import CrawlSpider, Rule
+from scrapy.spiders import CrawlSpider, Rule
 
 # Date and time sub-modules 
 from datetime import date, timedelta
@@ -39,71 +31,37 @@ from twisted.internet.error import DNSLookupError
 from twisted.internet.error import TimeoutError, TCPTimedOutError
 
 # Item class
-from nrega_scrape.items import FTOItem
-from nrega_scrape.items import FTOOverviewItem
+from scrape.items import FTOItem
+from scrape.items import FTOOverviewItem
 from common.helpers import *
 
 
 # FTO scraper
-class FtoContentSpider(CrawlSpider):
+class FtoBranchSpider(CrawlSpider):
 
-	# Set globals
-	name = "fto_material"
-	state_name = "CHHATTISGARH"
-	state_code = '33' 
-	district_name = 'RAIPUR'
-	district_code = '3316'
-	block_name = 'ARANG'
-	block_code = district_code + '015'
-	fin_year = '2018-2019'
+	name = "fto_branch"
+	conn, cursor = db_conn()
+	start_urls = pd.read_sql("SELECT fto_no FROM fto_queue WHERE done = 0;", con = conn).values.tolist()
+	cursor.close()
+	conn.close()
+	
 
-	# Construct the URL
-	basic = 'http://mnregaweb4.nic.in/netnrega/FTO/fto_reprt_detail.aspx?lflag=&flg=W&page=b'
-	state = '&state_name=' + state_name + '&state_code=' + state_code
-	district = '&district_name=' + district_name + '&district_code=' + district_code
-	block = '&block_name=' + block_name + '&block_code=' + block_code 
-	fin_year = '&fin_year=' + fin_year 
-	meta = '&typ=pb&mode=b&source=national&Digest=lJyuFv4MCVqYcWXqb+Upfw'
-
-	# Store the start URL
-	start_urls = [basic + state + district + block + fin_year + meta]
-	urls = []
-
-	# Parse function 
 	def parse(self, response):
 		
-		# Store the last table of the response
-		tables = response.xpath('//table')
-		# Store the table
-		table = response.xpath('//table')[-1]
-		
-		# Store the URLs in the table
-		# We will follow these in the next parse function
-		urls = table.xpath('*//a//@href').extract()
-		# Prepend basic URL to the scraped href
-		urls = [self.basic + url for url in urls]
-
-		# Get the target FTO nos.
-		conn, cursor = db_conn()
-		fto_nos = pd.read_sql("SELECT fto_no FROM " + block + " WHERE done = 0;", con = conn).values.tolist()
-		cursor.close()
-		conn.close()
-
 		# Now go through each hyperlink on the table
 		# Call the FTO list parser on each URL
 		# Yield the result of the response to processing pipeline
-		for url in urls:
-			if re.findall('fto_no=(.*FTO_\d+)&source', url)[0] in fto_nos:  
+		for url in self.start_urls:
 				yield(response.follow(url, self.parse_fto_content))
 
+	
 	# This takes as input a Twisted failure object
-	# It returns as output a representation of this object
-	# to the log file
-	# This ensures that all errors are logged in case we
-	# want to do anything with them later
+	# It returns as output a representation of this object to the log file
+	# This ensures that all errors are logged 
 	def error_handling(self, failure):
 		self.logger.error('Downloader error')
 
+	
 	def parse_fto_content(self, response):
 		
 		# Get all the tables on the web-page
@@ -123,6 +81,8 @@ class FtoContentSpider(CrawlSpider):
 				item['transact_ref_no'] = row.xpath('td[4]//text()').extract_first()
 
 				item['transact_date'] = row.xpath('td[5]//text()').extract_first()
+				item['transact_date'] = str(datetime.strptime(item['transact_date'], '%d/%m/%Y').date())
+				
 				item['app_name'] = row.xpath('td[6]//text()').extract_first()
 				item['wage_list_no'] = row.xpath('td[7]//text()').extract_first()
 
@@ -149,7 +109,6 @@ class FtoContentSpider(CrawlSpider):
 				yield(item)
 			
 		except Exception as e:
+				
 				print(e)
-				# Log the exception first 
-				# Then move on 
 				self.logger.error('Parse error on transactions table: %s', response.url)

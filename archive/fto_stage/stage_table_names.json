@@ -1,0 +1,10 @@
+{
+    "P": "fto_pending_bank",
+    "fst_sig": "fto_fst_sig",
+    "fst_sig_not": "fto_fst_sig_not",
+    "pb": "fto_processed",
+    "pp": "fto_partial_processed_bank",
+    "sb": "fto_sent_to_bank",
+    "sec_sig": "fto_sec_sig",
+    "sec_sig_not": "fto_sec_sig_not"
+}

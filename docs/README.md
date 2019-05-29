@@ -2,7 +2,7 @@
 
 ## Overview
 
-This repository contains scripts for the __Gates Mobile Access Mor Awaaz__ push call ETL. Every week for 52 weeks, 7200 __Sanchaar Kranti Yojana (SKY)__ programme beneficiaries in Raipur district, Chattisgarh will recieve a push call from our IVRS system. An automated voice will **give these beneficiaries information about their household's pending NREGA payments.** This information will include the total amount due to the household, which payment stage the pending transaction has reached, and the contact information of the Gram Rozgar Sevak in their panchayat if the payment has been rejected. 
+This repository contains scripts for the __Gates Mobile Access Mor Awaaz__ push call ETL. Every week for 52 weeks, 7200 __Sanchaar Kranti Yojana (SKY)__ programme beneficiaries in Raipur district, Chattisgarh will recieve a push call from our IVRS system. An automated voice will **give these beneficiaries information about their household's pending NREGA payments.** This information will include the total amount due to the household, which payment stage the pending transaction has reached, and the contact information of the Gram Rozgar Sevak in their panchayat if the payment has been rejected. The information pushed will be updated throughout the project based on user response. 
 
 The NREGA payments process captures these variables on documents called __Fund Transfer Orders (FTOs)__. FTOs are generated at the block office in each block and uploaded to the NREGA FTO tracking system. The scrape visits the FTO tracking system every week to scrape all the FTOs in Raipur district. The scraped data gets used to create calling scripts, which are then sent to our calling platform so that the push calls can be made.  
 
@@ -24,23 +24,22 @@ The NREGA payments process **tracks each transaction** that has to be made under
 
 * This script can be seen in the __shell__ folder. 
 
-* To look at the cron job which triggers this script, log in to the Amazon EC2 instance and use the commond **crontab -e.** 
+* To look at the cron job which triggers this script, log in to the Amazon EC2 instance and use the command **crontab -e.** 
 
 * This shell script triggers the following scripts in the order given below. 
 
-#### fto_stats.py
+#### fto_urls.py
 
-This script is run from nrega_etl.sh as soon as the cron triggers the script. It takes the following steps: 
+This script is run from nrega_etl.sh as soon as the cron job triggers the script. It takes the following steps: 
 
-* **Visits the block level summary page** for Raipur district 
-* **Scrapes the total number of FTOs** at each stage
-* **Follows the links in each of the cel**l in the block-level summary page
-* **Scrapes the list of FTO numbers** for each block for each stage from the hyperlinked pages 
-* **Writes the scraped list to DB** via the pipeline
+* **Visits the Table 8.1.1 block level summary page** for Raipur district 
+* **Scrapes the total number of FTOs** at each stage and the **associated unique URLs** for the FTO 
+* **Parses each scraped URL** and stores them in a set of .csv files
+* **Optional:** This script also has an option to scrape FTO URLs from the district page and an option to scrape materials FTOs too 
 
-#### fto_filter.py
+#### make_fto_tables.py
 
-This script is run from nrega_etl.sh as soon as fto_stats.py finishes. It filters the scraped FTO numbers to get only those FTOs that are needed for the call in that week. It takes the following steps: 
+This script is run from nrega_etl.sh as soon as fto_urls.py finishes.
 
 * FTOs are listed for each stage they have been through so we keep only FTO under the furthest stage
 * **Removes any FTOs** older than 7 days 

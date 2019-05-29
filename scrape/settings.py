@@ -9,10 +9,10 @@
 #     https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = 'nrega_scrape'
+BOT_NAME = 'scrape'
 
-SPIDER_MODULES = ['nrega_scrape.spiders']
-NEWSPIDER_MODULE = 'nrega_scrape.spiders'
+SPIDER_MODULES = ['scrape.spiders']
+NEWSPIDER_MODULE = 'scrape.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
@@ -22,7 +22,7 @@ NEWSPIDER_MODULE = 'nrega_scrape.spiders'
 ROBOTSTXT_OBEY = True
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 1
+# CONCURRENT_REQUESTS = 1
 DOWNLOAD_TIMEOUT = 45
 
 # Configure a delay for requests for the same website (default: 0)
@@ -69,7 +69,11 @@ COOKIES_ENABLED = False
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'nrega_scrape.pipelines.FTOContentPipeline': 1000
+	
+    'scrape.pipelines.FTOContentPipeline': 2000, 
+    'scrape.pipelines.FTOMaterialPipeline': 1000,
+    'scrape.pipelines.FTONoPipeline': 3000
+
 }
 
 
@@ -79,9 +83,9 @@ LOG_ENCODING = 'utf-8'
 LOG_FORMATTER = 'scrapy.logformatter.LogFormatter'
 LOG_FORMAT = '%(name)s, %(lineno)s, %(exc_info)s, %(asctime)s, %(filename)s, %(funcName)s, %(levelno)s, %(message)100s'
 LOG_DATEFORMAT = '%Y-%m-%d %H:%M:%S'
-LOG_STDOUT = False
+LOG_STDOUT = True
 LOG_LEVEL = 'INFO'
-LOG_FILE =  './nrega_output/log.csv'
+LOG_FILE =  './backend/logs/log.csv'
 LOG_SHORT_NAMES = True
 
 CLOSESPIDER_ERRORCOUNT = 0
