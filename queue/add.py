@@ -22,7 +22,8 @@ def put_fto_nos(engine, path, if_exists):
     fto_nos = pd.read_csv(path).drop_duplicates()
     fto_nos['done'] = 0
     fto_nos['fto_type'] = ''
-    fto_nos.to_sql('fto_queue', con = engine, index = False, if_exists = if_exists, chunksize = 100)
+    fto_nos.to_sql('fto_queue', con = engine, index = False, if_exists = if_exists, chunksize = 100
+    			   dtype = {'fto_no': String() 'fto_type': Integer(), 'done': String()})
 
 
 def main():
