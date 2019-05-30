@@ -31,7 +31,7 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.chrome.options import Options
 
 # Date and time sub-modules 
-from datetime import date, timedelta, datetime
+from datetime import date, timedelta
 
 # Twisted errors
 from twisted.internet.error import DNSLookupError
@@ -198,7 +198,7 @@ class FtoContentSpider(scrapy.Spider):
 				item['transact_ref_no'] = row.xpath('td[3]//text()').extract_first()
 
 				item['transact_date'] = row.xpath('td[4]//text()').extract_first()
-				item['transact_date'] = str(datetime.strptime(item['transact_date'], '%d/%m/%Y').date())
+				item['transact_date'] = str(datetime.datetime.strptime(item['transact_date'], '%d/%m/%Y').date())
 				
 				item['app_name'] = row.xpath('td[5]//text()').extract_first()
 				item['prmry_acc_holder_name'] = row.xpath('td[6]//text()').extract_first()
