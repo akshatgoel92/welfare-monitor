@@ -1,15 +1,3 @@
-#------------------------------------------------------------------#
-# Author: Akshat Goel
-# Date: 8th August 2018
-# Python version: 3.6.3
-# Dependencies:
-
-# [Only modules outside Python standard listed]
-# 1) scrapy 
-# 2) pandas 
-# 3) numpy 
-# 4) Selenium
-#------------------------------------------------------------------#
 import pandas as pd
 import numpy as np
 import argparse

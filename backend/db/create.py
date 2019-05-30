@@ -1,8 +1,3 @@
-#--------------------------------------------------------#
-# Author: Akshat Goel
-# Purpose: Create database tables according to schema
-# Contact: akshat.goel@ifmr.ac.in
-#--------------------------------------------------------#
 import sys
 from backend.db import schema
 from common import helpers

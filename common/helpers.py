@@ -1,8 +1,3 @@
-#--------------------------------------------------------#
-# Author: Akshat Goel
-# Purpose: All common helper functions go here
-# Contact: akshat.goel@ifmr.ac.in
-#--------------------------------------------------------#
 import os
 import json
 import sys

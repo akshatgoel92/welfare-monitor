@@ -1,8 +1,3 @@
-#-------------------------------------------------------------------#
-# Author: Akshat Goel
-# Purpose: Merge and download scraped FTO data to Dropbox every day
-# Contact: akshat.goel@ifmr.ac.in
-#-------------------------------------------------------------------#
 import os
 import json
 import sys

@@ -1,8 +1,3 @@
-#--------------------------------------------------------#
-# Author: Akshat Goel
-# Purpose: Add FTO nos. to scraping queue manually
-# Contact: akshat.goel@ifmr.ac.in
-#--------------------------------------------------------#
 from sqlalchemy import *
 from sqlalchemy.engine import reflection
 from common import helpers
