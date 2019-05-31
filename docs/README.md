@@ -84,6 +84,25 @@ This script contains the **scrapy pipeline objects** which process each **item**
 * Create a connection to the data-base
 
 
+### queue
+
+#### make.py
+
+This is executed by fto_stage.sh which is described below. It processes the scraped list of FTO nos. at each stage returned by fto_urls.csv and creats a pandas data-frame containing a queue of FTOs along with information about them. This is then inserted into the FTO queue table in the database. 
+
+#### add.py
+
+This script allows the field team to add FTO nos. manually to the FTO queue in case the fto_urls spider or the make.py script does not work on any given day. 
+
+#### update.py
+
+This script updates the FTO queue tracker every day with the progress of the scrape and sends an email out to the team with information on how many FTOs are remaining. 
+
+#### download.py
+
+This script is run at the end of each day to download data onto S3 and Dropbox where it can be accessed by the team.
+
+
 ### shell
 
 
