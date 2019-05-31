@@ -52,7 +52,7 @@ def db_engine():
 	return(engine)
 
 	
-def upload_dropbox(file_from, file_to):
+def upload_dropbox(file_from = './output/gma_test.xlsx', file_to = 'tests/gma_test.xlsx'):
 	
 	with open('./gma_secrets.json') as data_file:
 		credentials = json.load(data_file)

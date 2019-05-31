@@ -101,6 +101,7 @@ def main():
 
 	results = []
 	results.append(test_download_file_s3())
+	results.append(test_upload_dropbox())
 
 	return(results)
 
@@ -108,3 +109,4 @@ def main():
 if __name__ == '__main__':
 
 	results = main()
+	print(results)
