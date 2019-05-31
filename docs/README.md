@@ -20,7 +20,7 @@ The NREGA payments process **tracks each transaction** that has to be made under
 
 The scrape is based on a collection of scrapy spiders which visit the web-pages on NREGASoft that have the data we need. The shell scripts in the shell folder deploy the spiders on an AWS EC2 instance. The data is stored by the scrape in an AWS MySQL database instance and on AWS S3. The main scripts in the repository are described below in order of priority. 
 
-#### ./scrape
+### scrape
 
 #### fto_content.py 
 
@@ -57,7 +57,7 @@ NREGA payments to work materials vendors are also tracked by the FTO tracking sy
 This visits Table 8.1.1 and scrapes the URLs for the list of FTOs at each stage. It is used by the fto_stage.sh shell script described below.
 
 
-#### ./scrape/settings.py
+#### settings.py
 
 This is the **scrapy settings file**. The important settings we customize for this project are: 
 
@@ -84,7 +84,7 @@ This script contains the **scrapy pipeline objects** which process each **item**
 * Create a connection to the data-base
 
 
-#### ./shell
+### shell
 
 
 #### fto_stage.sh 
@@ -103,7 +103,9 @@ This script contains the **scrapy pipeline objects** which process each **item**
 * This shell script triggers the following scripts in the order given below.   
 
 
-#### ./common/helpers.py 
+### common
+
+#### helpers.py 
 
 This file has common functions which are used by the spiders and pipelines file to **perform housekeeping tasks.** The important functions are: 
 
@@ -113,27 +115,31 @@ This file has common functions which are used by the spiders and pipelines file 
 * **insert_data**:  This function prepares a string SQL statement to insert data into the MySQL database. The SQL statement is based on the value of the variable **unique** which is 1 if the table that the data is going to be written to has to satisfy a uniqueness constraint and 0 otherwise.
 
 
-#### ./backend/db/schema.py 
+### backend
+
+#### db/schema.py 
 
 This is the original **sqlalchemy** data-base schema.
 
 
-#### ./backend/db/create.py
+#### db/create.py
 
 This is the script which creates an instance of the original schema.
 
 
-#### ./backend/db/update.py
+#### db/update.py
 
 This contains helper functions that are used to modify the database.
 
 
-#### ./backend/ec2/*
+#### ec2
 
 This folder contains requirements files for the repository (*.txt). setup.sh installs all the dependencies on an AWS EC2 instance.
 
 
-#### ./backend/logs/process_log.py
+### logs
+
+#### process_log.py
 
 This file is called as the last step in the ETL. It processes the log file that the scrape creates and uploads it to Dropbox. It takes following steps: 
 
@@ -142,7 +148,7 @@ This file is called as the last step in the ETL. It processes the log file that 
 * Use the **Dropbox API** to upload it to a target folder 
 
 
-#### ./alembic/*
+### alembic
 
 We have stopped doing database migrations manually and have started using Alembic. This folder is the boiler-plate Alembic folder which has the migration environment and migration scripts.
 
