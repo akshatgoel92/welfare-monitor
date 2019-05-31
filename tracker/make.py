@@ -1,8 +1,3 @@
-#-------------------------------------------------------------------#
-# Author: Akshat Goel
-# Purpose: Merge and download scraped FTO data to Dropbox every day
-# Contact: akshat.goel@ifmr.ac.in
-#-------------------------------------------------------------------#
 import os
 import json
 import sys
@@ -98,7 +93,7 @@ def prep_stages_for_insert(fto_stages, stages, missing_stages):
 # When optimizing make sure that we are handling: 
 # 1) updates to stage of existing FTOs
 # 2) case where connection to database drops during insert 
-def insert_ftos(engine, fto_stages):
+def insert_ftos(engine, fto_stages, test):
 
 	sql = update.upsert_data('fto_queue', ['current_stage'])	
 	conn = engine.connect()
@@ -108,8 +103,9 @@ def insert_ftos(engine, fto_stages):
 		
 		for row in fto_stages:
 			conn.execute(sql, row)
-
-		trans.commit()
+			
+		if test == 0: 
+			trans.commit()
 
 	except Exception as e: 
 		
@@ -117,36 +113,9 @@ def insert_ftos(engine, fto_stages):
 		trans.rollback()
 		sys.exit()
 
-	try: 
 
-		update.create_primary_key(engine, 'fto_queue', ['fto_no'])
+def main(test = 0): 
 
-	except Exception as e:
-
-		er.handle_error(error_code ='4', data = {})
-		pass
-
-
-# Now we get the new FTOs along with their current stage
-def get_new_ftos(engine, fto_stages, file_to):
-	
-	fto_queue = update.select_data(engine, 'fto_queue', cols = ['fto_no'])
-	new_ftos = update.anti_join(fto_stages, fto_queue, on = ['fto_no'])
-	new_ftos.to_csv(file_to, index = False)
-
-
-# Put the new FTO nos. in the queue
-def put_fto_nos(engine, path, if_exists):
-	
-    fto_nos = pd.read_csv(path).drop_duplicates()
-    fto_nos['done'] = 0
-    fto_nos['fto_type'] = ''
-    fto_nos.to_sql('fto_queue', con = engine, index = False, if_exists = if_exists, chunksize = 100)
-
-
-def main(): 
-
-	manual = 0
 	stages = schema.load_stage_table_names()
 	engine = helpers.db_engine()
 	
@@ -154,11 +123,7 @@ def main():
 	fto_stages_dum = get_pivoted_stage(fto_stages)	
 	fto_stages_dum = prep_stages_for_insert(fto_stages_dum, stages, missing_stages)
 
-	insert_ftos(engine, fto_stages_dum)
-	
-	if manual == 1:
-		new_ftos = get_new_ftos(engine, fto_stages_dum, './output/fto_queue.csv') 
-		put_fto_nos('fto_queue', engine, './output/fto_queue.csv', 'append')
+	insert_ftos(engine, fto_stages_dum, test)
 
 
 if __name__ == "__main__": 

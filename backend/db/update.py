@@ -1,8 +1,3 @@
-#--------------------------------------------------------#
-# Author: Akshat Goel
-# Purpose: Create database tables according to schema
-# Contact: akshat.goel@ifmr.ac.in
-#--------------------------------------------------------#
 import os
 import json 
 import pandas as pd
@@ -99,9 +94,15 @@ def upsert_data(table, update_keys):
 	return(sql)
 
 
-def create_primary_key(engine, table, key):
+def create_primary_key(engine, table, key, is_string = 0, key_length = 50):
 
-	engine.execute('ALTER TABLE ' + table + ' ADD PRIMARY KEY(' + key + ')')
+	if is_string == 0:
+		engine.execute('ALTER TABLE ' + table + ' ADD PRIMARY KEY(' + key + ')')
+
+	elif is_string == 1:
+
+		key_length = '(' + str(key_length) + ')'
+		engine.execute('ALTER TABLE ' + table + ' ADD PRIMARY KEY(' + key + key_length + ')')
 
 	return
 

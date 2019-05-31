@@ -1,8 +1,3 @@
-#--------------------------------------------------------#
-# Author: Akshat Goel
-# Purpose: Process and upload the scrapy log to Dropbox and S3
-# Contact: akshat.goel@ifmr.ac.in
-#--------------------------------------------------------#
 import argparse
 import os
 from common import helpers

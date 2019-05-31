@@ -1,11 +1,4 @@
 # -*- coding: utf-8 -*-
-
-#------------------------------------------------------------------#
-# Author: Akshat Goel
-# Date: 8th August 2018
-# Python version: 3.6.3
-#------------------------------------------------------------------#
-
 # Scraping and cleaning modules
 import scrapy
 import datetime

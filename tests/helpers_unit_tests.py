@@ -35,7 +35,7 @@ def run_test(func):
 		except Exception as e: 
 
 			success = 0
-			er.handle_error(error_code ='0', data = {'traceback': e})
+			er.handle_error(error_code ='1')
 
 		return(success)
 	
@@ -97,34 +97,11 @@ def test_error_handling():
 	er.handle_error(error_code ='1', data = {'traceback': msg})
 	
 
-@run_test
-def test_queue_add():
-
-	queue.add.main()
-	
-
-@run_test
-def test_queue_update():
-
-	queue.update.main()
-
-
-@run_test
-def test_queue_make():
-
-	queue.make.main()
-
-
-@run_test
-def test_queue_download():
-	
-	queue.download.main()
-
-
 def main():
 
 	results = []
-	results.append(test_error_handling())
+	results.append(test_download_file_s3())
+	results.append(test_upload_dropbox())
 
 	return(results)
 
@@ -132,3 +109,4 @@ def main():
 if __name__ == '__main__':
 
 	results = main()
+	print(results)

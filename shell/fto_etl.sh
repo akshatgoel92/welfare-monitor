@@ -17,10 +17,10 @@ scrapy crawl fto_content
 # scrapy crawl fto_branch  
 
 # Then update the queue in the SQL database 
-python ./queue/update.py
+python ./tracker/update.py
 
 # Then update and upload the log
 python ./backend/logs/process.py './backend/logs/log.csv' 'logs/log'
 
 # Then download the data
-python ./queue/download.py 0 1 90 './output/transactions.csv' 'tests/transactions'
+python ./tracker/download.py 0 1 90 './output/transactions.csv' 'tests/transactions'

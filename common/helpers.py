@@ -1,8 +1,3 @@
-#--------------------------------------------------------#
-# Author: Akshat Goel
-# Purpose: All common helper functions go here
-# Contact: akshat.goel@ifmr.ac.in
-#--------------------------------------------------------#
 import os
 import json
 import sys
@@ -57,17 +52,17 @@ def db_engine():
 	return(engine)
 
 	
-def upload_dropbox(file_from, file_to):
+def upload_dropbox(file_from = './output/gma_test.xlsx', file_to = 'tests/gma_test.xlsx'):
 	
 	with open('./gma_secrets.json') as data_file:
 		credentials = json.load(data_file)
 
 	access_token = credentials['dropbox']['access_token']
+	file_to_prefix = credentials['dropbox']['prefix']
 	dbx = dropbox.Dropbox(access_token)
 
 	# Prepend the project Dropbox path to the folder
-	file_to_dropbox='/Female Mobile Phones Phase I/Phase II/CHiPS/Data/mis_scrapes/'
-	file_to=os.path.join(file_to_dropbox, file_to)
+	file_to=os.path.join(file_to_prefix, file_to)
 
 	with open(file_from, 'rb') as f:
 		dbx.files_upload(f.read(), file_to, mode = dropbox.files.WriteMode.overwrite)
@@ -86,19 +81,23 @@ def upload_s3(file_from, file_to):
 	s3.upload_file(file_from, bucket_name, file_to)
 
 
-def download_file_s3(file_from, file_to, bucket_name):
+def download_file_s3(file_from = 'tests/gma_test.xlsx', file_to = './output/gma_test.xlsx', 
+					 bucket_name = 'gma-ivrs'):
+
+	with open('./gma_secrets.json') as secrets:
+		s3_access = json.load(secrets)['s3']
+
+	access_key_id = s3_access['access_key_id']
+	secret_access_key = s3_access['secret_access_key']
+	bucket_name = s3_access['default_bucket']
 	
-	s3 = boto3.resource('s3')
+	s3 = boto3.resource('s3', aws_access_key_id = access_key_id, aws_secret_access_key = secret_access_key)
 
 	try: s3.Bucket(bucket_name).download_file(file_from, file_to)
 
-	except botocore.exceptions.ClientError as e:
+	except Exception as e:
 
-		if e.response['Error']['Code'] == "404":
-			print("The object does not exist.")
-
-		else:
-			raise
+		print(e)
 	
 
 def delete_files(path = './output/', extension = '.csv'):

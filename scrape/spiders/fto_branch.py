@@ -1,10 +1,4 @@
 # -*- coding: utf-8 -*-
-
-#------------------------------------------------------------------#
-# Author: Akshat Goel
-# Date: 8th August 2018
-# Python version: 3.6.3
-#------------------------------------------------------------------#
 # Scraping and cleaning modules
 import scrapy
 import datetime
@@ -81,7 +75,7 @@ class FtoBranchSpider(CrawlSpider):
 				item['transact_ref_no'] = row.xpath('td[4]//text()').extract_first()
 
 				item['transact_date'] = row.xpath('td[5]//text()').extract_first()
-				item['transact_date'] = str(datetime.strptime(item['transact_date'], '%d/%m/%Y').date())
+				item['transact_date'] = str(datetime.datetime.strptime(item['transact_date'], '%d/%m/%Y').date())
 				
 				item['app_name'] = row.xpath('td[6]//text()').extract_first()
 				item['wage_list_no'] = row.xpath('td[7]//text()').extract_first()
