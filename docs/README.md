@@ -77,7 +77,7 @@ This script contains the **scrapy pipeline objects** which process each **item**
 * Take as input a list of fields in each item that have to be converted to title case 
 * Create a connection to the data-base
 
-### queue
+### tracker
 
 #### make.py
 
