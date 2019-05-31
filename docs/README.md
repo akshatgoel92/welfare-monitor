@@ -81,7 +81,7 @@ This script contains the **scrapy pipeline objects** which process each **item**
 
 #### make.py
 
-This is executed by fto_stage.sh which is described below. It processes the scraped list of FTO nos. at each stage returned by fto_urls.csv and creats a pandas data-frame containing a queue of FTOs along with information about them. This is then inserted into the FTO queue table in the database. 
+This is executed by **fto_stage.sh** which is described below. It processes the scraped list of FTO nos. at each stage returned by **fto_urls.py** and creates a pandas data-frame containing a queue of FTOs along with information about them. This is then inserted into the FTO queue table in the database. 
 
 #### add.py
 
@@ -123,6 +123,10 @@ This file has common functions which are used by the spiders and pipelines file 
 
 * **insert_data**:  This function prepares a string SQL statement to insert data into the MySQL database. The SQL statement is based on the value of the variable **unique** which is 1 if the table that the data is going to be written to has to satisfy a uniqueness constraint and 0 otherwise.
 
+### errors.py
+
+This is a generic error-handling script. It takes the error messages in **error_messages.json** and sends an email to the team with the relevant error message. It is called by other scripts in the repository whenever a particular error happens.
+
 ### backend
 
 #### db/schema.py 
@@ -153,6 +157,7 @@ This file is called as the last step in the ETL. It processes the log file that 
 
 ### alembic
 
-We have stopped doing database migrations manually and have started using Alembic. This folder is the boiler-plate Alembic folder which has the migration environment and migration scripts.
+* We have stopped doing database migrations manually and have started using **Alembic**. 
+* This folder is the boiler-plate Alembic folder which has the migration environment and migration scripts.
 
   
