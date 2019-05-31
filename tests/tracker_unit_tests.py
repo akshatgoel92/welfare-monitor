@@ -9,7 +9,11 @@ import smtplib
 import boto3
 import pandas as pd
 import numpy as np
-import queue
+
+from tracker import make
+from tracker import add
+from tracker import update
+from tracker import download
 
 from smtplib import SMTP
 from email.mime.text import MIMEText
@@ -45,22 +49,36 @@ def run_test(func):
 @run_test
 def test_queue_make():
 
-	queue.make.main()
+	make.main(test = 1)
 
 
 @run_test
 def test_queue_add():
 
-	queue.add.main()
+	add.main()
 	
 
 @run_test
 def test_queue_update():
 
-	queue.update.main()
+	update.main()
 
 
 @run_test
 def test_queue_download():
 	
-	queue.download.main()
+	download.main()
+
+
+def main():
+
+	results = []
+	results.append(test_queue_make())
+
+	return(results)
+
+
+if __name__ == '__main__':
+
+	results = main()
+	print(results)
