@@ -190,8 +190,8 @@ class FtoContentSpider(scrapy.Spider):
 				item['jcn'] = row.xpath('td[2]//text()').extract_first()
 				item['transact_ref_no'] = row.xpath('td[3]//text()').extract_first()
 
-				item['transact_date'] = row.xpath('td[4]//text()').extract_first()
-				item['transact_date'] = str(datetime.datetime.strptime(item['transact_date'], '%d/%m/%Y').date())
+				item['transact_date'] = (row.xpath('td[4]//text()').extract_first()
+				# item['transact_date'] = str(datetime.datetime.strptime(item['transact_date'], '%d/%m/%Y').date())
 				
 				item['app_name'] = row.xpath('td[5]//text()').extract_first()
 				item['prmry_acc_holder_name'] = row.xpath('td[6]//text()').extract_first()
