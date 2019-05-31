@@ -12,13 +12,13 @@ The SKY programme is a Chattisgarh Government initiative to **expand women's acc
 
 For this project, the **survey team sampled 7200 women** from among these beneficiaries in Raipur district, Chattisgarh. As part of the intevention, our survey team is carrying out supplementary enrollment camps which train women to use the phones they have recieved and explain what to expect in the push calls.
 
-## NREGA FTO Tracking System
-
-The NREGA payments process **tracks each transaction** that has to be made under NREGA. This **information is digitized** and stored in the **FTO status tracking system.** On the **topmost page** relevant to us, the **total no. of FTOs at each stage** of the NREGA payments process is given. Each total has **hyperlinks to the list of FTO nos.** that were added to make up that total. These are themselves **hyperlinked to the payments and transaction information on each FTO.** The **scrape follows these hyperlinks** from the top totals to the bottom transactions using __scrapy__ and __Selenium__ and stores the results in a __MySQL__ data-base hosted on __Amazon Web Services__.
-
 ## Main scripts 
 
 The scrape is based on a collection of scrapy spiders which visit the web-pages on NREGASoft that have the data we need. The shell scripts in the shell folder deploy the spiders on an AWS EC2 instance. The data is stored by the scrape in an AWS MySQL database instance and on AWS S3. The main scripts in the repository are described below in order of priority. 
+
+## NREGA FTO Tracking System
+
+The NREGA payments process **tracks each transaction** that has to be made under NREGA. This **information is digitized** and stored in the **FTO status tracking system.** On the **topmost page** relevant to us, the **total no. of FTOs at each stage** of the NREGA payments process is given. Each total has **hyperlinks to the list of FTO nos.** that were added to make up that total. These are themselves **hyperlinked to the payments and transaction information on each FTO.** The **scrape follows these hyperlinks** from the top totals to the bottom transactions to get the information we need.
 
 ### scrape
 
@@ -41,21 +41,17 @@ This script is run from **fto_etl.sh**. It has the following steps:
 * Scrape **the response**
 * Write scraped data to MySQL DB **via the pipeline**
 
-
 #### fto_branch.py
 
 There are multiple places on the MIS where FTOs are tracked. This corresponds to different parts of the Stage 2 NREGA payments process. This spider visits Table 8.1.1 directly and scrapes the transactions data from there. Table 8.1.1 does not display the last two digits of a worker's bank account number. Apart from that, the fto_branch.py scrape gets all the fields which are scraped by fto_content. Right now, this is not being run. However, we can eventually use this for data quality checks.
-
 
 #### fto_material.py
 
 NREGA payments to work materials vendors are also tracked by the FTO tracking system. This scrapes materials FTOs from Table 8.1.1. This creates .csv output right now but we eventually want to create the database tables for this and make .csv output.
 
-
 #### fto_urls.py
 
 This visits Table 8.1.1 and scrapes the URLs for the list of FTOs at each stage. It is used by the fto_stage.sh shell script described below.
-
 
 #### settings.py
 
@@ -65,7 +61,6 @@ This is the **scrapy settings file**. The important settings we customize for th
 * **CLOSESPIDER_TIMEOUT**: 7200 
 * **CONCURRENT_REQUESTS**:
 
-
 #### items.py
 
 This is the **scrapy items** file. It defines the **items** that are going to be scraped by the scrapy project as classes composed of **scrapy field** attributes. Our file defines **three items**.
@@ -74,7 +69,6 @@ This is the **scrapy items** file. It defines the **items** that are going to be
 * FTONo: this is an **FTO number**
 * FTOItem: this is a **transaction**
 
-
 #### pipelines.py 
 
 This script contains the **scrapy pipeline objects** which process each **item** that is scraped by the spiders. Each pipeline has the following steps: 
@@ -82,7 +76,6 @@ This script contains the **scrapy pipeline objects** which process each **item**
 * Take as input list of tables to write the item information to 
 * Take as input a list of fields in each item that have to be converted to title case 
 * Create a connection to the data-base
-
 
 ### queue
 
@@ -105,7 +98,6 @@ This script is run at the end of each day to download data onto S3 and Dropbox w
 
 ### shell
 
-
 #### fto_stage.sh 
 
 * This script is located in the shell folder. 
@@ -114,13 +106,11 @@ This script is run at the end of each day to download data onto S3 and Dropbox w
 * This spider stores the list of FTOs at each stage as a set of .csvs in the output folder on the EC2 instance. 
 * fto_stage.sh then calls .queue/make.py to process these .csvs into the format of the MySQL database fto_queue table and insert them there.
 
-
 #### fto_etl.sh 
 
 * Every morning at 6:01 am, the ETL shell script nrega_etl.sh is triggered by a cron job on an __Amazon EC2 instance__. 
 * This script can be seen in the __shell__ folder. 
 * This shell script triggers the following scripts in the order given below.   
-
 
 ### common
 
@@ -133,28 +123,23 @@ This file has common functions which are used by the spiders and pipelines file 
 
 * **insert_data**:  This function prepares a string SQL statement to insert data into the MySQL database. The SQL statement is based on the value of the variable **unique** which is 1 if the table that the data is going to be written to has to satisfy a uniqueness constraint and 0 otherwise.
 
-
 ### backend
 
 #### db/schema.py 
 
 This is the original **sqlalchemy** data-base schema.
 
-
 #### db/create.py
 
 This is the script which creates an instance of the original schema.
-
 
 #### db/update.py
 
 This contains helper functions that are used to modify the database.
 
-
 #### ec2
 
 This folder contains requirements files for the repository (*.txt). setup.sh installs all the dependencies on an AWS EC2 instance.
-
 
 ### logs
 
@@ -165,7 +150,6 @@ This file is called as the last step in the ETL. It processes the log file that 
 * **Delete** any existing log 
 * **Load** the current log 
 * Use the **Dropbox API** to upload it to a target folder 
-
 
 ### alembic
 
