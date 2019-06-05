@@ -23,4 +23,4 @@ python ./tracker/update.py
 python ./backend/logs/process.py './backend/logs/log.csv' 'logs/log'
 
 # Then download the data
-python ./tracker/download.py 0 1 90 './output/transactions.csv' 'tests/transactions'
+python ./tracker/download.py 0 1 30 './output/transactions.csv' 'tests/transactions'
