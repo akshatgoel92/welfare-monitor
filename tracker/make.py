@@ -83,7 +83,10 @@ def prep_stages_for_insert(fto_stages, stages, missing_stages):
 	
 	fto_stages = fto_stages.values.tolist()
 	fto_stages = [tuple(row) for row in fto_stages]
-	print(fto_stages[0:5])
+	
+	msg = ""
+	subject = "GMA Update 1: Ready to insert new FTOs"
+	helpers.send_email(subject, msg) 
 
 	return(fto_stages)
 
@@ -103,9 +106,13 @@ def insert_ftos(engine, fto_stages, test):
 		
 		for row in fto_stages:
 			conn.execute(sql, row)
-			
+					
 		if test == 0: 
+			
 			trans.commit()
+			msg = ""
+			subject = "GMA Update 2: Finished inserting new FTOs"
+			helpers.send_email(subject, msg)
 
 	except Exception as e: 
 		
