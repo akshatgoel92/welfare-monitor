@@ -102,10 +102,10 @@ def insert_ftos(engine, fto_stages, test):
 	conn = engine.connect()
 	trans = conn.begin()
 
-	try: 
+	try:
 		
-		for row in fto_stages:
-			conn.execute(sql, row)
+		fto_stages.to_sql('fto_queue', con = engine, index = False, if_exists = replace, chunksize = 100,
+						  dtype = {'fto_no': String(), 'fto_type': String(), 'done': Integer()})
 					
 		if test == 0: 
 			
@@ -129,9 +129,9 @@ def main(test = 0):
 	fto_stages, missing_stages = get_csv(stages)
 	fto_stages_dum = get_pivoted_stage(fto_stages)	
 	fto_stages_dum = prep_stages_for_insert(fto_stages_dum, stages, missing_stages)
-
 	insert_ftos(engine, fto_stages_dum, test)
 
 
 if __name__ == "__main__": 
+	
 	main()
