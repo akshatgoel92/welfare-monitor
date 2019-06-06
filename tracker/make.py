@@ -105,7 +105,8 @@ def insert_ftos(engine, fto_stages, test):
 	try:
 		
 		fto_stages.to_sql('fto_queue', con = engine, index = False, if_exists = 'replace', chunksize = 100,
-						  dtype = {'fto_no': String(), 'fto_type': String(), 'done': Integer()})
+						  dtype = {'fto_no': String(), 'fto_type': String(), 'done': Integer(), 
+						  			'current_stage': String()})
 					
 		if test == 0: 
 			
