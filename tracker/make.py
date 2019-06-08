@@ -115,8 +115,9 @@ def insert_ftos(engine, fto_stages, test):
 			subject = "GMA Update 2: Finished inserting new FTOs"
 			helpers.send_email(subject, msg)
 
-	except Exception as e: 
-		
+	except Exception as e:
+
+		print(e)
 		er.handle_error(error_code ='3', data = {})
 		trans.rollback()
 		sys.exit()
