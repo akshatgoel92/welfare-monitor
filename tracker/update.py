@@ -53,8 +53,10 @@ def update_ftos(engine, scraped_ftos, target_ftos):
 		all_ftos.drop(['_merge'], axis = 1, inplace = True)
 
 		all_ftos.loc[(all_ftos['fto_type'] == 'Material'), 'done'] = 1
-		all_ftos.to_sql('fto_queue', con = conn, index = False, if_exists = 'replace', chunksize=100)
-
+		all_ftos.to_sql('fto_queue', con = conn, index = False, if_exists = 'replace', chunksize=100,
+						dtype = {'fto_no': String(100), 'fto_type': String(15), 'done': SmallInteger(), 
+								 'current_stage': String(15)})
+		conn.execute("ALTER TABLE fto_queue ADD PRIMARY KEY (fto_no(100));")
 		trans.commit()
 		conn.close()
 
