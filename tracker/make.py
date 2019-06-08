@@ -80,12 +80,7 @@ def prep_stages_for_insert(fto_stages, stages, missing_stages):
 	
 	fto_stages['stage'] = fto_stages['current_stage']
 	fto_stages = fto_stages[['fto_no', 'done', 'fto_type', 'current_stage', 'stage']]
-	
-	'''
-	fto_stages = fto_stages.values.tolist()
-	fto_stages = [tuple(row) for row in fto_stages]
-	'''
-	
+		
 	msg = ""
 	subject = "GMA Update 1: Ready to insert new FTOs"
 	helpers.send_email(subject, msg) 
@@ -107,7 +102,7 @@ def insert_ftos(engine, fto_stages, test):
 	try:
 		
 		fto_stages.to_sql('fto_queue', con = engine, index = False, if_exists = 'replace', chunksize = 100,
-						  dtype = {'fto_no': String(100), 'fto_type': String(30), 'done': Integer(), 
+						  dtype = {'fto_no': String(100), 'fto_type': String(15), 'done': Integer(), 
 						  			'current_stage': String(15)})
 					
 		if test == 0: 
