@@ -81,8 +81,10 @@ def prep_stages_for_insert(fto_stages, stages, missing_stages):
 	fto_stages['stage'] = fto_stages['current_stage']
 	fto_stages = fto_stages[['fto_no', 'done', 'fto_type', 'current_stage', 'stage']]
 	
+	'''
 	fto_stages = fto_stages.values.tolist()
 	fto_stages = [tuple(row) for row in fto_stages]
+	'''
 	
 	msg = ""
 	subject = "GMA Update 1: Ready to insert new FTOs"
