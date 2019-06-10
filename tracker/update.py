@@ -55,7 +55,7 @@ def update_ftos(engine, scraped_ftos, target_ftos):
 		all_ftos.loc[(all_ftos['fto_type'] == 'Material'), 'done'] = 1
 		all_ftos.to_sql('fto_queue', con = conn, index = False, if_exists = 'replace', chunksize=100,
 						dtype = {'fto_no': String(100), 'fto_type': String(15), 'done': SmallInteger(), 
-								 'current_stage': String(15)})
+								 'stage': String(15)})
 		conn.execute("ALTER TABLE fto_queue ADD PRIMARY KEY (fto_no(100));")
 		trans.commit()
 		conn.close()
@@ -68,17 +68,17 @@ def update_ftos(engine, scraped_ftos, target_ftos):
 
 	total = len(all_ftos)
 	done = len(all_ftos.loc[all_ftos['done'] == 1])
+	progress = done/total
 
-	return(total, done)
+	return(total, done, progress)
 
 
 # This function calculates the progress of the code
-def get_progress(total, done):
+def send_progress(total, done, progress):
 	
 	try: 
 		
-		progress = done/total
-		msg = 'There are a total of {} FTOs. The code has done {} FTOs. The code is {} done'
+		msg = 'There are a total of {} FTOs. The code has done {} FTOs. The code is {} done.'
 		subject = 'GMA FTO Scrape: Progress Report'
 		helpers.send_email(subject, msg.format(total, done, progress))
 	
@@ -93,8 +93,8 @@ def main():
 	engine = helpers.db_engine()
 	scraped_ftos = get_scraped_ftos(engine)
 	target_ftos = get_target_ftos(engine)
-	total, done = update_ftos(engine,scraped_ftos, target_ftos)
-	get_progress(total, done)
+	total, done, progress = update_ftos(engine,scraped_ftos, target_ftos)
+	send_progress(total, done, progress)
 
 
 if __name__ == '__main__':
