@@ -110,7 +110,16 @@ This script is run at the end of each day to download data onto S3 and Dropbox w
 
 * Every morning at 6:01 am, the ETL shell script nrega_etl.sh is triggered by a cron job on an __Amazon EC2 instance__. 
 * This script can be seen in the __shell__ folder. 
-* This shell script triggers the following scripts in the order given below.   
+* This shell script triggers the following scripts in the order given below.  
+
+#### fto_match_field.sh
+
+* This script is found in the shell directory.
+* Its main purpose is to pull field data, merge it with transaction/fto data from the database, 
+  and output a csv in the appropriate format for BTT.
+* It will be run every day, and a time needs to be selected. 
+* It reformats necessary data in order to be able to match the job card numbers.
+* A message is emailed to the team if there are no matches.
 
 ### common
 
@@ -159,5 +168,11 @@ This file is called as the last step in the ETL. It processes the log file that 
 
 * We have stopped doing database migrations manually and have started using **Alembic**. 
 * This folder is the boiler-plate Alembic folder which has the migration environment and migration scripts.
+
+### script
+
+#### scrape_info_to_btt_csv.py
+
+Thie file's main purpose is to pull field data, merge it with transaction/fto data from the database, and output a csv in the appropriate format for BTT. It reformats necessary data in order to be able to match the job card numbers. A message is emailed to the team if there are no matches.
 
   
