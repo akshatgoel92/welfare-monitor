@@ -80,10 +80,10 @@ def prep_stages_for_insert(fto_stages, stages, missing_stages):
 	
 	fto_stages['stage'] = fto_stages['current_stage']
 	fto_stages = fto_stages[['fto_no', 'done', 'fto_type', 'current_stage', 'stage']]
-	
-	fto_stages = fto_stages.values.tolist()
-	fto_stages = [tuple(row) for row in fto_stages]
-	print(fto_stages[0:5])
+		
+	msg = ""
+	subject = "GMA Update 1: Ready to insert new FTOs"
+	helpers.send_email(subject, msg) 
 
 	return(fto_stages)
 
@@ -99,16 +99,22 @@ def insert_ftos(engine, fto_stages, test):
 	conn = engine.connect()
 	trans = conn.begin()
 
-	try: 
+	try:
 		
-		for row in fto_stages:
-			conn.execute(sql, row)
-			
+		fto_stages.to_sql('fto_queue', con = engine, index = False, if_exists = 'replace', chunksize = 100,
+						  dtype = {'fto_no': String(100), 'fto_type': String(15), 'done': SmallInteger(), 
+						  			'current_stage': String(15)})
+					
 		if test == 0: 
+			
 			trans.commit()
+			msg = ""
+			subject = "GMA Update 2: Finished inserting new FTOs"
+			helpers.send_email(subject, msg)
 
-	except Exception as e: 
-		
+	except Exception as e:
+
+		print(e)
 		er.handle_error(error_code ='3', data = {})
 		trans.rollback()
 		sys.exit()
@@ -122,9 +128,9 @@ def main(test = 0):
 	fto_stages, missing_stages = get_csv(stages)
 	fto_stages_dum = get_pivoted_stage(fto_stages)	
 	fto_stages_dum = prep_stages_for_insert(fto_stages_dum, stages, missing_stages)
-
 	insert_ftos(engine, fto_stages_dum, test)
 
 
 if __name__ == "__main__": 
+	
 	main()
