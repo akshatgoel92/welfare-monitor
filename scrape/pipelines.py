@@ -5,55 +5,30 @@
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-#---------------------------------------------------------------------# 
-
-#---------------------------------------------------------------------# 
-# Import packages
-#---------------------------------------------------------------------# 
+#---------------------------------------------------------------------#  
 import os
 import json
 import re
-
-#---------------------------------------------------------------------# 
-# MySQL driver 
-# Install this as MySQLdb to ensure compataibility
-#---------------------------------------------------------------------# 
 import pymysql
-pymysql.install_as_MySQLdb()
-
-#---------------------------------------------------------------------# 
-# Scrapy
-#---------------------------------------------------------------------# 
 from scrapy import signals
 from scrapy.contrib.exporter import CsvItemExporter
 from scrapy.exceptions import DropItem
-
-#---------------------------------------------------------------------# 
-# Project specific
-#---------------------------------------------------------------------# 
 from scrape.items import NREGAItem
 from scrape.items import FTONo
 from scrape.items import FTOItem
 from scrape.items import FTOOverviewItem
 from scrape.items import FTOMaterialItem
-
-#---------------------------------------------------------------------# 
-# Import helper functions for data-base
-#---------------------------------------------------------------------# 
 from common.helpers import sql_connect
 from common.helpers import clean_item
-
-from backend.db.update import insert_data
-from backend.db.update import update_fto_type
-from backend.db.update import get_keys 
-#---------------------------------------------------------------------# 
-# Twisted adbapi library for connection pools to SQL data-base
-#---------------------------------------------------------------------# 
+from db.update import insert_data
+from db.update import update_fto_type
+from db.update import get_keys 
 from twisted.enterprise import adbapi
 
-#---------------------------------------------------------------------# 
-# Process each item using this pipeline
-#---------------------------------------------------------------------# 
+pymysql.install_as_MySQLdb()
+
+
+
 class FTONoPipeline(object):
 
 	def open_spider(self, spider):
@@ -64,11 +39,7 @@ class FTONoPipeline(object):
 			self.exporter = CsvItemExporter(self.file)
 			self.exporter.start_exporting()
 
-#---------------------------------------------------------------------# 
-# Check to see whether items are missing
-# There are rows on FTOs which don't contain transaction information
-# This sequence of statements removes these rows from the final scrape
-#---------------------------------------------------------------------# 
+
 	def process_item(self, item, spider):
 		
 		if isinstance(item, FTONo) and spider.name == 'fto_urls': 
@@ -86,14 +57,13 @@ class FTONoPipeline(object):
 
 		return(item)
 
-	#---------------------------------------------------------------------# 
-	# Finish exporting item before closing the spider
-	#---------------------------------------------------------------------# 
+
 	def close_spider(self, spider):	
 
 		if spider.name == 'fto_urls':
 			self.exporter.finish_exporting()
 			self.file.close()
+
 
 		
 class FTOContentPipeline(object):
@@ -115,9 +85,6 @@ class FTOContentPipeline(object):
 	
 	def process_item(self, item, spider):
 
-		#---------------------------------------------------------------------# 
-		# Do this for over-view item spider
-		#---------------------------------------------------------------------# 
 		if isinstance(item, FTOOverviewItem) and spider.name == 'fto_content':
 			
 			title_fields = ['state', 
@@ -133,10 +100,7 @@ class FTOContentPipeline(object):
 										str(spider.block))
 			
 			self.dbpool.runOperation(sql, data)
-		
-		#---------------------------------------------------------------------# 
-		# Do this for FTO content spider
-		#---------------------------------------------------------------------# 
+		 
 		if isinstance(item, FTOItem) and spider.name == 'fto_content':
 
 			title_fields = ['block_name,' 
@@ -173,9 +137,7 @@ class FTOContentPipeline(object):
 				except Exception as e:
 					self.logger.error('Error in the data-base upload: %s', str(e))
 
-		#---------------------------------------------------------------------# 
-		# Do this for FTO branch spider
-		#---------------------------------------------------------------------# 
+
 		if isinstance(item, FTOItem) and spider.name == 'fto_branch':
 			
 			title_fields = ['block_name',
@@ -202,9 +164,6 @@ class FTOContentPipeline(object):
 			if item['wage_list_no'] == '':
 				raise(DropItem("Wage list no. missing"))
 			
-			#---------------------------------------------------------------------# 
-			# Drop transaction reference numbers that don't match the format
-			#---------------------------------------------------------------------# 
 			if re.search('\d{10}NRG\d{17}', item['transact_ref_no']) is None:
 				raise(DropItem("Transaction ref no does not fit format"))
 				
@@ -226,12 +185,11 @@ class FTOContentPipeline(object):
 					
 		return(item)
 	
-	#---------------------------------------------------------------------# 
-	# Execute this function when the spider is closing
-	# Shut down all the connections in the DB connection pool
-	#---------------------------------------------------------------------# 
+
 	def close_spider(self, spider):
 		self.dbpool.close()
+
+
 
 class FTOMaterialPipeline(object):
 
@@ -245,11 +203,10 @@ class FTOMaterialPipeline(object):
 
 	def process_item(self, item, spider):
 		
-		#---------------------------------------------------------------------# 
+		 
 		# Check to see whether items are missing
 		# There are rows on FTOs which don't contain transaction information
 		# This sequence of statements removes these rows from the final scrape
-		#---------------------------------------------------------------------# 
 		if isinstance(item, FTOMaterialItem) and spider.name == 'fto_material': 
 			
 			if item['block_name'] is None:
@@ -268,9 +225,7 @@ class FTOMaterialPipeline(object):
 			
 		return(item)
 
-	#---------------------------------------------------------------------# 
-	# Finish exporting item before closing the spider
-	#---------------------------------------------------------------------# 
+
 	def close_spider(self, spider):	
 
 		if spider.name == 'fto_material':
