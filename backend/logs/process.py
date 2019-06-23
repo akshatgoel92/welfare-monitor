@@ -1,6 +1,7 @@
 import argparse
 import os
 from common import helpers
+from common import errors as er
 from datetime import datetime
 
 
@@ -15,11 +16,23 @@ def process_log():
 	file_from = args.file_from
 	file_to = args.file_to + '_' + str(datetime.today()) + '.csv'
 	
+	try:
+
+		log_size = os.path.getsize(file_from)/1024
+		subj = "GMA Update 3: Log size report"
+		msg = "The size of the log is {} KB.".format(log_size) 
+		helpers.send_email(subj, msg)
+
+	except Exception as e:
+
+		er.handle_error(error_code ='12', data = {})
+
+
 	try: helpers.upload_dropbox(file_from, file_to)
-	except Exception as e: er.handle_error(error_code ='12', data = {})
+	except Exception as e: er.handle_error(error_code ='13', data = {})
 		
 	try: helpers.upload_s3(file_from, file_to)
-	except Exception as e: er.handle_error(error_code ='13', data = {})
+	except Exception as e: er.handle_error(error_code ='14', data = {})
 
 	os.unlink(file_from)
 
