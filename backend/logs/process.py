@@ -15,8 +15,11 @@ def process_log():
 	file_from = args.file_from
 	file_to = args.file_to + '_' + str(datetime.today()) + '.csv'
 	
-	helpers.upload_dropbox(file_from, file_to)
-	helpers.upload_s3(file_from, file_to)
+	try: helpers.upload_dropbox(file_from, file_to)
+	except Exception as e: er.handle_error(error_code ='12', data = {})
+		
+	try: helpers.upload_s3(file_from, file_to)
+	except Exception as e: er.handle_error(error_code ='13', data = {})
 
 	os.unlink(file_from)
 
