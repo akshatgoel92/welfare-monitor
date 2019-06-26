@@ -92,7 +92,8 @@ def get_db_tables():
 
 	except Exception as e:
 		
-		er.handle_error(error_code ='5', data = {})
+		#er.handle_error(error_code ='5', data = {})
+		print('IN EXCEPTIONS')
 		conn.close()
 
 	return transactions, fto_queue
@@ -142,8 +143,8 @@ def merge_db_tables(transactions, fto_queue):
 	# data prep before merge
 	transactions.drop(columns=['block_name', 'transact_ref_no', 'app_name',
 							   'wage_list_no', 'acc_no', 'ifsc_code',
-							   'processed_date', 'utr_no', 'rejection_reason',
-							   'scrape_date', 'scrape_time'], inplace=True)
+							   'processed_date', 'utr_no', 'scrape_date', 
+							   'scrape_time'], inplace=True)
 
 	# Add CH-033 to the beginning of jcn's that don't have it
 	transactions['jcn'] = transactions[['CH-033' not in x for x in transactions['jcn']]]['jcn'].apply(lambda x: 'CH-033' + x[2:])
@@ -160,7 +161,10 @@ def merge_db_tables(transactions, fto_queue):
 
 def merge_field_data(db_tables, df_field_data):
 
-	df_full = pd.merge(db_tables, df_field_data, on='jcn')
+	df_full = pd.merge(db_tables, df_field_data, on='jcn', how='outer', indicator=True)
+	
+	# Get merged and field data non-matches
+	df_full = df_full.query('_merge != "left_only"')
 
 	if df_full.empty:
 		er.handle_error(error_code ='12', data = {})
@@ -173,34 +177,46 @@ def set_call_script(df_full):
 
 	def get_stage_letter(status, current_stage):
 
-		script = 'Da Db Dc '
+		script = 'P0 P1 P2 P3'
 
-		if not status and not current_stage:
-			return script
+		if pd.isna(status) and pd.isna(current_stage):
+			# here is where the non-matches should be
+			# need to add on to script
+			script += ' Q A B'
 
-		if status:
-			# Processed or Rejected
-			script += 'Ga Gb'
-			return script
-
-		if current_stage == "fst_sig" or current_stage == "fst_sig_not" or \
+		elif status:
+			# Processed
+			if status == 'Processed':
+				script += ' R EA EB EC'
+			else:
+				# Rejected
+				script += ' R FA FB FC'
+			
+		elif current_stage == "fst_sig" or current_stage == "fst_sig_not" or \
 				current_stage == "sec_sig" or current_stage == "sec_sig_not":
-			script += 'Ea Eb'
-			return script
+			script += ' R CA CB CC'
 
 		else:
-			script += 'Fa Fb'
-			return script
+			script += ' R DA DB DC'
+			
+		conclusion = ' P0 Z1 Z2'
+
+		script += conclusion
+
+		return script
+
+
+	df_full['time_pref'] = None
+	df_full['amount'] = np.where(df_full['credit_amt_actual'] != 0, \
+								 df_full['credit_amt_actual'], \
+								 df_full['credit_amt_due'])
 
 	df_full['day 1'] = np.vectorize(get_stage_letter)(df_full['status'], \
 													  df_full['current_stage'])
 
-	df_full['time_pref'] = None
-	df_full['amount'] = np.where(df_full['credit_amt_actual'].notnull(), \
-								 df_full['credit_amt_actual'], \
-								 df_full['credit_amt_due'])
-
-	df_full = df_full[['id','sky_phone', 'amount', 'transact_date', 'time_pref', 'day 1']]
+	df_full = df_full[['id','sky_phone', 'amount', 'transact_date', 'time_pref',
+					   'rejection_reason', 'day 1']]
+	print(df_full)
 
 	return df_full
 
@@ -215,10 +231,9 @@ def main():
 
 	df_full = merge_field_data(db_tables, df_field_data)
 
-	df_full = set_call_script(df_full)
+	df_final = set_call_script(df_full)
 
-	df_full.to_csv('dummy_calls_btt_pilot_3.csv', index=False)
-
+	df_final.to_csv('dummy_calls_btt_pilot_3.csv', index=False)
 
 
 
