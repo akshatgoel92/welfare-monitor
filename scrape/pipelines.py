@@ -30,6 +30,8 @@ pymysql.install_as_MySQLdb()
 
 
 class FTONoPipeline(object):
+	'''This writes the output of FTO urls to a set of .csvs.'''
+
 
 	def open_spider(self, spider):
 	
@@ -67,56 +69,34 @@ class FTONoPipeline(object):
 
 		
 class FTOContentPipeline(object):
+	'''This takes in input from the content spiders and 
+	writes information to the database.'''
+
 
 	def __init__(self):
 		
-		user, password, host, db_name = sql_connect().values()
-		
-		self.dbpool = adbapi.ConnectionPool('pymysql', 
-											db = db_name, 
-											host = host, 
-											user = user, 
-											passwd = password, 
+		user, password, host, db_name, db_test = sql_connect().values()
+		self.dbpool = adbapi.ConnectionPool('pymysql', db = db_name, host = host, 
+											user = user, passwd = password, 
 											cursorclass = pymysql.cursors.DictCursor, 
-											charset = 'utf8', 
-											use_unicode = True,
-											cp_max = 16)
+											charset = 'utf8', use_unicode = True, cp_max = 16)
 		
 	
 	def process_item(self, item, spider):
 
 		if isinstance(item, FTOOverviewItem) and spider.name == 'fto_content':
 			
-			title_fields = ['state', 
-							'district',
-							'block', 
-							'type',
-							'pay_mode']
-			
+			title_fields = ['state', 'district', 'block', 'type', 'pay_mode']
 			item = clean_item(item, title_fields)
-			
-			sql,  data = update_fto_type(item['fto_no'], 
-										item['fto_type'], 
-										str(spider.block))
-			
+			sql,  data = update_fto_type(item['fto_no'], item['fto_type'], str(spider.block))
 			self.dbpool.runOperation(sql, data)
 		 
 		if isinstance(item, FTOItem) and spider.name == 'fto_content':
 
-			title_fields = ['block_name,' 
-							'status', 
-							'rejection_reason',
-							'prmry_acc_holder_name',
+			title_fields = ['block_name,' 'status', 'rejection_reason', 'prmry_acc_holder_name',
 							'app_name']
-			
-			tables = ['banks', 
-					  'transactions',
-					  'wage_lists',
-					  'accounts']
-			
-			unique_tables = ['banks', 
-							 'wage_lists',
-							 'accounts']
+			tables = ['banks', 'transactions', 'wage_lists', 'accounts']
+			unique_tables = ['banks', 'wage_lists', 'accounts']
 			
 			if item['block_name'] is None:
 				raise(DropItem("Block name missing"))
@@ -127,30 +107,20 @@ class FTOContentPipeline(object):
 				
 				unique = 1 if table in unique_tables else 0
 				keys = get_keys(table)
-				sql, data = insert_data(item,
-										keys,
-										table, 
-										unique)
+				sql, data = insert_data(item, keys, table, unique)
+				
 				try:
-					self.dbpool.runOperation(sql, 
-											data)
+					self.dbpool.runOperation(sql, data)
+				
 				except Exception as e:
 					self.logger.error('Error in the data-base upload: %s', str(e))
 
 
 		if isinstance(item, FTOItem) and spider.name == 'fto_branch':
 			
-			title_fields = ['block_name',
-							'app_name',
-							'status', 
-							'rejection_reason']
-		
-			tables = ['banks', 
-					  'transactions', 
-					  'wage_lists']
-			
-			unique_tables = ['banks', 
-							'wage_lists']
+			title_fields = ['block_name', 'app_name', 'status', 'rejection_reason']
+			tables = ['banks', 'transactions', 'wage_lists']
+			unique_tables = ['banks', 'wage_lists']
 			
 			if item['block_name'] is None:
 				raise(DropItem("Block name missing"))
@@ -173,10 +143,8 @@ class FTOContentPipeline(object):
 				
 				unique = 1 if table in unique_tables else 0
 				keys = get_keys(table)
-				sql, data = insert_data(item,
-										keys,
-										table, 
-										unique)
+				sql, data = insert_data(item, keys, table, unique)
+				
 				try:
 					self.dbpool.runOperation(sql, 
 												data)
@@ -192,6 +160,7 @@ class FTOContentPipeline(object):
 
 
 class FTOMaterialPipeline(object):
+
 
 	def open_spider(self, spider):
 	
@@ -232,4 +201,3 @@ class FTOMaterialPipeline(object):
 			
 			self.exporter.finish_exporting()
 			self.file.close()
-

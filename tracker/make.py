@@ -10,8 +10,8 @@ import numpy as np
 
 from sqlalchemy import *
 from common import helpers
-from backend.db import schema
-from backend.db import update
+from db import schema
+from db import update
 from common import errors as er
 
 pymysql.install_as_MySQLdb()

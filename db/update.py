@@ -119,7 +119,7 @@ def create_index(engine, table, col, name):
 # This is used by the pipelines file to decide where each field will should be sent
 def get_keys(table):
 	
-	with open('./backend/db/table_keys.json') as file:
+	with open('./db/table_keys.json') as file:
 		
 		tables = json.load(file)
 		keys = tables[table]

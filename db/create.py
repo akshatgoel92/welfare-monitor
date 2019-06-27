@@ -1,5 +1,5 @@
 import sys
-from backend.db import schema
+from db import schema
 from common import helpers
 
 

@@ -39,4 +39,5 @@ scrapy crawl fto_urls -a stage=pb
 # Now make the data-base queue
 python tracker/make.py
 
+# Update the tracker
 python tracker/update.py

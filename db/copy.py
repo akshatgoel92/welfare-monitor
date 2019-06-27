@@ -1,10 +1,13 @@
 # Import packages
-import common
-import sys
 from sqlalchemy.engine import reflection
+from common import helpers
+import sys
 
 
-def create_db(engine_test, engine_prod, db_test,  db_prod = 'nrega_payments'): 
+def copy_db(db_test = 'gma_bank_db_test',  db_prod = 'gma_bank_db'): 
+	
+	engine_prod = helpers.db_engine()
+	engine_test = helpers.db_engine(test = 1)
 	
 	tables = reflection.Inspector.from_engine(engine_prod).get_table_names()
 	conn = engine_test.connect()
@@ -17,8 +20,6 @@ def create_db(engine_test, engine_prod, db_test,  db_prod = 'nrega_payments'):
 			db_prod_sql = db_prod + "." + table 
 			sql = "CREATE TABLE IF NOT EXISTS {} LIKE {};".format(table, db_prod_sql)
 			conn.execute(sql)
-			
-			
 			print('Table {} done'.format(table))					
 	
 		except Exception as e:
@@ -31,7 +32,4 @@ def create_db(engine_test, engine_prod, db_test,  db_prod = 'nrega_payments'):
 
 if __name__ == '__main__': 
 
-	db_test = 'bh_test'
-	engine_prod = common.database_engine()	
-	engine_test = common.database_engine('bh_test')
-	create_db(engine_test, engine_prod, db_test)
+	copy_db()
