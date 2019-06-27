@@ -28,7 +28,7 @@ def sql_connect():
 	return(sql_access)
 
 
-def db_conn():
+def db_conn(test = 0):
 	
 	with open('./gma_secrets.json') as secrets:
 		sql_access = json.load(secrets)['mysql']
@@ -37,17 +37,28 @@ def db_conn():
 	password = sql_access['password']
 	host = sql_access['host']
 	db = sql_access['db']
-		
-	conn = pymysql.connect(host, user, password, db, charset="utf8", use_unicode=True)
+	db_test = sql_access['db_test']
+	
+	if test == 1:	
+		conn = pymysql.connect(host, user, password, db_test, charset="utf8", use_unicode=True)
+
+	elif test == 0:
+		conn = pymysql.connect(host, user, password, db, charset="utf8", use_unicode=True) 
+	
 	cursor = conn.cursor()
 	
 	return(conn, cursor)
 
 
-def db_engine():
+def db_engine(test = 0):
 	
-	user, password, host, db = sql_connect().values()
-	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
+	user, password, host, db, db_test = sql_connect().values()
+	
+	if test == 1:
+		engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db_test)
+	
+	elif test == 0:
+		engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
 
 	return(engine)
 

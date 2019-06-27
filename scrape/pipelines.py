@@ -5,56 +5,33 @@
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-#---------------------------------------------------------------------# 
-
-#---------------------------------------------------------------------# 
-# Import packages
-#---------------------------------------------------------------------# 
+#---------------------------------------------------------------------#  
 import os
 import json
 import re
-
-#---------------------------------------------------------------------# 
-# MySQL driver 
-# Install this as MySQLdb to ensure compataibility
-#---------------------------------------------------------------------# 
 import pymysql
-pymysql.install_as_MySQLdb()
-
-#---------------------------------------------------------------------# 
-# Scrapy
-#---------------------------------------------------------------------# 
 from scrapy import signals
 from scrapy.contrib.exporter import CsvItemExporter
 from scrapy.exceptions import DropItem
-
-#---------------------------------------------------------------------# 
-# Project specific
-#---------------------------------------------------------------------# 
 from scrape.items import NREGAItem
 from scrape.items import FTONo
 from scrape.items import FTOItem
 from scrape.items import FTOOverviewItem
 from scrape.items import FTOMaterialItem
-
-#---------------------------------------------------------------------# 
-# Import helper functions for data-base
-#---------------------------------------------------------------------# 
 from common.helpers import sql_connect
 from common.helpers import clean_item
-
-from backend.db.update import insert_data
-from backend.db.update import update_fto_type
-from backend.db.update import get_keys 
-#---------------------------------------------------------------------# 
-# Twisted adbapi library for connection pools to SQL data-base
-#---------------------------------------------------------------------# 
+from db.update import insert_data
+from db.update import update_fto_type
+from db.update import get_keys 
 from twisted.enterprise import adbapi
 
-#---------------------------------------------------------------------# 
-# Process each item using this pipeline
-#---------------------------------------------------------------------# 
+pymysql.install_as_MySQLdb()
+
+
+
 class FTONoPipeline(object):
+	'''This writes the output of FTO urls to a set of .csvs.'''
+
 
 	def open_spider(self, spider):
 	
@@ -64,11 +41,7 @@ class FTONoPipeline(object):
 			self.exporter = CsvItemExporter(self.file)
 			self.exporter.start_exporting()
 
-#---------------------------------------------------------------------# 
-# Check to see whether items are missing
-# There are rows on FTOs which don't contain transaction information
-# This sequence of statements removes these rows from the final scrape
-#---------------------------------------------------------------------# 
+
 	def process_item(self, item, spider):
 		
 		if isinstance(item, FTONo) and spider.name == 'fto_urls': 
@@ -86,73 +59,44 @@ class FTONoPipeline(object):
 
 		return(item)
 
-	#---------------------------------------------------------------------# 
-	# Finish exporting item before closing the spider
-	#---------------------------------------------------------------------# 
+
 	def close_spider(self, spider):	
 
 		if spider.name == 'fto_urls':
 			self.exporter.finish_exporting()
 			self.file.close()
 
+
 		
 class FTOContentPipeline(object):
+	'''This takes in input from the content spiders and 
+	writes information to the database.'''
+
 
 	def __init__(self):
 		
-		user, password, host, db_name = sql_connect().values()
-		
-		self.dbpool = adbapi.ConnectionPool('pymysql', 
-											db = db_name, 
-											host = host, 
-											user = user, 
-											passwd = password, 
+		user, password, host, db_name, db_test = sql_connect().values()
+		self.dbpool = adbapi.ConnectionPool('pymysql', db = db_name, host = host, 
+											user = user, passwd = password, 
 											cursorclass = pymysql.cursors.DictCursor, 
-											charset = 'utf8', 
-											use_unicode = True,
-											cp_max = 16)
+											charset = 'utf8', use_unicode = True, cp_max = 16)
 		
 	
 	def process_item(self, item, spider):
 
-		#---------------------------------------------------------------------# 
-		# Do this for over-view item spider
-		#---------------------------------------------------------------------# 
 		if isinstance(item, FTOOverviewItem) and spider.name == 'fto_content':
 			
-			title_fields = ['state', 
-							'district',
-							'block', 
-							'type',
-							'pay_mode']
-			
+			title_fields = ['state', 'district', 'block', 'type', 'pay_mode']
 			item = clean_item(item, title_fields)
-			
-			sql,  data = update_fto_type(item['fto_no'], 
-										item['fto_type'], 
-										str(spider.block))
-			
+			sql,  data = update_fto_type(item['fto_no'], item['fto_type'], str(spider.block))
 			self.dbpool.runOperation(sql, data)
-		
-		#---------------------------------------------------------------------# 
-		# Do this for FTO content spider
-		#---------------------------------------------------------------------# 
+		 
 		if isinstance(item, FTOItem) and spider.name == 'fto_content':
 
-			title_fields = ['block_name,' 
-							'status', 
-							'rejection_reason',
-							'prmry_acc_holder_name',
+			title_fields = ['block_name,' 'status', 'rejection_reason', 'prmry_acc_holder_name',
 							'app_name']
-			
-			tables = ['banks', 
-					  'transactions',
-					  'wage_lists',
-					  'accounts']
-			
-			unique_tables = ['banks', 
-							 'wage_lists',
-							 'accounts']
+			tables = ['banks', 'transactions', 'wage_lists', 'accounts']
+			unique_tables = ['banks', 'wage_lists', 'accounts']
 			
 			if item['block_name'] is None:
 				raise(DropItem("Block name missing"))
@@ -163,32 +107,20 @@ class FTOContentPipeline(object):
 				
 				unique = 1 if table in unique_tables else 0
 				keys = get_keys(table)
-				sql, data = insert_data(item,
-										keys,
-										table, 
-										unique)
+				sql, data = insert_data(item, keys, table, unique)
+				
 				try:
-					self.dbpool.runOperation(sql, 
-											data)
+					self.dbpool.runOperation(sql, data)
+				
 				except Exception as e:
 					self.logger.error('Error in the data-base upload: %s', str(e))
 
-		#---------------------------------------------------------------------# 
-		# Do this for FTO branch spider
-		#---------------------------------------------------------------------# 
+
 		if isinstance(item, FTOItem) and spider.name == 'fto_branch':
 			
-			title_fields = ['block_name',
-							'app_name',
-							'status', 
-							'rejection_reason']
-		
-			tables = ['banks', 
-					  'transactions', 
-					  'wage_lists']
-			
-			unique_tables = ['banks', 
-							'wage_lists']
+			title_fields = ['block_name', 'app_name', 'status', 'rejection_reason']
+			tables = ['banks', 'transactions', 'wage_lists']
+			unique_tables = ['banks', 'wage_lists']
 			
 			if item['block_name'] is None:
 				raise(DropItem("Block name missing"))
@@ -202,9 +134,6 @@ class FTOContentPipeline(object):
 			if item['wage_list_no'] == '':
 				raise(DropItem("Wage list no. missing"))
 			
-			#---------------------------------------------------------------------# 
-			# Drop transaction reference numbers that don't match the format
-			#---------------------------------------------------------------------# 
 			if re.search('\d{10}NRG\d{17}', item['transact_ref_no']) is None:
 				raise(DropItem("Transaction ref no does not fit format"))
 				
@@ -214,10 +143,8 @@ class FTOContentPipeline(object):
 				
 				unique = 1 if table in unique_tables else 0
 				keys = get_keys(table)
-				sql, data = insert_data(item,
-										keys,
-										table, 
-										unique)
+				sql, data = insert_data(item, keys, table, unique)
+				
 				try:
 					self.dbpool.runOperation(sql, 
 												data)
@@ -226,14 +153,14 @@ class FTOContentPipeline(object):
 					
 		return(item)
 	
-	#---------------------------------------------------------------------# 
-	# Execute this function when the spider is closing
-	# Shut down all the connections in the DB connection pool
-	#---------------------------------------------------------------------# 
+
 	def close_spider(self, spider):
 		self.dbpool.close()
 
+
+
 class FTOMaterialPipeline(object):
+
 
 	def open_spider(self, spider):
 	
@@ -245,11 +172,10 @@ class FTOMaterialPipeline(object):
 
 	def process_item(self, item, spider):
 		
-		#---------------------------------------------------------------------# 
+		 
 		# Check to see whether items are missing
 		# There are rows on FTOs which don't contain transaction information
 		# This sequence of statements removes these rows from the final scrape
-		#---------------------------------------------------------------------# 
 		if isinstance(item, FTOMaterialItem) and spider.name == 'fto_material': 
 			
 			if item['block_name'] is None:
@@ -268,13 +194,10 @@ class FTOMaterialPipeline(object):
 			
 		return(item)
 
-	#---------------------------------------------------------------------# 
-	# Finish exporting item before closing the spider
-	#---------------------------------------------------------------------# 
+
 	def close_spider(self, spider):	
 
 		if spider.name == 'fto_material':
 			
 			self.exporter.finish_exporting()
 			self.file.close()
-

@@ -200,7 +200,7 @@ def create_stage_table_names():
 
 	tables = ['fst_sig_not', 'fst_sig', 'sec_sig_not', 'sec_sig', 'sb', 'P', 'pp', 'pb']
 
-	with open('./backend/db/stage_names.json', 'w') as file:
+	with open('./db/stage_names.json', 'w') as file:
 
 		json.dump(tables, file, sort_keys = True, indent = 4)
 
@@ -209,7 +209,7 @@ def create_stage_table_names():
 
 def load_stage_table_names():
 
-	with open('./backend/db/stage_names.json') as file:
+	with open('./db/stage_names.json') as file:
 		
 		tables = json.load(file)
 
@@ -225,7 +225,7 @@ def send_keys_to_file(engine):
 		
 		tables[table] = [column['name'] for column in inspector.get_columns(table)]
 						
-	with open('./backend/db/table_keys.json', 'w') as file:
+	with open('./db/table_keys.json', 'w') as file:
 		
 		json.dump(tables, file, sort_keys = True, indent = 4)
 
