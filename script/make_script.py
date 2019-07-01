@@ -108,8 +108,7 @@ def get_field_data_table():
 		df_field_data['jcn'] = df_field_data['jcn'].apply(ensure_jcn_format)
 	# Exception handling
 	except Exception as e:
-		#er.handle_error(error_code ='5', data = {})
-		print("Error in get_field_data_table:")
+		er.handle_error(error_code ='5', data = {})
 		# Print the traceback
 		print(e)
 		# Exit in the case of an exception
@@ -146,10 +145,7 @@ def get_db_tables(start_date, end_date):
 
 	except Exception as e:
 		
-		#er.handle_error(error_code ='5', data = {})
-		print(e)
-		print("Error in get_field_db_table:")
-		print('IN EXCEPTIONS')
+		er.handle_error(error_code ='5', data = {})
 		conn.close()
 
 	return transactions, fto_queue
@@ -285,42 +281,29 @@ def main():
 	start_date = helpers.get_time_window(today, window_length)
 	# Get the field data table
 	df_field_data = get_field_data_table()
-	# Print progress
-	print(1)
-	# Print the start date and today while we're testing
-	print(start_date, today)
 	# Get the transactions and FTO queue
 	transactions, fto_queue = get_db_tables(start_date, today)
-	# Print a marker while we're testing
-	print(2)
 	# Merge the database tables with each other - do this join in SQL eventually
 	db_tables = merge_db_tables(transactions, fto_queue)
-	# Print progress while we are testing
-	print(3)
 	# Now merge the database information with the field data-set
 	df_full = merge_field_data(db_tables, df_field_data)
-	# Print progress while we are testing
-	print(4)
 	# Allocate the calling script
 	df_full = set_call_script(df_full)
-	df_full.to_csv('/Users/akshatgoel/Desktop/test_without_hh.csv')
 	# Now aggregate to the household level
 	df_full = get_hh_level_data(df_full)
 	# Randomize stage letter
 	if pilot == 1: df_final = replace_stage_letter(df_full)
 	# Send this to S3 instead whenever ready instead of .csv
-	df_final.to_csv('/Users/akshatgoel/Desktop/pilot_5.csv', index = False)
-	# Print
-	print(6)
+	df_final.to_csv('./output/script_{}.csv'.format(today), index = False)
 
 # Execute the script
 if __name__ == '__main__':
 	main()
 
 # Pending
-# Add in error handling
+# Add in new error messages
 # Make this into a routine with command line arguments and adjust the shell script accordingly
-# Make decision on whether file I/O should be done using S3 for all download and upload and convert where needed
+# Add in S3 upload
 # Confirm rejected payments scripts
 # Make helper functions into separate file
 # Add test calls to team if possible
