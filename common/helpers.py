@@ -174,3 +174,13 @@ def get_time_window(end_date, window_length):
 	start_date = str(datetime.datetime.strptime(end_date, '%Y-%m-%d').date() - time_window)
 
 	return(start_date)
+
+
+# Input: String format date as found on scraped pages
+# Output: String format date as we want to place in data-base
+def format_date(date_string):
+
+	date_object = datetime.datetime.strptime(date_string, '%d/%m/%Y')
+	string_object = datetime.datetime.strftime(date_object, '%Y-%m-%d')
+
+	return(string_object)
