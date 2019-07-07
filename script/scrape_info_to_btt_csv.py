@@ -295,6 +295,8 @@ def main():
 	if pilot == 1: df_final = replace_stage_letter(df_full)
 	# Send this to S3 instead whenever ready instead of .csv
 	df_final.to_csv('./output/script_{}.csv'.format(today), index = False)
+	# S3 upload
+	helpers.s3_upload('./output/script_{}.csv'.format(today), 'scripts/script_{}.csv'.format(today))
 
 # Execute the script
 if __name__ == '__main__':
@@ -303,7 +305,6 @@ if __name__ == '__main__':
 # Pending
 # Add in new error messages
 # Make this into a routine with command line arguments and adjust the shell script accordingly
-# Add in S3 upload
 # Confirm rejected payments scripts
 # Make helper functions into separate file
 # Add test calls to team if possible

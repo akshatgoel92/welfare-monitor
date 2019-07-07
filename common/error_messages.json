@@ -57,7 +57,39 @@
 		"14": {
 			"subj":"GMA Error 14: There was an error uploading the log to S3.",
 			"msg": "There is no action required from the field team. Akshat should log in to the EC2 instance and upload the log manually."
-		}
+		},
+		"15": {
+			"subj":"GMA Error 15: There was an error adding the enrolment camp data to the field data table.",
+			"msg": "There is no action required from the field team. Akshat should upload upload the data manually."
+		},
+		"16": {
+			"subj":"GMA Error 16: There was an error creating the primary key of the field data table in the script generation.",
+			"msg": "There is no action required from the field team. Akshat should log in to the database and create the key manually."
+		},
+		"17": {
+			"subj":"GMA Error 17: There was an error getting the field data from the database.",
+			"msg": "There is no action required from the field team. Akshat should re-run the script generation program manually."
+		},
+		"18": {
+			"subj":"GMA Error 18: There was an error ensuring the JCN format.",
+			"msg": "There is no action required from the field team. Akshat should re-run the script generation program manually."
+		},
+		"19": {
+			"subj":"GMA Error 19: There was an error getting the queue data from the table to create the calling script.",
+			"msg": "There is no action required from the field team. Akshat should re-run the script generation program manually."
+		},
+		"20": {
+			"subj":"GMA Error 20: There was an error getting the transactions data from the table to create the calling script.",
+			"msg": "There is no action required from the field team. Akshat should re-run the script generation program manually."
+		},
+		"20": {
+			"subj":"GMA Error 21: There was an error formatting the JCNs in the transactions data while creating the calling script.",
+			"msg": "There is no action required from the field team. Akshat should re-run the script generation program manually."
+		},
+		"21": {
+			"subj":"GMA Error 21: There was an error merging the queue and the transactions file.",
+			"msg": "There is no action required from the field team. Akshat should re-run the script generation program manually."
+		},
 
 	}
 ]
