@@ -9,8 +9,11 @@ export PYTHONPATH=.
 # Switch to the working directory
 cd /home/ec2-user/fto-scrape/
 
-# Clear existing .csv files
-rm output/*.csv
+# Clear existing .csv files if they exist
+if ls output/*.csv &>/dev/null 
+then 
+	rm output/*.csv
+fi
 
 # Then execute the stage spider
 scrapy crawl fto_urls -a stage=fst_sig
