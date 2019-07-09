@@ -75,7 +75,7 @@ class FTOContentPipeline(object):
 
 	def __init__(self):
 		
-		user, password, host, db_name, db_test = sql_connect().values()
+		user, password, host, db_name = sql_connect().values()
 		self.dbpool = adbapi.ConnectionPool('pymysql', db = db_name, host = host, 
 											user = user, passwd = password, 
 											cursorclass = pymysql.cursors.DictCursor, 
