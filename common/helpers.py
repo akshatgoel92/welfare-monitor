@@ -38,7 +38,7 @@ def db_conn(test = 0):
 	host = sql_access['host']
 	db = sql_access['db']
 	
-	conn = pymysql.connect(host, user, password, db_test, charset="utf8", use_unicode=True) 
+	conn = pymysql.connect(host, user, password, db, charset="utf8", use_unicode=True) 
 	cursor = conn.cursor()
 	
 	return(conn, cursor)
@@ -48,7 +48,7 @@ def db_engine(test = 0):
 	
 	user, password, host, db = sql_connect().values()
 	
-	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db_test)
+	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
 	
 	return(engine)
 
