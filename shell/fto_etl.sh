@@ -20,7 +20,7 @@ scrapy crawl fto_content
 python ./tracker/update.py
 
 # Then update and upload the log
-python ./logs/process.py './backend/logs/log.csv' 'logs/log'
+python ./logs/process.py './logs/log.csv' 'logs/log'
 
 # Then download the data
 python ./tracker/download.py 0 1 30 './output/transactions.csv' 'tests/transactions'
