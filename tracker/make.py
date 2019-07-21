@@ -26,11 +26,11 @@ def prep_csv(stage):
 		df['stage'] = stage
 
 	except pd.errors.EmptyDataError as e:
-
+        
 		er.handle_error(error_code ='2', data = {'stage': stage})
 		cols = ['block_code', 'district_code', 'fto_no', 'state_code', 'transact_date', 'url', 'stage']
 		df = pd.DataFrame([], columns = cols)
-
+    
 	return(df)
 
 
@@ -40,13 +40,13 @@ def get_csv(stages):
 	scraped_ftos = pd.concat(map(prep_csv, stages))
 	unique_stages = scraped_ftos['stage'].unique().tolist()
 	missing_stages = [stage for stage in stages if stage not in unique_stages]
-
+    
 	return(scraped_ftos, missing_stages)
 
 
 # Calculate the current stage
 # Create dummy variables to get numeric values for whether an FTO has been finished at each stage
-def get_pivoted_stage(fto_stages):
+def get_current_stage(fto_stages, stages, missing_stages):
 	
 	fto_stages_dum = pd.get_dummies(fto_stages, columns = ['stage'])
 	fto_stages_dum.drop(['fto_no'], inplace = True, axis = 1)
@@ -55,6 +55,10 @@ def get_pivoted_stage(fto_stages):
 	fto_stages['total'] = 1	
 	fto_stages = fto_stages.pivot_table(index='fto_no', columns='stage', values='total', fill_value=0)
 	fto_stages.columns.name = ''
+	fto_stages['stage'] = ''
+	
+	for col in missing_stages: fto_stages[col] = 0
+	for stage in stages: fto_stages.loc[fto_stages[stage] == 1, 'stage'] = stage
 
 	return(fto_stages)
 
@@ -64,27 +68,35 @@ def get_pivoted_stage(fto_stages):
 # Create a current stage column
 # Iterate through the data-set and create the current stage variable
 # Return the data-frame ready to be merged with the original data-set
-def prep_stages_for_insert(fto_stages, stages, missing_stages):
-	
-	for col in missing_stages: fto_stages[col] = 0
-
+def format_queue_for_insert(fto_stages, stages, missing_stages):
+    
 	fto_stages.reset_index(inplace = True)
-	fto_stages['current_stage'] = ''
-
-	for stage in stages: fto_stages.loc[fto_stages[stage] == 1, 'current_stage'] = stage
-	fto_stages = fto_stages[['fto_no','current_stage']]
-	print('Done')
-
 	fto_stages['done'] = '0'
-	fto_stages['fto_type'] = ''
+	fto_stages = fto_stages[['fto_no', 'done', 'stage']]
 	
-	fto_stages['stage'] = fto_stages['current_stage']
-	fto_stages = fto_stages[['fto_no', 'done', 'fto_type', 'current_stage', 'stage']]
-		
 	msg = ""
 	subject = "GMA Update 1: Ready to insert new FTOs"
-	helpers.send_email(subject, msg) 
+	helpers.send_email(subject, msg)
+	
+	return(fto_stages)
 
+
+def add_fto_type(fto_stages):
+	
+	get_fto_types = "SELECT fto_no, fto_type FROM fto_queue;"
+	engine = helpers.db_engine()
+	conn = engine.connect()
+	trans = conn.begin()
+	
+	try: fto_queue = pd.read_sql(get_fto_types, con = engine)
+	except Exception as e: 
+		trans.rollback()
+		print(e)
+    
+	fto_stages = pd.merge(fto_stages, fto_queue, on = ['fto_no'], how = 'left')
+	fto_stages.rename(columns = {'fto_type_y': 'fto_type'}, inplace = True)
+	fto_stages = fto_stages[['fto_no', 'done', 'fto_type', 'stage']]
+    
 	return(fto_stages)
 
 
@@ -93,9 +105,9 @@ def prep_stages_for_insert(fto_stages, stages, missing_stages):
 # When optimizing make sure that we are handling: 
 # 1) updates to stage of existing FTOs
 # 2) case where connection to database drops during insert 
-def insert_ftos(engine, fto_stages, test):
-
-	sql = update.upsert_data('fto_queue', ['current_stage'])	
+def insert_ftos(fto_stages, test):
+	
+	engine = helpers.db_engine()
 	conn = engine.connect()
 	trans = conn.begin()
 
@@ -103,7 +115,7 @@ def insert_ftos(engine, fto_stages, test):
 		
 		fto_stages.to_sql('fto_queue', con = engine, index = False, if_exists = 'replace', chunksize = 100,
 						  dtype = {'fto_no': String(100), 'fto_type': String(15), 'done': SmallInteger(), 
-						  			'current_stage': String(15)})
+						  			'stage': String(15)})
 					
 		if test == 0: 
 			
@@ -113,7 +125,7 @@ def insert_ftos(engine, fto_stages, test):
 			helpers.send_email(subject, msg)
 
 	except Exception as e:
-
+        
 		print(e)
 		er.handle_error(error_code ='3', data = {})
 		trans.rollback()
@@ -121,14 +133,13 @@ def insert_ftos(engine, fto_stages, test):
 
 
 def main(test = 0): 
-
-	stages = schema.load_stage_table_names()
-	engine = helpers.db_engine()
 	
+	stages = schema.load_stage_table_names()
 	fto_stages, missing_stages = get_csv(stages)
-	fto_stages_dum = get_pivoted_stage(fto_stages)	
-	fto_stages_dum = prep_stages_for_insert(fto_stages_dum, stages, missing_stages)
-	insert_ftos(engine, fto_stages_dum, test)
+	fto_stages = get_current_stage(fto_stages, stages, missing_stages)
+	fto_stages = format_queue_for_insert(fto_stages, stages, missing_stages)
+	fto_stages = add_fto_type(fto_stages)
+	insert_ftos(fto_stages, test)
 
 
 if __name__ == "__main__": 
