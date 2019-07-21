@@ -5,6 +5,7 @@ import dropbox
 import pymysql
 import smtplib
 import argparse
+import datetime
 import pandas as pd
 import numpy as np
 
@@ -132,6 +133,41 @@ def insert_ftos(fto_stages, test):
 		sys.exit()
 
 
+def insert_ftos_history(fto_stages, test):
+	
+	engine = helpers.db_engine()
+	conn = engine.connect()
+	trans = conn.begin()
+	
+	fto_stages['action_time'] = str(datetime.datetime.now().date())
+	
+	try: fto_stages_history = pd.read_sql('fto_queue_history', con = engine)
+	except Exception as e: print(e)
+		
+	fto_stages = update.anti_join(fto_stages, fto_stages_history, on = ['fto_no', 'stage'])
+	fto_stages = fto_stages[['fto_no', 'stage', 'action_time_x']]
+	fto_stages.rename(columns = {'action_time_x': 'action_time'}, inplace = True)
+		
+	try:
+		
+		fto_stages.to_sql('fto_queue_history', con = engine, index = False, if_exists = 'append', chunksize = 100,
+						  dtype = {'fto_no': String(100), 'stage': String(15), 'action_time': String(50)})
+					
+		if test == 0: 
+			
+			trans.commit()
+			msg = ""
+			subject = "GMA Update 2: Finished inserting new FTOs"
+			helpers.send_email(subject, msg)
+
+	except Exception as e:
+        
+		print(e)
+		er.handle_error(error_code ='3', data = {})
+		trans.rollback()
+		sys.exit()
+
+
 def main(test = 0): 
 	
 	stages = schema.load_stage_table_names()
@@ -140,7 +176,8 @@ def main(test = 0):
 	fto_stages = format_queue_for_insert(fto_stages, stages, missing_stages)
 	fto_stages = add_fto_type(fto_stages)
 	insert_ftos(fto_stages, test)
-
+	insert_ftos_history(fto_stages, test)
+	
 
 if __name__ == "__main__": 
 	
