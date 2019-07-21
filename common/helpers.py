@@ -164,3 +164,15 @@ def get_time_window(end_date, window_length):
 	start_date = str(datetime.datetime.strptime(end_date, '%Y-%m-%d').date() - time_window)
 
 	return(start_date)
+
+
+def format_date(date_string):
+    
+    if date_string != None and date_string != '':
+        date_string = date_string.strip()
+        date_string = str(datetime.datetime.strptime(date_string, '%d/%m/%Y').date())
+    
+    elif date_string == None:
+        date_string = ''
+
+    return(date_string)
