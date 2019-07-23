@@ -168,11 +168,12 @@ def get_time_window(end_date, window_length):
 
 def format_date(date_string):
     
-    if date_string != None and date_string != '':
-        date_string = date_string.strip()
-        date_string = str(datetime.datetime.strptime(date_string, '%d/%m/%Y').date())
+	date_string = date_string.strip()
+	
+	if date_string != None and date_string != '': 
+		date_string = str(datetime.datetime.strptime(date_string, '%d/%m/%Y').date())
     
-    elif date_string == None:
-        date_string = ''
+	elif date_string == None: 
+		date_string = ''
 
-    return(date_string)
+	return(date_string)
