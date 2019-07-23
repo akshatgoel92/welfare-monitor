@@ -189,7 +189,7 @@ class FtoContentSpider(scrapy.Spider):
 				item['block_name'] = row.xpath('td[1]//text()').extract_first() 
 				item['jcn'] = row.xpath('td[2]//text()').extract_first()
 				item['transact_ref_no'] = row.xpath('td[3]//text()').extract_first()
-				item['transact_date'] = row.xpath('td[4]//text()').extract_first()
+				item['transact_date'] = format_date(row.xpath('td[4]//text()').extract_first())
 				
 				item['app_name'] = row.xpath('td[5]//text()').extract_first()
 				item['prmry_acc_holder_name'] = row.xpath('td[6]//text()').extract_first()
@@ -203,7 +203,7 @@ class FtoContentSpider(scrapy.Spider):
 				item['credit_amt_actual'] = row.xpath('td[12]//text()').extract_first()
 			
 				item['status'] = row.xpath('td[13]//text()').extract_first()
-				item['processed_date'] = row.xpath('td[14]//text()').extract_first()
+				item['processed_date'] = format_date(row.xpath('td[14]//text()').extract_first())
 				item['utr_no'] = row.xpath('td[15]//text()').extract_first()
 			
 				item['rejection_reason'] = row.xpath('td[16]//text()').extract_first()
