@@ -184,3 +184,51 @@ def format_date(date_string):
 	string_object = datetime.datetime.strftime(date_object, '%Y-%m-%d')
 
 	return(string_object)
+
+
+def get_matching_s3_objects(prefix="", suffix=""):
+	"""
+	Generate objects in an S3 bucket.
+	Taken from: https://alexwlchan.net/2019/07/listing-s3-keys/
+	:param prefix: Only fetch objects whose key starts with this prefix (optional).
+	:param suffix: Only fetch objects whose keys end with this suffix (optional).
+    """
+	
+	with open('./gma_secrets.json') as secrets:
+		s3_access = json.load(secrets)['s3']
+
+	access_key_id = s3_access['access_key_id']
+	secret_access_key = s3_access['secret_access_key']
+	bucket_name = s3_access['default_bucket']
+	
+	s3 = boto3.client("s3", aws_access_key_id = access_key_id, aws_secret_access_key = secret_access_key)
+	paginator = s3.get_paginator("list_objects_v2")
+	kwargs = {'Bucket': bucket_name}
+	
+	# We can pass the prefix directly to the S3 API.  If the user has passed
+	# a tuple or list of prefixes, we go through them one by one.
+	if isinstance(prefix, str): prefixes = (prefix, )
+	else: prefixes = prefix
+	
+	for key_prefix in prefixes: 
+		kwargs["Prefix"] = key_prefix
+	
+		for page in paginator.paginate(**kwargs):
+			
+			try: contents = page["Contents"]
+			except Exception as e: print e 
+			
+			for obj in contents:
+				key = obj["Key"]
+				if key.endswith(suffix): yield obj
+
+
+def get_matching_s3_keys(bucket, prefix="", suffix=""):
+    """
+    Generate the keys in an S3 bucket.
+
+    :param bucket: Name of the S3 bucket.
+    :param prefix: Only fetch keys that start with this prefix (optional).
+    :param suffix: Only fetch keys that end with this suffix (optional).
+    """
+	for obj in get_matching_s3_objects(bucket, prefix, suffix): yield obj["Key"]
