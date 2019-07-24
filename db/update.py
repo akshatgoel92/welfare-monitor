@@ -107,14 +107,6 @@ def create_primary_key(engine, table, key, is_string = 0, key_length = 50):
 	return
 
 
-def create_index(engine, table, col, name):
-
-	index = Index(name, table.c.col)
-	index.create(engine)
-
-	return
-
-
 # Get a table's keys
 # This is used by the pipelines file to decide where each field will should be sent
 def get_keys(table):
