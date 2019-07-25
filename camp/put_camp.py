@@ -1,34 +1,55 @@
-import helpers
-import db
+from common import helpers
+from sqlalchemy.types import Integer, String
+from db import update
+import pandas as pd
 
 
-def get_camp_data(prefix = "scripts"):
+def get_camp_data(prefix = "pilots/btt_merged", suffix = ".csv"):
 	
-	objects = helpers.get_matching_s3_keys(prefix = prefix)
-	df_field = pd.concat([helpers.download_s3(obj) for obj in objects])
+	objects = [obj for obj in helpers.get_matching_s3_keys(prefix = prefix, suffix = suffix)]
+	df_field = pd.concat([pd.read_csv(helpers.get_object_s3(obj)) for obj in objects], ignore_index = True)
+	
 	
 	return(df_field)
 
 
+def check_camp_data_columns(df_field):
+	
+	df_field.columns = ['id', 'sky_phone', 'time_pref', 'jcn_extra', 'jcn']
+	df_field = df_field[['id', 'sky_phone', 'jcn', 'jcn_extra', 'time_pref']]
+	
+	return(df_field)
+	
+
 def get_camp_table_from_db():
 	
 	engine = helpers.db_engine()
-	df_db = pd.read_sql("SELECT * FROM field_data;", conn = engine)
+	df_db = pd.read_sql("SELECT id FROM field_data;", con = engine)
 	
 	return(df_db)
 
 
-def put_camp_data(df_field, df_db):
+def get_new_trainees(df_field, df_db):
+	
+	new_df_field = db.update.anti_join(df_field, df_db, on = ['id'])
+	
+	return(new_df_field)
+
+
+def put_new_trainees(new_df_field):
 
 	engine = helpers.db_engine()
 	conn = engine.connect()
 	
-	
-	new_df_field = db.modify.anti_join(df_field, df_db, on = ['id'])
-	new_df_field['welcome'] = 0
-	
-	try: new_df_field.to_sql(field_data, if_exists = 'append', conn = engine, chunksize = 100)
-	except Exception as e: print(e)
+	try: 
+		
+		new_df_field.to_sql('field_data', if_exists = 'append', con = engine, index = False,
+							 chunksize = 100, dtype = {'id': Integer(), 'sky_phone': String(50), 
+							 'jcn': String(50), 'jcn_extra': String(50), 'time_pref': String(50)})
+		
+	except Exception as e: 
+		
+		print(e)
 		
 	return(new_df_field)
 
@@ -36,8 +57,11 @@ def put_camp_data(df_field, df_db):
 def main():
 	
 	df_field = get_camp_data()
+	df_field = check_camp_data_columns(df_field)
 	df_db = get_camp_table_from_db()
-	put_camp_data(df_field, df_db)
+	
+	new_df_field = get_new_camp_trainees(df_field, df_db)
+	put_new_trainees(new_df_field)
 		
 if __name__ == '__main__':
 	

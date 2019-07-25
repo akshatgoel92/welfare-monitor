@@ -26,18 +26,19 @@ def run_test(func):
 	@functools.wraps(func)
 	def test(*args, **kwargs):
 		
+		data = None
 		success = 1
 		
 		try: 
 
-			func(*args, **kwargs)
+			data = func(*args, **kwargs)
 		
 		except Exception as e: 
-
+			
 			success = 0
 			er.handle_error(error_code ='1')
 
-		return(success)
+		return(data, success)
 	
 	return(test)
 
@@ -95,14 +96,19 @@ def test_error_handling():
 
 	msg = 'This is a test. If you see this the test has passed.'
 	er.handle_error(error_code ='1', data = {'traceback': msg})
+
 	
+@run_test
+def test_s3_list():
+	
+	test = helpers.get_matching_s3_keys(prefix='scripts', suffix='xlsx')
+	return(test)
+
 
 def main():
 
 	results = []
-	results.append(test_download_file_s3())
-	results.append(test_upload_dropbox())
-
+	results.append(test_s3_list())
 	return(results)
 
 

@@ -69,6 +69,22 @@ def upload_dropbox(file_from = './output/gma_test.xlsx', file_to = 'tests/gma_te
 		dbx.files_upload(f.read(), file_to, mode = dropbox.files.WriteMode.overwrite)
 
 
+def get_object_s3(key):
+
+	with open('./gma_secrets.json') as secrets:
+		s3_access = json.load(secrets)['s3']
+
+	access_key_id = s3_access['access_key_id']
+	secret_access_key = s3_access['secret_access_key']
+	bucket_name = s3_access['default_bucket']
+	
+	s3 = boto3.client('s3', aws_access_key_id = access_key_id, aws_secret_access_key = secret_access_key)
+	response = s3.get_object(Bucket= bucket_name, Key = key)
+	file = response["Body"]
+	
+	return(file)
+
+
 def upload_s3(file_from, file_to):
 	
 	with open('./gma_secrets.json') as secrets:
@@ -179,9 +195,10 @@ def format_date(date_string):
 def get_matching_s3_objects(prefix="", suffix=""):
 	"""
 	Generate objects in an S3 bucket.
-	Taken from: https://alexwlchan.net/2019/07/listing-s3-keys/
 	:param prefix: Only fetch objects whose key starts with this prefix (optional).
 	:param suffix: Only fetch objects whose keys end with this suffix (optional).
+	Taken from: https://alexwlchan.net/2019/07/listing-s3-keys/
+	Copyright © 2012–19 Alex Chan. Prose is CC-BY licensed, code is MIT.
     """
 	
 	with open('./gma_secrets.json') as secrets:
@@ -206,22 +223,23 @@ def get_matching_s3_objects(prefix="", suffix=""):
 		for page in paginator.paginate(**kwargs):
 			
 			try: contents = page["Contents"]
-			except Exception as e: print e 
+			except Exception as e: print(e) 
 			
 			for obj in contents:
 				key = obj["Key"]
 				if key.endswith(suffix): yield obj
 
 
-def get_matching_s3_keys(bucket, prefix="", suffix=""):
-    """
-    Generate the keys in an S3 bucket.
-
-    :param bucket: Name of the S3 bucket.
-    :param prefix: Only fetch keys that start with this prefix (optional).
-    :param suffix: Only fetch keys that end with this suffix (optional).
-    """
-	for obj in get_matching_s3_objects(bucket, prefix, suffix): yield obj["Key"]
+def get_matching_s3_keys(prefix="", suffix=""):
+	"""
+	Generate the keys in an S3 bucket.
+	:param bucket: Name of the S3 bucket.
+	:param prefix: Only fetch keys that start with this prefix (optional).
+	:param suffix: Only fetch keys that end with this suffix (optional).
+	Taken from: https://alexwlchan.net/2019/07/listing-s3-keys/
+	Copyright © 2012–19 Alex Chan. Prose is CC-BY licensed, code is MIT.
+	"""
+	for obj in get_matching_s3_objects(prefix, suffix): yield obj["Key"]
 
 
 def format_date(date_string):
