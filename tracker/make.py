@@ -157,7 +157,7 @@ def insert_ftos_history(fto_stages, test):
 			
 			trans.commit()
 			msg = ""
-			subject = "GMA Update 2: Finished inserting new FTOs"
+			subject = "GMA Update 3: Finished inserting new FTOs into history table"
 			helpers.send_email(subject, msg)
 
 	except Exception as e:
