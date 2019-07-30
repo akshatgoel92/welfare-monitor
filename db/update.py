@@ -94,6 +94,14 @@ def upsert_data(table, update_keys):
 	return(sql)
 
 
+def check_primary_key(engine, table):
+	
+	check_primary_key = "SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = {} and column_key = 'PRI');" 
+	has_primary_key = engine.execute(check_primary_key.format(table))
+	
+	return(has_primary_key)
+
+
 def create_primary_key(engine, table, key, is_string = 0, key_length = 50):
 
 	if is_string == 0:
