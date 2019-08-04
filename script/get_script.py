@@ -113,8 +113,7 @@ def get_field_data_table():
 	conn = engine.connect()
 	
 	get_field_data = "SELECT * from field_data;"
-	if check is False: create_field_data_table()
-
+	
 	
 	try: 
 		
@@ -330,11 +329,9 @@ def replace_stage_letter(df_full):
 # S3 upload
 def main():
 	
-	window_length = 30
+	window_length = 100
 	today = str(datetime.today().date())
 	start_date = helpers.get_time_window(today, window_length)
-	
-	if engine.has_table('field_data') is False: sys.exit()
 	
 	df_field_data = get_field_data_table()
 	transactions, fto_queue = get_transactions_and_queue(start_date, today)
