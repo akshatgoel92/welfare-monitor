@@ -13,9 +13,6 @@ export PYTHONPATH=.
 # Then execute the content spider
 scrapy crawl fto_content
 
-# Then execute the branch spider 
-# scrapy crawl fto_branch  
-
 # Then update the queue in the SQL database 
 python ./tracker/update.py
 
@@ -23,4 +20,4 @@ python ./tracker/update.py
 python ./logs/process.py './logs/log.csv' 'logs/log'
 
 # Then download the data
-python ./tracker/download.py 0 1 30 './output/transactions.csv' 'tests/transactions'
+python ./tracker/download.py 0 1 30 './output/transactions.csv' 'nrega/transactions'

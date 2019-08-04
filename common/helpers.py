@@ -243,13 +243,9 @@ def get_matching_s3_keys(prefix="", suffix=""):
 
 
 def format_date(date_string):
-    
+  
+	if type(date_string) != str: date_string = ''
 	date_string = date_string.strip()
-	
-	if date_string != None and date_string != '': 
-		date_string = str(datetime.datetime.strptime(date_string, '%d/%m/%Y').date())
-    
-	elif date_string == None: 
-		date_string = ''
-
+	if date_string != '': date_string = str(datetime.datetime.strptime(date_string, '%d/%m/%Y').date())
+   	
 	return(date_string)
