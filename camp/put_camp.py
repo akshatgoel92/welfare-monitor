@@ -5,7 +5,7 @@ from db import update
 import pandas as pd
 
 
-def get_camp_data(prefix = "pilots/btt_merged", suffix = ".csv"):
+def get_camp_data(prefix = "camps/camp", suffix = "05082019.csv"):
 	
 	objects = [obj for obj in helpers.get_matching_s3_keys(prefix = prefix, suffix = suffix)]
 	df_field = pd.concat([pd.read_csv(helpers.get_object_s3(obj)) for obj in objects], ignore_index = True)
@@ -16,8 +16,9 @@ def get_camp_data(prefix = "pilots/btt_merged", suffix = ".csv"):
 
 def check_camp_data_columns(df_field):
 	
-	df_field.columns = ['id', 'sky_phone', 'time_pref', 'jcn_extra', 'jcn']
-	df_field = df_field[['id', 'sky_phone', 'jcn', 'jcn_extra', 'time_pref']]
+	cols = ['id', 'phone', 'jcn', 'time_pref', 'time_pref_label', 'amount', 'transact_date', 'rejection_reason', 'day1']
+	df_field = df_field[cols]
+	df_field['pilot'] = 0
 	
 	return(df_field)
 	
@@ -45,8 +46,10 @@ def put_new_trainees(new_df_field):
 	try: 
 		
 		new_df_field.to_sql('field_data', if_exists = 'append', con = engine, index = False,
-							 chunksize = 100, dtype = {'id': Integer(), 'sky_phone': String(50), 
-							 'jcn': String(50), 'jcn_extra': String(50), 'time_pref': String(50)})
+							 chunksize = 100, dtype = {'id': Integer(), 'phone': String(50), 
+							 'jcn': String(50), 'time_pref': String(50), 'time_pref_label': String(50), 
+							 'amount': Integer(), 'transact_date': String(50), 'rejection_reason': String(150), 
+							 'day1': String(50)})
 		
 	except Exception as e: 
 		
@@ -61,7 +64,7 @@ def add_primary_key():
 	engine = helpers.db_engine()
 	conn = engine.connect()
 	
-	try: has_primary_key = update.check_primary_key(engine, 'field_data', )
+	try: has_primary_key = update.check_primary_key(engine, 'field_data')
 	
 	except Exception as e: 
 		
@@ -70,7 +73,7 @@ def add_primary_key():
 	
 	try: 
 		
-		if has_primary_key = 0: update.create_primary_key(engine, "field_data", "id")
+		if has_primary_key == 0: update.create_primary_key(engine, "field_data", "id")
 	
 	except Exception as e: 
 		
@@ -88,7 +91,7 @@ def main():
 	
 	new_df_field = get_new_trainees(df_field, df_db)
 	put_new_trainees(new_df_field)
-
+	add_primary_key()
 		
 if __name__ == '__main__':
 	
