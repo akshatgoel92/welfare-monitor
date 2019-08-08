@@ -81,7 +81,7 @@ def add_primary_key():
 		sys.exit()
 	
 	return
-	
+
 	
 def main():
 	
