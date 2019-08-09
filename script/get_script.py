@@ -201,7 +201,7 @@ def get_call_script(df):
 	df['script'] = df.loc[(df['recieved_welcome'] != 'both'), 'script'] = "P0 P1 P2"
 	
 	# Static NREGA scripts
-	df['script'] = df.loc[(df['stage'].isna() & df['status'].is.na() & df['_merge'] == 'right_only', 'script'] = 'P0 P1 P2 P3 Q A P0 Z1 Z2'
+	df['script'] = df.loc[df['stage'].isna() & df['status'].isna() & df['_merge'] == 'right_only', 'script'] = 'P0 P1 P2 P3 Q A P0 Z1 Z2'
 	
 	# Dynamic NREGA scripts for FTOs at the block office
 	df['script'] = df.loc[(df['stage']=='fst_sig_not') | (df['stage']=='fst_sig'), 'script'] = 'P0 P1 P2 P3 R CA CB CC P0 Z1 Z2'
@@ -254,7 +254,7 @@ def main():
 	
 	pilot = 0
 	local = 1
-	window_length = 11
+	window_length = 7
 	
 	today = str(datetime.today().date())
 	start_date = helpers.get_time_window(today, window_length)
@@ -276,12 +276,12 @@ def main():
 	
 	df.to_csv(local_output_path, index = False)
 	
-
+'''
 if __name__ == '__main__':
 	
 	main()
 		
 # Pending
-# Make this into a routine with command line arguments and adjust the shell script accordingly
+# Add command line arguments
 # Add in new error messages
-# Do Alembic migrations
+# Do Alembic migrations'''
