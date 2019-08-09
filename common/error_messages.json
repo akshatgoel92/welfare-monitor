@@ -82,23 +82,23 @@
 			"subj":"GMA Error 20: There was an error getting the transactions data from the table to create the calling script.",
 			"msg": "There is no action required from the field team. Akshat should re-run program manually."
 		},
-		"20": {
+		"21": {
 			"subj":"GMA Error 21: There was an error formatting the JCNs in the transactions data while creating the calling script.",
 			"msg": "There is no action required from the field team. Akshat should re-run the program manually."
 		},
-		"21": {
+		"22": {
 			"subj":"GMA Error 22: There was an error merging the queue and the transactions file.",
 			"msg": "There is no action required from the field team. Akshat should re-run the script generation program manually."
 		},
-		"22": {
+		"23": {
 			"subj":"GMA Error 23: There was an error writing the camp data to the database table.",
 			"msg": "There is no action required from the field team. Akshat should re-run the program manually."
 		},
-		"23": {
+		"24": {
 			"subj":"GMA Error 24: There was an checking whether the camp data already has a primary key.",
 			"msg": "There is no action required from the field team. Akshat should re-run the program manually."
 		},
-		"24": {
+		"25": {
 			"subj":"GMA Error 25: There was an error adding a primary key to the camp data.",
 			"msg": "There is no action required from the field team. Akshat should re-run the program manually."
 		}

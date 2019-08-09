@@ -1,46 +1,91 @@
+from sqlalchemy.types import Integer, String
+from sqlalchemy.dialects.mysql import TINYINT
+from common import errors as er
 from common import helpers
+from db import update
+
+import pandas as pd
 import argparse
+import datetime
+import re
 
 
-def script_to_s3(file_from, file_to):
-	
-	script = pd.read_csv(file_from)
-	
-	try: helpers.s3_upload(file_from, file_to)
-	except Exception as e: print(e)
-	
-	return
-
-
-def script_from_s3(prefix, suffix):
+def get_script_data_list(prefix = "scripts/call", suffix = ".csv"):
 	
 	objects = [obj for obj in helpers.get_matching_s3_keys(prefix = prefix, suffix = suffix)]
-	scripts = pd.concat([pd.read_csv(helpers.get_object_s3(obj)) for obj in objects], ignore_index = True)
 	
-	return(scripts)
-
-
-def get_script_date(script_name):
+	return(objects)
 	
-	pass
 
-
-def script_to_db(scripts):
+def get_script_data_file(script_data_file):
 	
+	df = pd.read_csv(helpers.get_object_s3(script_data_file))
+	
+	return(df)
+
+
+def add_s3_file_name(df, script_data_file):
+	
+	df['file_name_s3'] = script_data_file
+	
+	return(df)
+
+
+def add_s3_date(df, script_data_file): 
+	
+	date = re.findall('callsequence_(.*).csv', script_data_file)[0]
+	date = datetime.datetime.strptime(date, '%d%m%Y')
+	date = datetime.datetime.strftime(date, '%Y-%m-%d') 
+	
+	df['file_upload_to_s3_date'] = date
+	
+	return(df)
+	
+
+def get_script_data(script_data_list):
+	 
+	 df = [get_script_data_file(script_data_file) for script_data_file in script_data_list]
+	 
+	 return(df)
+
+
+def add_script_data_columns(df, script_data_list):
+	
+	df = [add_s3_file_name(data, file_name) for data, file_name in zip(df, script_data_list)]
+	df = [add_s3_date(data, file_name) for data, file_name in zip(df, script_data_list)]
+	df = pd.concat(df, ignore_index = True)
+	
+	# Change these columns
+	df = df[['id', 'phone', 'time_pref', 'time_pref_label', 'amount', 
+			'transact_date', 'rejection_reason', 'day1', 
+			'file_name_s3', 'file_upload_to_s3_date']]
+	
+	df['insert_date'] = str(datetime.datetime.today())
+	
+	return(df)
+
+
+def put_scripts(scripts):
+
 	engine = helpers.db_engine()
 	conn = engine.connect()
-	trans = conn.begin()
-		
-	try: 
-		scripts.to_sql('script', if_exists='replace', con=conn)
-		trans.commit()
-		conn.close()
-
-	except Exception as e:
-		trans.rollback() 
-		conn.close()
-		print(e)
 	
+	if not scripts.empty: 
+	
+		try: 
+			
+			scripts.to_sql('scripts', if_exists = 'replace', con = engine, index = False, chunksize = 100, 
+						   dtype = {'id': Integer(), 'phone': String(50), 'time_pref': String(50), 'time_pref_label': String(50), 
+						   			'amount': Integer(), 'transact_date': String(50), 'rejection_reason': String(50), 
+									'day1': String(50), 'file_name_s3': String(50), 
+									'file_upload_to_s3_date': String(50), 
+									'insert_date': String(50)})
+		
+		except Exception as e: 
+		
+			er.handle_error(error_code ='23', data = {})
+			sys.exit()
+		
 	return
 
 
@@ -48,20 +93,12 @@ def make_script_primary_key():
 	
 	engine = helpers.db_engine()
 	conn = engine.connect()
-	
-	try: has_primary_key = update.check_primary_key(engine, 'field_data')
-	
-	except Exception as e: 
 		
-		er.handle_error(error_code ='24', data = {})
-		sys.exit()
-	
 	try: 
-		
-		if has_primary_key == 0: update.create_primary_key(engine, "scripts", "id")
+		add_primary_key = "ALTER TABLE scripts ADD PRIMARY KEY(id, file_upload_to_s3_date(50));"
+		engine.execute(add_primary_key)
 	
 	except Exception as e: 
-		
 		er.handle_error(error_code ='25', data = {})
 		sys.exit()
 	
@@ -70,13 +107,12 @@ def make_script_primary_key():
 
 def main():
 	
-	file_from = argparse.args(file_from)
-	file_to = argparse.args(file_to)
-	
-	script_to_s3(file_from, file_to)
-	script_to_db(file_from)
-	
-	return
+	script_data_list = get_script_data_list(suffix = '.csv')
+	df = get_script_data(script_data_list)
+	df = add_script_data_columns(df, script_data_list)
+		
+	put_scripts(df)
+	make_script_primary_key()
 	
 	
 if __name__ == '__main__':
