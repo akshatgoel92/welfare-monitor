@@ -23,6 +23,17 @@ def check_table_empty(conn, table):
 	return(is_empty)
 
 
+def check_table_exists(engine, db_name, table):
+	
+	check = '''SELECT count(TABLE_NAME) 
+			   FROM information_schema.TABLES
+			   WHERE TABLE_SCHEMA = '{}' AND TABLE_NAME = '{}'; '''.format(db_name, table)
+	
+	result = pd.read_sql(check, con = engine).values.tolist()[0][0]
+	
+	return(result)
+
+
 # Return only those entries in df_1 not in df_2
 def anti_join(df_1, df_2, on):
 	
@@ -41,7 +52,6 @@ def select_data(engine, table, cols = ['*']):
 	result = pd.read_sql(query, con = engine)
 
 	return(result)
-
 
 # Insert a new item into the SQL database
 # First get fields which are both in the item and tha table
