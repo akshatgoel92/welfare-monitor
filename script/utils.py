@@ -4,14 +4,18 @@ import numpy as np
 
 def format_jcn(old_jcn):
 	
-	if not old_jcn: return None
+	if not old_jcn: return ''
 	old_jcn.replace(" ", "")
 	new_jcn = ''
 	
 	for index, char in enumerate(old_jcn):
 		
-		if char.isalpha() or char.isdigit(): new_jcn += char
-		elif char == '/': new_jcn += old_jcn[index:]; break
+		if char.isalpha() or char.isdigit(): 
+			new_jcn += char
+		
+		elif char == '/': 
+			new_jcn += old_jcn[index:]
+			break
 		
 		elif char == '-':
 			
@@ -31,3 +35,5 @@ def format_jcn(old_jcn):
 					new_jcn += '0'
 	
 	return(new_jcn)
+	
+	

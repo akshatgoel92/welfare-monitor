@@ -125,7 +125,6 @@ def make_camp_primary_key():
 		sys.exit()
 	
 	try: 
-		
 		if has_primary_key == 0: update.create_primary_key(engine, "enrolment_record", "id")
 	
 	except Exception as e: 
@@ -138,7 +137,7 @@ def make_camp_primary_key():
 	
 def main():
 	
-	camp_data_list = get_camp_data_list(suffix = '.csv')
+	camp_data_list = get_camp_data_list(suffix = '05082019.csv')
 	df = get_camp_data(camp_data_list)
 	df = add_camp_data_columns(df, camp_data_list)
 	

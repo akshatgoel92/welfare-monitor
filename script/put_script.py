@@ -3,7 +3,6 @@ from sqlalchemy.dialects.mysql import TINYINT
 from common import errors as er
 from common import helpers
 from db import update
-
 import pandas as pd
 import argparse
 import datetime

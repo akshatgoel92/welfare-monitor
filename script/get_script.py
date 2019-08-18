@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import random
 import sys
 
 from common import errors as er
@@ -8,15 +9,16 @@ from common import helpers
 from script import utils
 from sqlalchemy import *
 
+random.seed(13029)
+np.random.seed(110498)
+
 
 def get_camp_data(pilot):
-	
 	
 	engine = helpers.db_engine()
 	conn = engine.connect()
 	
-	get_field_data = '''SELECT id, phone, jcn, time_pref, time_pref_label, amount, transact_date, 
-						rejection_reason, day1 FROM field_data WHERE pilot = {};'''.format(pilot)
+	get_field_data = '''SELECT id, phone, jcn, time_pref, time_pref_label FROM enrolment_record WHERE pilot = {};'''.format(pilot)
 	
 	try: 
 		
@@ -59,47 +61,21 @@ def get_transactions(start_date, end_date):
 	return(transactions)
 
 
-def format_transactions_jcn(transactions, df_field):
+def format_transactions_jcn(transactions):
 	
 	transactions['jcn'] = transactions[['CH-033' not in x for x in transactions['jcn']]]['jcn'].apply(lambda x: 'CH-033' + x[2:])
 	transactions['jcn'] = transactions['jcn'].apply(utils.format_jcn)
 	
-	return(transactions, df_field)
+	return(transactions)
 	
 
 def format_camp_jcn(df_field):
-	
-	def fill_ch(row):
-	
-		if 'CH-033' not in row['jcn'] and row['jcn'] !='': row['jcn'] = 'CH-033' + row['jcn'][2:]  
-		else: row['jcn'] = ''
 		
-		return(row)
-	
 	df_field['jcn'] = df_field['jcn'].fillna('').apply(lambda x: x.replace('--', '-'))
-	df_field['jcn'] = df_field.apply(fill_ch, axis = 1)
+	df_field['jcn'] = df_field[['CH-033' not in x for x in df_field['jcn']]]['jcn'].apply(lambda x: 'CH-033' + x[2:] if x != '' else '')
 	df_field['jcn'] = df_field['jcn'].apply(utils.format_jcn)
 	
 	return(df_field)
-
-
-def merge_camp_data(transactions, df_field_data):
-
-	
-	df = pd.merge(transactions, df_field_data, on='jcn', how='outer', indicator=True)
-	df = df.loc[df_full['_merge'] != 'left_only']
-	
-	df = df[['jcn', 'transact_date_x', 'processed_date', 'credit_amt_due', 'credit_amt_actual', 
-			 'status', 'rejection_reason_x', 'fto_no', 'stage', 'id', 'phone', 'time_pref', 
-			 'time_pref_label', 'amount', 'day1', '_merge']]
-	
-	df.columns = ['jcn', 'transact_date', 'processed_date', 'credit_amt_due', 'credit_amt_actual', 
-				  'status', 'rejection_reason', 'fto_no', 'stage', 'id', 'phone', 'time_pref', 
-				  'time_pref_label', 'amount', 'day1', '_merge']
-	
-	if df.empty: er.handle_error(error_code ='12', data = {})
-	
-	return(df)
 
 
 def get_alternate_transactions(local = 1, filepath = './output/transactions_alt.csv'):
@@ -151,69 +127,95 @@ def add_status_data(transactions, transactions_alt):
 	
 	return(transactions)
 
+
+def merge_camp_data(transactions, df_field_data):
+
+	
+	df = pd.merge(transactions, df_field_data, on='jcn', how='outer', indicator=True)
+	df = df.loc[df['_merge'] != 'left_only']
+	
+	df = df[['jcn', 'transact_date', 'processed_date', 'credit_amt_due', 'credit_amt_actual', 
+			 'status', 'rejection_reason', 'fto_no', 'stage', 'id', 'phone', 'time_pref', 
+			 'time_pref_label', '_merge']]
+	
+	df.columns = ['jcn', 'transact_date', 'processed_date', 'credit_amt_due', 'credit_amt_actual', 
+				  'status', 'rejection_reason', 'fto_no', 'stage', 'id', 'phone', 'time_pref', 
+				  'time_pref_label', '_merge']
+	
+	if df.empty: er.handle_error(error_code ='12', data = {})
+	
+	return(df)
+
 # Still need to complete
-def get_welcome_script(df):
+def get_welcome_script(df, welcome_code = "PO P1 P2"):
 	
 	engine = helpers.db_engine()
-	conn = engine.connect()
-	trans = conn.begin()
 	
-	try: 
-		welcome_script = pd.read_sql("SELECT id, script FROM scripts where day1 = P0 P1 P2", con = engine)
-		conn.close()
-	except Exception as e:
+	try: welcome_script = pd.read_sql("SELECT id, script FROM scripts where day1 = '{}'; ".format(welcome_code), con = engine)
+	
+	except Exception as e: 
 		print(e)
-		trans.rollback()
-		conn.close()
+		sys.exit()
 	
 	df = pd.merge(df, welcome_script, how = 'outer', on = 'id', indicator = 'recieved_welcome')
 	
 	return(df)
 
 
-# Still need to complete
-def get_rejection_reason(df):
+# Check static NREGA
+def get_static_nrega_script(df):
 	
-	engine = helpers_db.engine()
-	conn = engine.connect()
-	trans = conn.begin()
+	engine = helpers.db_engine()
 	
-	try: 
-		
-		rejection_reasons = pd.read_sql("SELECT * FROM rejection_reason", con = engine)
-		conn.close()
+	try: static_nrega = pd.read_sql("SELECT id FROM scripts WHERE day1 = '{}'".format(script), con = engine)
 	
 	except Exception as e:
-		
-		trans.rollback()
-		conn.close()
 		print(e)
+		sys.exit()
 	
-	df = pd.merge(df, rejection_reason, how = 'left', on = 'rejection_reason', indicator = True)
+	df = pd.merge(df, static_nrega, how = 'outer', on = 'id', indicator = 'got_static_nrega')
 	
 	return(df)
 
 
+def get_jcn_generation_script(df):
+	
+	engine = helpers.db_engine()
+	
+	try: jcn_gen = pd.read_sql("SELECT id FROM scripts WHERE day1 = '{}'".format(script), con = engine)
+	
+	except Exception as e:
+		print(e)
+		sys.exit()
+	
+	df = pd.merge(df, static_nrega, how = 'outer', on = 'id', indicator = 'got_jcn_generation', con = engine)
+	
+	return(df) 
+
+
 def get_call_script(df):
 		
-	
-	# Welcome script
-	df['script'] = df.loc[(df['recieved_welcome'] != 'both'), 'script'] = "P0 P1 P2"
+	# Initialize script
+	df['day1'] = ''
 	
 	# Static NREGA scripts
-	df['script'] = df.loc[df['stage'].isna() & df['status'].isna() & df['_merge'] == 'right_only', 'script'] = 'P0 P1 P2 P3 Q A P0 Z1 Z2'
+	# Change this to something else
+	df.loc[(df['_merge'] == 'right_only') & df['recieved_static_nrega'] == 'both' & (df['transact_date'].isna()) & (df['status'].isna()), 'day1'] = 'P0 P1 P2 P3 Q B P0 Z1 Z2'
+	
+	# Welcome static scripts
+	df.loc[(df['recieved_static_nrega'] == 'right_only')] = 'P0 P1 P2 P3 Q A P0 Z1 Z2'
 	
 	# Dynamic NREGA scripts for FTOs at the block office
-	df['script'] = df.loc[(df['stage']=='fst_sig_not') | (df['stage']=='fst_sig'), 'script'] = 'P0 P1 P2 P3 R CA CB CC P0 Z1 Z2'
-	df['script'] = df.loc[(df['stage']=='sec_sig_not') | (df['stage']=='sec_sig'), 'script'] = 'P0 P1 P2 P3 R CA CB CC P0 Z1 Z2'
+	df.loc[(df['stage']=='fst_sig_not') | (df['stage']=='fst_sig'), 'day1'] = 'P0 P1 P2 P3 R CA CB CC P0 Z1 Z2'
+	df.loc[(df['stage']=='sec_sig_not') | (df['stage']=='sec_sig'), 'day1'] = 'P0 P1 P2 P3 R CA CB CC P0 Z1 Z2'
 	
 	# Dynamic NREGA scripts for unprocessed FTOs at the bank
-	df['script'] = df.loc[(df['stage']=='sb') | (df['stage']=='pp'), 'script'] = 'P0 P1 P2 P3 R DA DB DC P0 Z1 Z2'
-	df['script'] = df.loc[(df['stage']=='P'), 'script'] = 'P0 P1 P2 P3 R DA DB DC P0 Z1 Z2'
+	df.loc[(df['stage']=='sb') | (df['stage']=='pp'), 'day1'] = 'P0 P1 P2 P3 R DA DB DC P0 Z1 Z2'
+	df.loc[(df['stage']=='P'), 'script'] = 'P0 P1 P2 P3 R DA DB DC P0 Z1 Z2'
 		
 	# Dynamic NREGA scripts for trnasactions which have been processed
-	df['script'] = df.loc[(df['status']=='Processed') & (df['stage']=='pb'), 'script'] = 'P0 P1 P2 P3 R EA EB EC P0 Z1 Z2'
-	df['script'] = df.loc[(df['status']=='Rejected') & (df['stage']=='pb'), 'script'] = 'P0 P1 P2 P3 R FA FB FC P0 Z1 Z2'
+	df.loc[(df['status']=='Processed') & (df['stage']=='pb'), 'day1'] = 'P0 P1 P2 P3 R EA EB EC P0 Z1 Z2'
+	df.loc[(df['status']=='Rejected') & (df['stage']=='pb'), 'day1'] = 'P0 P1 P2 P3 R FA FB FC P0 Z1 Z2'
 
 	return(df)
 
@@ -238,23 +240,42 @@ def get_hh_dates(df):
 	return(df)
 
 
-def clean_df(df):
+# Still need to complete
+def get_rejection_reason(df):
+	
+	engine = helpers.db_engine()
+	
+	try: rejection_reasons = pd.read_sql("SELECT * FROM rejection_reason;", con = engine)
+	except Exception as e: print(e)
+	
+	df = pd.merge(df, rejection_reason, how = 'left', on = 'rejection_reason', indicator = True)
+	
+	return(df)
+
+
+def prep_df(df):
 	
 	# Keep only relevant columns and drop duplicates
-	df = df[['id', 'phone', 'jcn', 'transact_date', 'time_pref', 'time_pref_label', 'amount', 'transact_date', 'rejection_reason', 'day1']] 
+	df = df[['id', 'phone', 'transact_date', 'time_pref', 'time_pref_label', 'amount', 'transact_date', 'rejection_reason', 'script']] 
 	df.drop_duplicates(['id'], inplace = True)
-	
 	df.reset_index(inplace = True)
 	df = df.sample(frac=1)
 	
 	return(df)
 
 
+def add_test_calls(df):
+	
+	test_calls = pd.read_csv(filepath)
+	
+	return(pd.concat([df, test_calls], axis = 1))
+	
+	
 def main():
 	
 	pilot = 0
 	local = 1
-	window_length = 7
+	window_length = 30
 	
 	today = str(datetime.today().date())
 	start_date = helpers.get_time_window(today, window_length)
@@ -265,18 +286,22 @@ def main():
 	transactions_alt = get_alternate_transactions(local = local)
 	transactions = get_transactions(start_date, today)
 	transactions = add_status_data(transactions, transactions_alt)
-	camp = get_field_data_table(pilot)
+	camp = get_camp_data(pilot)
 	
-	transactions, camp = check_jcn_format(transactions, df_field)
-	df = merge_field_data(transactions, camp)
+	transactions = format_transactions_jcn(transactions)
+	camp = format_camp_jcn(camp)
 	
-	df = set_call_script(df)
-	df = get_hh_amaounts(df)
+	df = merge_camp_data(transactions, camp)
+	df.to_csv('./output/nregamerge_09082019.csv', index = False)
+	
+	df = get_call_script(df)
+	df = get_hh_amounts(df)
 	df = get_hh_dates(df)
+	df = prep_df(df)
 	
 	df.to_csv(local_output_path, index = False)
 	
-'''
+
 if __name__ == '__main__':
 	
 	main()
@@ -284,4 +309,4 @@ if __name__ == '__main__':
 # Pending
 # Add command line arguments
 # Add in new error messages
-# Do Alembic migrations'''
+# Do Alembic migrations
