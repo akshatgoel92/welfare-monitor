@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import argparse
 import random
 import sys
 
@@ -9,6 +10,7 @@ from common import helpers
 from script import utils
 from sqlalchemy import *
 
+# Seed should be in global scope
 random.seed(13029)
 np.random.seed(110498)
 
@@ -146,159 +148,81 @@ def merge_camp_data(transactions, df_field_data):
 	
 	return(df)
 
-# Still need to complete
-def get_welcome_script(df, welcome_code = "PO P1 P2"):
+
+def get_static_script_indicators(df):
 	
-	engine = helpers.db_engine()
-	
-	try: welcome_script = pd.read_sql("SELECT id, script FROM scripts where day1 = '{}'; ".format(welcome_code), con = engine)
-	
-	except Exception as e: 
-		print(e)
-		sys.exit()
-	
-	df = pd.merge(df, welcome_script, how = 'outer', on = 'id', indicator = 'recieved_welcome')
-	
+	# Look-back for welcome script
+	df = utils.check_welcome_script(df)
+	# Look back for static NREGA introduction
+	df = utils.check_static_nrega_script(df)
+	# Look back for formatting indicators
+	df = utils.format_indicators(df)
+	# Return statement
 	return(df)
-
-
-# Check static NREGA
-def get_static_nrega_script(df):
-	
-	engine = helpers.db_engine()
-	
-	try: static_nrega = pd.read_sql("SELECT id FROM scripts WHERE day1 = '{}'".format(script), con = engine)
-	
-	except Exception as e:
-		print(e)
-		sys.exit()
-	
-	df = pd.merge(df, static_nrega, how = 'outer', on = 'id', indicator = 'got_static_nrega')
-	
-	return(df)
-
-
-def get_jcn_generation_script(df):
-	
-	engine = helpers.db_engine()
-	
-	try: jcn_gen = pd.read_sql("SELECT id FROM scripts WHERE day1 = '{}'".format(script), con = engine)
-	
-	except Exception as e:
-		print(e)
-		sys.exit()
-	
-	df = pd.merge(df, static_nrega, how = 'outer', on = 'id', indicator = 'got_jcn_generation', con = engine)
-	
-	return(df) 
 
 
 def get_call_script(df):
-		
-	# Initialize script
-	df['day1'] = ''
 	
-	# Static NREGA scripts
-	# Change this to something else
-	df.loc[(df['_merge'] == 'right_only') & df['recieved_static_nrega'] == 'both' & (df['transact_date'].isna()) & (df['status'].isna()), 'day1'] = 'P0 P1 P2 P3 Q B P0 Z1 Z2'
-	
-	# Welcome static scripts
-	df.loc[(df['recieved_static_nrega'] == 'right_only')] = 'P0 P1 P2 P3 Q A P0 Z1 Z2'
-	
-	# Dynamic NREGA scripts for FTOs at the block office
-	df.loc[(df['stage']=='fst_sig_not') | (df['stage']=='fst_sig'), 'day1'] = 'P0 P1 P2 P3 R CA CB CC P0 Z1 Z2'
-	df.loc[(df['stage']=='sec_sig_not') | (df['stage']=='sec_sig'), 'day1'] = 'P0 P1 P2 P3 R CA CB CC P0 Z1 Z2'
-	
-	# Dynamic NREGA scripts for unprocessed FTOs at the bank
-	df.loc[(df['stage']=='sb') | (df['stage']=='pp'), 'day1'] = 'P0 P1 P2 P3 R DA DB DC P0 Z1 Z2'
-	df.loc[(df['stage']=='P'), 'script'] = 'P0 P1 P2 P3 R DA DB DC P0 Z1 Z2'
-		
-	# Dynamic NREGA scripts for trnasactions which have been processed
-	df.loc[(df['status']=='Processed') & (df['stage']=='pb'), 'day1'] = 'P0 P1 P2 P3 R EA EB EC P0 Z1 Z2'
-	df.loc[(df['status']=='Rejected') & (df['stage']=='pb'), 'day1'] = 'P0 P1 P2 P3 R FA FB FC P0 Z1 Z2'
-
+	# Allocate static scripts
+	df = utils.set_static_scripts(df)
+	# Allocate dynamic scripts
+	df = utils.set_nrega_scripts(df)
+	# Aggregate amounts to household level
+	df = utils.set_nrega_hh_amounts(df)
+	# Aggregate dates to household level
+	df = utils.set_nrega_hh_dates(df)
+	# Allocate rejection reason - still need to complete
+	df = utils.set_nrega_rejection_reason(df)
+	# Keep only columns that are relevant to BTT
+	df = utils.format_df(df)
+	# Add test calls 
+	df = utils.add_test_calls(df)
+	# Resturn statement
 	return(df)
 
-
-def get_hh_amounts(df):
-	
-	# Replace amount with actual amount if it exists else with the amount due
-	df['amount'] = np.where(df['credit_amt_actual'] != 0, df['credit_amt_actual'], df['credit_amt_due'])
-	df['amount'] = df.groupby('id')['amount'].transform('sum')
-	df['amount'] = df['amount'].replace(0, np.nan)
-	
-	return(df)
-	
-	
-def get_hh_dates(df):
-	
-	# Replace transact_date with processed_date if transaction has been processed and then format
-	df['transact_date'] = np.where(~df['processed_date'].isna(), df['processed_date'], df['transact_date'])
-	df['transact_date'] = pd.to_datetime(df['transact_date'], format = '%Y/%m/%d', dayfirst = True)
-	df['transact_date'] = df.groupby('id')['transact_date'].transform('max')
-	
-	return(df)
-
-
-# Still need to complete
-def get_rejection_reason(df):
-	
-	engine = helpers.db_engine()
-	
-	try: rejection_reasons = pd.read_sql("SELECT * FROM rejection_reason;", con = engine)
-	except Exception as e: print(e)
-	
-	df = pd.merge(df, rejection_reason, how = 'left', on = 'rejection_reason', indicator = True)
-	
-	return(df)
-
-
-def prep_df(df):
-	
-	# Keep only relevant columns and drop duplicates
-	df = df[['id', 'phone', 'transact_date', 'time_pref', 'time_pref_label', 'amount', 'transact_date', 'rejection_reason', 'script']] 
-	df.drop_duplicates(['id'], inplace = True)
-	df.reset_index(inplace = True)
-	df = df.sample(frac=1)
-	
-	return(df)
-
-
-def add_test_calls(df):
-	
-	test_calls = pd.read_csv(filepath)
-	
-	return(pd.concat([df, test_calls], axis = 1))
-	
 	
 def main():
+
+	# Create parser for command line arguments
+	parser = argparse.ArgumentParser(description = 'Parse the data for script generation')
+	parser.add_argument('pilot', type = int, help = 'Whether to make script for pilot data or production data')
+	parser.add_argument('local', type = int, help ='Whether to get processed data from local')
+	parser.add_argument('window_length', type = int, help ='Time window in days from today for NREGA lookback')
+	args = parser.parse_args()
 	
-	pilot = 0
-	local = 1
-	window_length = 30
+	# Parse arguments
+	window_length = args.window_length
+	pilot = args.pilot
+	local = args.local
 	
+	# Set window lengths
 	today = str(datetime.today().date())
 	start_date = helpers.get_time_window(today, window_length)
 	
+	# Set output paths
 	local_output_path = './output/callsequence_{}.csv'.format(today)
+	merge_output_path = './output/nregamerge_{}.csv'.format(today)
 	s3_output_path = 'scripts/callsequence_{}.csv'.format(today)
 	
+	# Get transactions and camp data
 	transactions_alt = get_alternate_transactions(local = local)
 	transactions = get_transactions(start_date, today)
-	transactions = add_status_data(transactions, transactions_alt)
 	camp = get_camp_data(pilot)
 	
+	# Add payment status data
+	transactions = add_status_data(transactions, transactions_alt)
+	
+	# Format JCNs to prepare for merge
 	transactions = format_transactions_jcn(transactions)
 	camp = format_camp_jcn(camp)
 	
-	df = merge_camp_data(transactions, camp)
-	df.to_csv('./output/nregamerge_09082019.csv', index = False)
-	
+	# Merge data and create call script
+	df_merged = merge_camp_data(transactions, camp)
+	df = get_static_script_indicators(df_merged)
 	df = get_call_script(df)
-	df = get_hh_amounts(df)
-	df = get_hh_dates(df)
-	df = prep_df(df)
 	
+	# Output the .csvs and send them to S3
+	df_merged.to_csv(merge_output_path, index = False)
 	df.to_csv(local_output_path, index = False)
 	
 
@@ -307,6 +231,11 @@ if __name__ == '__main__':
 	main()
 		
 # Pending
-# Add command line arguments
+# Check why nobody got A in this one
+# Ask about 5 people who got static NREGA instead of welcome script
+# Add rejection reason
+# Add test calls
+# Change file name convention to call date
 # Add in new error messages
+# Add update e-mails
 # Do Alembic migrations
