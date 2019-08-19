@@ -231,11 +231,11 @@ if __name__ == '__main__':
 	main()
 		
 # Pending
-# Check why nobody got A in this one
 # Ask about 5 people who got static NREGA instead of welcome script
-# Add rejection reason
-# Add test calls
 # Change file name convention to call date
+# Check why nobody got A in this one
 # Add in new error messages
-# Add update e-mails
 # Do Alembic migrations
+# Add rejection reason
+# Add update e-mails
+# Add test calls
