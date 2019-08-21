@@ -98,10 +98,7 @@ def format_indicators(df):
 	
 
 def set_static_scripts(df):
-		
-	# Initialize script
-	df['day1'] = ''
-	
+			
 	# Not got welcome script and not got static NREGA introduction so should get the welcome script
 	df.loc[(df['got_static_nrega'] == 0) & (df['got_welcome'] == 0), 'day1'] = "P0 P1 P2 00 P0"
 	
@@ -109,7 +106,7 @@ def set_static_scripts(df):
 	df.loc[(df['got_static_nrega'] == 0) & (df['got_welcome'] == 1), 'day1'] = "P0 P1 P2 P3 Q A P0 Z1 Z2"
 	
 	# Proportional wages
-	df.loc[(df['_merge'] == 'right_only') & (df['got_static_nrega'] == 1) & (df['transact_date'].isna()) & (df['status'].isna()), 'day1'] = 'P0 P1 P2 P3 Q B P0 Z1 Z2'
+	df.loc[(df['got_static_nrega'] == 1), 'day1'] = 'P0 P1 P2 P3 Q B P0 Z1 Z2'
 	
 	return(df)
 
@@ -150,16 +147,25 @@ def set_nrega_hh_dates(df):
 	return(df)
 
 
-def format_df(df):
+def format_df(df, static):
 	
-	df = df[['id', 'phone', 'transact_date', 'time_pref', 'time_pref_label', 'amount', 'transact_date', 'rejection_reason', 'day1']] 
+	if static == 1: 
+		df.rename(columns={'credit_amt_actual':'amount'}, inplace = True)
+		df['transact_date'] = ''
+		df['amount'] = ''
+	
+	df = df[['id', 'phone', 'time_pref', 'time_pref_label', 'amount', 'transact_date', 'rejection_reason', 'day1']] 
 	df.drop_duplicates(['id'], inplace = True)
 	df.reset_index(inplace = True)
 	df = df.sample(frac=1)
+	df.drop(['index'], axis = 1, inplace = True)
 	
 	return(df)
 
 
 def add_test_calls(df):
+	
+	test_calls = pd.read_excel('./script/test_calls.xlsx')
+	df = pd.concat([df, test_calls])
 	
 	return(df)

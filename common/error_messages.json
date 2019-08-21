@@ -101,6 +101,23 @@
 		"25": {
 			"subj":"GMA Error 25: There was an error adding a primary key to the camp data.",
 			"msg": "There is no action required from the field team. Akshat should re-run the program manually."
+		}, 
+		"26": {
+			"subj":"GMA Error 26: There was an error getting the camp data in the script creation file.",
+			"msg": "There is no action required from the field team. Akshat should re-run the program manually."
+		}, 
+		"27": {
+			"subj":"GMA Error 27: There was an error getting the transactions data in the script creation file.",
+			"msg": "There is no action required from the field team. Akshat should re-run the program manually."
+		}, 
+		"28": {
+			"subj":"GMA Error 28: There was an error getting the alternate transactions data in the script creation file.",
+			"msg": "There is no action required from the field team. Akshat should re-run the program manually."
+		},
+		
+		"29": {
+			"subj":"GMA Error 29: There was an error merging the camp data with the transactions data.",
+			"msg": "There is no action required from the field team. Akshat should re-run the program manually."
 		}
 
 	}

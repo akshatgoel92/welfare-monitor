@@ -137,7 +137,7 @@ def make_camp_primary_key():
 	
 def main():
 	
-	camp_data_list = get_camp_data_list(suffix = '05082019.csv')
+	camp_data_list = get_camp_data_list()
 	df = get_camp_data(camp_data_list)
 	df = add_camp_data_columns(df, camp_data_list)
 	

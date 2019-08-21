@@ -30,7 +30,7 @@ def get_camp_data(pilot):
 		
 	except Exception as e:
 		
-		er.handle_error(error_code ='5', data = {})
+		er.handle_error(error_code ='26', data = {})
 		sys.exit()
 		conn.close()
 		
@@ -56,11 +56,19 @@ def get_transactions(start_date, end_date):
 
 	except Exception as e:
 		
-		er.handle_error(error_code ='5', data = {})
+		er.handle_error(error_code ='27', data = {})
 		sys.exit()
 		conn.close()
 
 	return(transactions)
+
+
+def get_alternate_transactions(local = 1, filepath = './output/transactions_alt.csv'):
+	
+	transactions_alt = pd.read_csv(filepath)
+	transactions_alt = transactions_alt[['transact_ref_no', 'status', 'processed_date', 'rejection_reason']]
+			
+	return(transactions_alt)
 
 
 def format_transactions_jcn(transactions):
@@ -78,38 +86,6 @@ def format_camp_jcn(df_field):
 	df_field['jcn'] = df_field['jcn'].apply(utils.format_jcn)
 	
 	return(df_field)
-
-
-def get_alternate_transactions(local = 1, filepath = './output/transactions_alt.csv'):
-	
-	
-	if local == 1: 
-		
-		transactions_alt = pd.read_csv(filepath)
-		transactions_alt = transactions_alt[['transact_ref_no', 'status', 'processed_date', 'rejection_reason']]
-	
-	elif local == 0: 
-		
-		engine = helpers.db_engine()
-		conn = engine.connection()
-		
-		get_joined_tables = '''SELECT a.jcn, a.transact_ref_no, a.transact_date, a.processed_date, a.credit_amt_due, 
-						   	a.credit_amt_actual, a.status, a.rejection_reason, a.fto_no, b.stage 
-						   	FROM transactions_alternate a INNER JOIN fto_queue b ON a.fto_no = b.fto_no 
-						   	WHERE a.transact_date BETWEEN {} and {};'''.format(start_date, end_date)
-		
-		try: 
-		
-			gens_transactions_alt = pd.read_sql(get_joined_tables, con = conn, chunksize = 1000)
-			transactions_alt = pd.concat([gen for gen in gens_transactions_alt])	
-			conn.close()
-
-		except Exception as e:
-		
-			er.handle_error(error_code ='5', data = {})
-			conn.close()
-		
-	return(transactions_alt)
 
 
 def add_status_data(transactions, transactions_alt):
@@ -144,7 +120,7 @@ def merge_camp_data(transactions, df_field_data):
 				  'status', 'rejection_reason', 'fto_no', 'stage', 'id', 'phone', 'time_pref', 
 				  'time_pref_label', '_merge']
 	
-	if df.empty: er.handle_error(error_code ='12', data = {})
+	if df.empty: er.handle_error(error_code ='29', data = {})
 	
 	return(df)
 
@@ -161,10 +137,26 @@ def get_static_script_indicators(df):
 	return(df)
 
 
-def get_call_script(df):
+def get_static_call_script(df):
 	
+	# Initialize script
+	df['day1'] = ''
 	# Allocate static scripts
 	df = utils.set_static_scripts(df)
+	# Keep only columns that are relevant to BTT in static data
+	df = utils.format_df(df, 1)
+	# Add test calls to static script
+	df = utils.add_test_calls(df)
+		
+	return(df)
+
+
+def get_dynamic_call_script(df):
+	
+	# Initialize script
+	df['day1'] = ''
+	# Separate into dynamic
+	df = df.loc[df['_merge'] == 'both']
 	# Allocate dynamic scripts
 	df = utils.set_nrega_scripts(df)
 	# Aggregate amounts to household level
@@ -173,27 +165,37 @@ def get_call_script(df):
 	df = utils.set_nrega_hh_dates(df)
 	# Allocate rejection reason - still need to complete
 	df = utils.set_nrega_rejection_reason(df)
-	# Keep only columns that are relevant to BTT
-	df = utils.format_df(df)
-	# Add test calls 
+	# Keep only columns that are relevant to BTT in dynamic data
+	df = utils.format_df(df, 0)
+	# Add test calls to dynamic script
 	df = utils.add_test_calls(df)
-	# Resturn statement
+	
 	return(df)
 
+
+def send_update_email():
+	
+	helpers.send_mail('GMA Update: Finished executing the script creation. Please check the previous mails for any errors.')
+	
+	return
 	
 def main():
 
 	# Create parser for command line arguments
 	parser = argparse.ArgumentParser(description = 'Parse the data for script generation')
 	parser.add_argument('pilot', type = int, help = 'Whether to make script for pilot data or production data')
-	parser.add_argument('local', type = int, help ='Whether to get processed data from local')
 	parser.add_argument('window_length', type = int, help ='Time window in days from today for NREGA lookback')
+	parser.add_argument('local', type = int, help ='Whether to get processed data from local')
+	parser.add_argument('static', type = int, help ='Whether to make static script')
+	parser.add_argument('dynamic', type = int, help ='Whether to make dynamic script')
 	args = parser.parse_args()
 	
 	# Parse arguments
 	window_length = args.window_length
 	pilot = args.pilot
 	local = args.local
+	static = args.static
+	dynamic = args.dynamic
 	
 	# Set window lengths
 	today = str(datetime.today().date())
@@ -204,38 +206,43 @@ def main():
 	merge_output_path = './output/nregamerge_{}.csv'.format(today)
 	s3_output_path = 'scripts/callsequence_{}.csv'.format(today)
 	
-	# Get transactions and camp data
+	# Prepare camp data
+	camp = get_camp_data(pilot)
+	camp = format_camp_jcn(camp) 
+	
+	# Prepare transactions data
 	transactions_alt = get_alternate_transactions(local = local)
 	transactions = get_transactions(start_date, today)
-	camp = get_camp_data(pilot)
 	
-	# Add payment status data
+	# Add additional data about processed payments and format
 	transactions = add_status_data(transactions, transactions_alt)
-	
-	# Format JCNs to prepare for merge
 	transactions = format_transactions_jcn(transactions)
-	camp = format_camp_jcn(camp)
 	
-	# Merge data and create call script
+	# Merge camp and transactions data 
 	df_merged = merge_camp_data(transactions, camp)
-	df = get_static_script_indicators(df_merged)
-	df = get_call_script(df)
 	
-	# Output the .csvs and send them to S3
-	df_merged.to_csv(merge_output_path, index = False)
-	df.to_csv(local_output_path, index = False)
+	# Merge and get indicators
+	df = get_static_script_indicators(df_merged)
+	
+	# Get scripts
+	if static == 1:
+		
+		df_static = get_static_call_script(df)
+		df_static.to_csv(local_output_path, index = False)
+	
+	if dynamic == 1:
+
+		df_dynamic = get_dynamic_call_script(df)
+		df_merged.to_csv(merge_output_path, index = False)
 	
 
 if __name__ == '__main__':
 	
-	main()
-		
+	main()		
+
 # Pending
-# Ask about 5 people who got static NREGA instead of welcome script
+
+
 # Change file name convention to call date
-# Check why nobody got A in this one
-# Add in new error messages
 # Do Alembic migrations
 # Add rejection reason
-# Add update e-mails
-# Add test calls
