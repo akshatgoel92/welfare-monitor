@@ -15,26 +15,54 @@ np.random.seed(110498)
 random.seed(13029)
 
 
-def get_dynamic_call_script(df):
+def get_dynamic_call_script(local_output_path, s3_output_path):
+	
+	# Prepare camp data
+	camp = gets.get_camp_data(pilot)
+	# Format JCNs
+	camp = formatters.format_camp_jcn(camp)
+	
+	# Get alternate transactions
+	transactions_alt = gets.get_alternate_transactions(local = local)
+	# Get transactions data
+	transactions = gets.get_transactions(start_date, today)
+	
+	# Add additional data about processed payments and format
+	transactions = joins.join_alternate_transactions(transactions, transactions_alt)
+	# Format JCN in transactions data
+	transactions = formatters.format_transactions_jcn(transactions)
+	# Merge camp and transactions data 
+	df = joins.join_camp_data(transactions, camp)
 	
 	# Initialize script
 	df['day1'] = ''
 	# Separate into dynamic
 	df = df.loc[df['_merge'] == 'both']
+	
 	# Allocate dynamic scripts
 	df = utils.set_nrega_scripts(df)
-	# Aggregate amounts to household level
-	df = utils.set_nrega_hh_amounts(df)
 	# Aggregate dates to household level
 	df = utils.set_nrega_hh_dates(df)
+	# Aggregate amounts to household level
+	df = utils.set_nrega_hh_amounts(df)
 	# Allocate rejection reason - still need to complete
 	df = utils.set_nrega_rejection_reason(df)
+	
 	# Keep only columns that are relevant to BTT in dynamic data
 	df = utils.format_df(df, 0)
 	# Add test calls to dynamic script
 	df = utils.add_test_calls(df)
+	# Output
+	df_dynamic.to_csv(local_output_path, index = False)
+	# S3 upload
+	helpers.s3_upload(local_output_path, s3_output_path)
 	
 	return(df)
+
+
+def get_static_call_script(df):
+	
+	pass
 
 	
 def main():
@@ -65,32 +93,16 @@ def main():
 	merge_output_path = './output/nregamerge_{}.csv'.format(today)
 	s3_output_path = 'scripts/callsequence_{}.csv'.format(today)
 	
-	# Prepare camp data
-	camp = gets.get_camp_data(pilot)
-	camp = formatters.format_camp_jcn(camp) 
+
 	
 	# Get scripts
-	if static == 1:
-		df_static = get_static_script_look_backs(camp)
-		df_static = get_static_call_script(df_static)
-		df_static.to_csv(local_output_path, index = False)
+	if static == 1: df_static.to_csv(local_output_path, index = False)
 		
-	if dynamic == 1:
-		# Prepare transactions data
-		transactions_alt = gets.get_alternate_transactions(local = local)
-		transactions = gets.get_transactions(start_date, today)
-	
-		# Add additional data about processed payments and format
-		transactions = joins.join_alternate_transactions(transactions, transactions_alt)
-		transactions = formatters.format_transactions_jcn(transactions)
+	if dynamic == 1: get_dynamic_call_script(df_merged)
 		
-		# Merge camp and transactions data 
-		df_merged = merge_camp_data(transactions, camp)
-		df_dynamic = get_dynamic_call_script(df_merged)
-		df_dynamic.to_csv(local_output_path, index = False)
 	
 	# Output scripts
-	if join == 1:
+	if join == 1: df = joins.join_dynamic_static()
 		df = pd.concat([df_dynamic, df_static])
 		df.to_csv(local_output_path, index = False)
 	
@@ -100,6 +112,7 @@ def main():
 if __name__ == '__main__':
 	
 	main()		
+
 # Pending
 # Add rejection reason
 # Add output function call and S3 upload S3 upload
