@@ -62,13 +62,17 @@ def format_camp_jcn(df_field):
 	return(df_field)
 	
 
-def format_df(df, static):
+def format_static_df(df):
+
+	df.rename(columns={'credit_amt_actual':'amount'}, inplace = True)
+	df['transact_date'] = ''
+	df['amount'] = 
 	
-	if static == 1: 
-		df.rename(columns={'credit_amt_actual':'amount'}, inplace = True)
-		df['transact_date'] = ''
-		df['amount'] = ''
-	
+	return(df)
+
+
+def format_final_df(df):
+		
 	df = df[['id', 'phone', 'time_pref', 'time_pref_label', 'amount', 'transact_date', 'rejection_reason', 'day1']] 
 	df.drop_duplicates(['id'], inplace = True)
 	df.reset_index(inplace = True)
