@@ -55,12 +55,12 @@ def get_welcome_script_indicator(df):
 
 
 
-def get_static_nrega_script_indicator(df):
+def get_static_nrega_script_indicator(df, ind):
 	
-	df['got_static_nrega_int'] = 0
-	df.loc[(df['got_static_nrega'] == 'both'), 'got_static_nrega_int'] = 1
+	df[ind + '_int'] = 0
+	df.loc[(df[ind] == 'both'), ind + '_int'] = 1
 	
-	df.drop(['got_static_nrega'], inplace = True, axis = 1)
-	df = df.rename(columns = {'got_static_nrega_int': 'got_static_nrega'})
+	df.drop([ind], inplace = True, axis = 1)
+	df = df.rename(columns = {ind + '_int': ind})
 	
 	return(df)

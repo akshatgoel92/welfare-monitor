@@ -81,10 +81,15 @@ def get_static_call_script(local_output_path, s3_output_path, pilot = 0):
 	# Get welcome script indicator
 	df = checks.get_welcome_script_indicator(df)
 	
-	# Check static NREGA script
-	df = checks.check_static_nrega_script(df)
-	# Get static NREGA script indicator 
-	df = checks.get_static_nrega_script_indicator(df)
+	# Check static NREGA script for A 
+	df = checks.check_static_nrega_script(df, "P0 P1 P2 P3 Q A P0 Z1 Z2", "got_static_nrega")
+	# Get static NREGA script indicator for A 
+	df = checks.get_static_nrega_script_indicator(df, "got_static_nrega")
+	
+	# Check static NREGA script for B
+	df = checks.check_static_nrega_script(df, "P0 P1 P2 P3 Q A P0 Z1 Z2", "got_second_static_nrega")
+	# Get static NREGA script indicator for B
+	df = checks.get_static_nrega_script_indicator(df, "got_second_static_nrega")
 	
 	# Initialize script
 	df['day1'] = ''
@@ -110,9 +115,10 @@ def main():
 	parser.add_argument('window_length', type = int, help ='Time window in days from today for NREGA lookback', default = 7)
 	parser.add_argument('pilot', type = int, help = 'Whether to make script for pilot data or production data', default = 0)
 	parser.add_argument('dynamic', type = int, help ='Whether to make dynamic script', default = 1)
+	parser.add_argument('join', type = int, help ='Whether to join the two or not...', default = 0)
 	parser.add_argument('static', type = int, help ='Whether to make static script', default = 0)
 	parser.add_argument('local', type = int, help ='Get transactions from local', default = 1)
-	parser.add_argument('join', type = int, help ='Whether to join the two or not...', default = 0)
+	
 	args = parser.parse_args()
 	
 	# Parse arguments
@@ -123,19 +129,17 @@ def main():
 	local = args.local
 	join = args.join
 	
-	# Set window lengths
 	today = str(datetime.today().date())
 	start_date = helpers.get_time_window(today, window_length)
 	
-	# Set output paths
 	local_output_path = './output/callsequence_{}.csv'.format(today)
 	merge_output_path = './output/nregamerge_{}.csv'.format(today)
 	s3_output_path = 'scripts/callsequence_{}.csv'.format(today)
 	
-	# Get scripts
-	if static == 1: get_static_call_script()
-	if dynamic == 1: get_dynamic_call_script()
-	if join == 1: df = joins.join_dynamic_static()
+	if static == 1: get_static_call_script(local_output_path, s3_output_path, pilot)
+	if dynamic == 1: get_dynamic_call_script(local_output_path, s3_output_path, pilot, local)
+	if join == 1: df = joins.join_dynamic_static(local_output_path, s3_output_path, pilot, local)
+	
 	helpers.send_mail('GMA Update: The script was successfully created and uploaded ...take a break. Relaaaaax. See you tomorrow!')
 		
 
@@ -144,5 +148,6 @@ if __name__ == '__main__':
 	main()		
 
 # Pending
+# Rejection reason
 # Change file name convention to call date
 # Do Alembic migrations

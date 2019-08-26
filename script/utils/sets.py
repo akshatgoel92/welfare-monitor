@@ -21,7 +21,13 @@ def set_static_scripts(df):
 	df.loc[(df['got_static_nrega'] == 0) & (df['got_welcome'] == 1), 'day1'] = "P0 P1 P2 P3 Q A P0 Z1 Z2"
 	
 	# Proportional wages
-	df.loc[(df['got_static_nrega'] == 1), 'day1'] = 'P0 P1 P2 P3 Q B P0 Z1 Z2'
+	df.loc[(df['got_second_static_nrega'] == 0) & (df['got_static_nrega'] == 1) & (df['got_welcome'] == 1), 'day1'] = 'P0 P1 P2 P3 Q B P0 Z1 Z2'
+	
+	# New JCN 
+	df.loc[(df['jcn_renewal'] == 1) & df['got_second_static_nrega'] == 1) & (df['got_static_nrega'] == 1) & (df['got_welcome'] == 1), 'day1'] = 'P0 P1 P2 P3 Q H P0 Z1 Z2'
+	
+	# JCN renewal
+	df.loc[(df['jcn_renewal'] == 2) & df['got_second_static_nrega'] == 1) & (df['got_static_nrega'] == 1) & (df['got_welcome'] == 1), 'day1'] = 'P0 P1 P2 P3 Q G P0 Z1 Z2'
 	
 	return(df)
 

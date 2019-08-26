@@ -7,6 +7,7 @@ from db import update
 import pandas as pd
 import argparse
 import datetime
+import sys
 import re
 
 
@@ -55,7 +56,7 @@ def add_camp_data_columns(df, camp_data_list):
 	df = [add_s3_date(data, file_name) for data, file_name in zip(df, camp_data_list)]
 	df = pd.concat(df, ignore_index = True)
 	
-	df = df[['id', 'phone', 'jcn', 'time_pref', 'time_pref_label', 'file_name_s3', 'file_upload_to_s3_date']]
+	df = df[['id', 'phone', 'jcn', 'jc_status', 'time_pref', 'time_pref_label', 'file_name_s3', 'file_upload_to_s3_date']]
 	df['insert_date'] = str(datetime.datetime.today())
 	df['enrolment_date'] = ''
 	df['pilot'] = 0
@@ -140,8 +141,8 @@ def main():
 	
 	# Create parser for command line arguments
 	parser = argparse.ArgumentParser(description = 'Parse the data for script generation')
-	parser.add_argument('prefix', type = str, help ='Prefix for file names to be searched on S3', default = 'camps/camp')
-	parser.add_argument('suffix', type = str, help ='Suffix for file names to be searched on S3', default = '.csv')
+	parser.add_argument('--prefix', type = str, help ='Prefix for file names to be searched on S3', default = 'camps/camp')
+	parser.add_argument('--suffix', type = str, help ='Suffix for file names to be searched on S3', default = '.csv')
 	args = parser.parse_args()
 	
 	# Parse arguments
