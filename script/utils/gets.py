@@ -15,7 +15,7 @@ def get_camp_data(pilot):
 	engine = helpers.db_engine()
 	conn = engine.connect()
 	
-	get_field_data = '''SELECT id, phone, jcn, time_pref, time_pref_label FROM enrolment_record WHERE pilot = {};'''.format(pilot)
+	get_field_data = '''SELECT id, phone, jcn, jc_status, time_pref, time_pref_label FROM enrolment_record WHERE pilot = {};'''.format(pilot)
 	
 	try: 
 		
