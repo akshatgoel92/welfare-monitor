@@ -5,6 +5,7 @@ from common import helpers
 from db import update
 
 import pandas as pd
+import argparse
 import datetime
 import re
 
@@ -137,7 +138,17 @@ def make_camp_primary_key():
 	
 def main():
 	
-	camp_data_list = get_camp_data_list()
+	# Create parser for command line arguments
+	parser = argparse.ArgumentParser(description = 'Parse the data for script generation')
+	parser.add_argument('prefix', type = str, help ='Prefix for file names to be searched on S3', default = 'camps/camp')
+	parser.add_argument('suffix', type = str, help ='Suffix for file names to be searched on S3', default = '.csv')
+	args = parser.parse_args()
+	
+	# Parse arguments
+	prefix = args.prefix
+	suffix = args.suffix	
+	
+	camp_data_list = get_camp_data_list(prefix = prefix, suffix = suffix)
 	df = get_camp_data(camp_data_list)
 	df = add_camp_data_columns(df, camp_data_list)
 	
