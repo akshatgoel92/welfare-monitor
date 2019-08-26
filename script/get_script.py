@@ -11,8 +11,8 @@ from script import utils
 from sqlalchemy import *
 
 # Seed should be in global scope
-random.seed(13029)
 np.random.seed(110498)
+random.seed(13029)
 
 
 def get_camp_data(pilot):
@@ -125,7 +125,57 @@ def merge_camp_data(transactions, df_field_data):
 	return(df)
 
 
-def get_static_script_indicators(df):
+def set_static_scripts(df):
+			
+	# Not got welcome script and not got static NREGA introduction so should get the welcome script
+	df.loc[(df['got_static_nrega'] == 0) & (df['got_welcome'] == 0), 'day1'] = "P0 P1 P2 00 P0"
+	
+	# Got welcome script but not got static NREGA introduction so should get static NREGA introduction
+	df.loc[(df['got_static_nrega'] == 0) & (df['got_welcome'] == 1), 'day1'] = "P0 P1 P2 P3 Q A P0 Z1 Z2"
+	
+	# Proportional wages
+	df.loc[(df['got_static_nrega'] == 1), 'day1'] = 'P0 P1 P2 P3 Q B P0 Z1 Z2'
+	
+	return(df)
+
+
+def set_nrega_scripts(df):
+	
+	# Dynamic NREGA scripts for FTOs at the block office
+	df.loc[(df['stage']=='fst_sig_not') | (df['stage']=='fst_sig'), 'day1'] = 'P0 P1 P2 P3 R CA CB CC P0 Z1 Z2'
+	df.loc[(df['stage']=='sec_sig_not') | (df['stage']=='sec_sig'), 'day1'] = 'P0 P1 P2 P3 R CA CB CC P0 Z1 Z2'
+	
+	# Dynamic NREGA scripts for unprocessed FTOs at the bank
+	df.loc[(df['stage']=='sb') | (df['stage']=='pp') | (df['stage']=='P'), 'day1'] = 'P0 P1 P2 P3 R DA DB DC P0 Z1 Z2'
+		
+	# Dynamic NREGA scripts for transactions which have been processed
+	df.loc[(df['status']=='Processed') & (df['stage']=='pb'), 'day1'] = 'P0 P1 P2 P3 R EA EB EC P0 Z1 Z2'
+	df.loc[(df['status']=='Rejected') & (df['stage']=='pb'), 'day1'] = 'P0 P1 P2 P3 R FA FB FC P0 Z1 Z2'
+	
+	return(df)
+
+
+def set_nrega_hh_amounts(df):
+	
+	# Replace amount with actual amount if it exists else with the amount due
+	df['amount'] = np.where(df['credit_amt_actual'] != 0, df['credit_amt_actual'], df['credit_amt_due'])
+	df['amount'] = df.groupby('id')['amount'].transform('sum')
+	df['amount'] = df['amount'].replace(0, np.nan)
+	
+	return(df)
+	
+	
+def set_nrega_hh_dates(df):
+	
+	# Replace transact_date with processed_date if transaction has been processed and then format
+	df['transact_date'] = np.where(~df['processed_date'].isna(), df['processed_date'], df['transact_date'])
+	df['transact_date'] = pd.to_datetime(df['transact_date'], format = '%Y/%m/%d', dayfirst = True)
+	df['transact_date'] = df.groupby('id')['transact_date'].transform('max')
+	
+	return(df)
+
+
+def get_static_script_look_backs(df):
 	
 	# Look-back for welcome script
 	df = utils.check_welcome_script(df)
@@ -140,7 +190,10 @@ def get_static_script_indicators(df):
 def get_static_call_script(df):
 	
 	# Initialize script
+	df['amount'] = ''
 	df['day1'] = ''
+	df['transact_date'] = ''
+	df['rejection_reason'] = ''
 	# Allocate static scripts
 	df = utils.set_static_scripts(df)
 	# Keep only columns that are relevant to BTT in static data
@@ -183,19 +236,20 @@ def main():
 
 	# Create parser for command line arguments
 	parser = argparse.ArgumentParser(description = 'Parse the data for script generation')
-	parser.add_argument('pilot', type = int, help = 'Whether to make script for pilot data or production data')
 	parser.add_argument('window_length', type = int, help ='Time window in days from today for NREGA lookback')
-	parser.add_argument('local', type = int, help ='Whether to get processed data from local')
-	parser.add_argument('static', type = int, help ='Whether to make static script')
+	parser.add_argument('pilot', type = int, help = 'Whether to make script for pilot data or production data')
 	parser.add_argument('dynamic', type = int, help ='Whether to make dynamic script')
+	parser.add_argument('static', type = int, help ='Whether to make static script')
+	parser.add_argument('local', type = int, help ='Get transactions from local')
+	parser.add_argument('join', type = int, help ='Whether to join the two or not...')
 	args = parser.parse_args()
 	
 	# Parse arguments
 	window_length = args.window_length
+	dynamic = args.dynamic
+	static = args.static
 	pilot = args.pilot
 	local = args.local
-	static = args.static
-	dynamic = args.dynamic
 	
 	# Set window lengths
 	today = str(datetime.today().date())
@@ -210,39 +264,32 @@ def main():
 	camp = get_camp_data(pilot)
 	camp = format_camp_jcn(camp) 
 	
-	# Prepare transactions data
-	transactions_alt = get_alternate_transactions(local = local)
-	transactions = get_transactions(start_date, today)
-	
-	# Add additional data about processed payments and format
-	transactions = add_status_data(transactions, transactions_alt)
-	transactions = format_transactions_jcn(transactions)
-	
-	# Merge camp and transactions data 
-	df_merged = merge_camp_data(transactions, camp)
-	
-	# Merge and get indicators
-	df = get_static_script_indicators(df_merged)
-	
 	# Get scripts
 	if static == 1:
-		
-		df_static = get_static_call_script(df)
-		df_static.to_csv(local_output_path, index = False)
+		df_static = get_static_script_look_backs(camp)
+		df_static = get_static_call_script(df_static)
+		print('Static script done!')
 	
 	if dynamic == 1:
-
-		df_dynamic = get_dynamic_call_script(df)
-		df_merged.to_csv(merge_output_path, index = False)
+		# Prepare transactions data
+		transactions_alt = get_alternate_transactions(local = local)
+		transactions = get_transactions(start_date, today)
 	
+		# Add additional data about processed payments and format
+		transactions = add_status_data(transactions, transactions_alt)
+		transactions = format_transactions_jcn(transactions)
+		
+		# Merge camp and transactions data 
+		df_merged = merge_camp_data(transactions, camp)
+		df_dynamic = get_dynamic_call_script(df_merged)
+		
 
 if __name__ == '__main__':
 	
 	main()		
 
 # Pending
-
-
+# Add rejection reason
+# Add output function call and S3 upload S3 upload
 # Change file name convention to call date
 # Do Alembic migrations
-# Add rejection reason
