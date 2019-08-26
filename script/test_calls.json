@@ -1,0 +1,72 @@
+{
+ "0": {
+  "id": 901,
+  "phone": 9819728992,
+  "time_pref": 1,
+  "time_pref_label": "9 AM - 12 PM",
+  "amount": NaN,
+  "transact_date": NaN,
+  "rejection_reason": NaN,
+  "day1": "P0 P1 P2 P3 Q B P0 Z1 Z2"
+ },
+ "1": {
+  "id": 902,
+  "phone": 9920076608,
+  "time_pref": 1,
+  "time_pref_label": "9 AM - 12 PM",
+  "amount": NaN,
+  "transact_date": NaN,
+  "rejection_reason": NaN,
+  "day1": "P0 P1 P2 P3 Q A P0 Z1 Z2"
+ },
+ "2": {
+  "id": 903,
+  "phone": 9650057796,
+  "time_pref": 4,
+  "time_pref_label": "6 PM - 9 PM",
+  "amount": NaN,
+  "transact_date": NaN,
+  "rejection_reason": NaN,
+  "day1": "P0 P1 P2 00 P0"
+ },
+ "3": {
+  "id": 904,
+  "phone": 7297869046,
+  "time_pref": 4,
+  "time_pref_label": "6 PM - 9 PM",
+  "amount": NaN,
+  "transact_date": NaN,
+  "rejection_reason": NaN,
+  "day1": "P0 P1 P2 00 P0"
+ },
+ "4": {
+  "id": 905,
+  "phone": 8989973795,
+  "time_pref": 3,
+  "time_pref_label": "3 PM - 6 PM",
+  "amount": NaN,
+  "transact_date": NaN,
+  "rejection_reason": NaN,
+  "day1": "P0 P1 P2 P3 Q B P0 Z1 Z2"
+ },
+ "5": {
+  "id": 906,
+  "phone": 9958581681,
+  "time_pref": 2,
+  "time_pref_label": "12 PM - 3 PM",
+  "amount": NaN,
+  "transact_date": NaN,
+  "rejection_reason": NaN,
+  "day1": "P0 P1 P2 00 P0"
+ },
+ "6": {
+  "id": 907,
+  "phone": 8291520739,
+  "time_pref": 2,
+  "time_pref_label": "12 PM - 3 PM",
+  "amount": NaN,
+  "transact_date": NaN,
+  "rejection_reason": NaN,
+  "day1": "P0 P1 P2 P3 Q A P0 Z1 Z2"
+ }
+}
