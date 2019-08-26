@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import random
+import json
 import sys
 
 from common import errors as er
@@ -64,13 +65,18 @@ def set_nrega_hh_dates(df):
 # Still need to complete
 def set_nrega_rejection_reason(df):
 	
+	pass
+	
 	return(df)
 
 
 # Change to JSON	
 def set_test_calls(df):
 	
-	test_calls = pd.read_excel('./script/test_calls.xlsx')
+	with open(filepath, 'r') as f:
+		df = json.load(f)
+		
+	test_calls = pd.DataFrame.from_dict(test_calls, orient = 'index')
 	df = pd.concat([df, test_calls])
 	
 	return(df)

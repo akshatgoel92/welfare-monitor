@@ -7,7 +7,13 @@ import sys
 from common import errors as er
 from datetime import datetime
 from common import helpers
-from script.utils import *
+
+from script.utils import formatters
+from script.utils import checks
+from script.utils import joins
+from script.utils import gets
+from script.utils import sets
+ 
 from sqlalchemy import *
 
 
@@ -51,9 +57,9 @@ def get_dynamic_call_script(local_output_path, s3_output_path, pilot = 0, local 
 	df = sets.set_nrega_rejection_reason(df)
 	
 	# Keep only columns that are relevant to BTT in dynamic data
-	df = formatters.format_final_df(df)
+	df = utils.formatters.format_final_df(df)
 	# Add test calls to dynamic script
-	df = sets.set_test_calls(df)
+	df = utils.sets.set_test_calls(df)
 	
 	# Output
 	df_dynamic.to_csv(local_output_path, index = False)
@@ -68,15 +74,15 @@ def get_static_call_script(local_output_path, s3_output_path, pilot = 0):
 	# Prepare camp data
 	camp = gets.get_camp_data(pilot)
 	# Format JCNs
-	camp = formatters.format_camp_jcn(camp)
+	df = formatters.format_camp_jcn(camp)
 	
 	# Check welcome script
-	df = checks.check_welcome_script(camp)
+	df = checks.check_welcome_script(df)
 	# Get welcome script indicator
 	df = checks.get_welcome_script_indicator(df)
 	
 	# Check static NREGA script
-	df = checks.check_static_nrega_script(camp)
+	df = checks.check_static_nrega_script(df)
 	# Get static NREGA script indicator 
 	df = checks.get_static_nrega_script_indicator(df)
 	
@@ -90,10 +96,9 @@ def get_static_call_script(local_output_path, s3_output_path, pilot = 0):
 	# Keep only columns that are relevant to BTT in static data
 	df = formatters.format_final_df(df)
 	# Add test calls to static script
-	df = sets.set_test_calls(df) 
-	
+	df = sets.set_test_calls(df)  
 	# Output 
-	df_static.to_csv(local_output_path, index = False)
+	df.to_csv(local_output_path, index = False)
 	# S3 upload
 	helpers.s3_upload(local_output_path, s3_output_path)
 
@@ -131,7 +136,7 @@ def main():
 	if static == 1: get_static_call_script()
 	if dynamic == 1: get_dynamic_call_script()
 	if join == 1: df = joins.join_dynamic_static()
-	helpers.send_mail('GMA Update: The script was successfully created and uploaded ...take a break. See you tomorrow!')
+	helpers.send_mail('GMA Update: The script was successfully created and uploaded ...take a break. Relaaaaax. See you tomorrow!')
 		
 
 if __name__ == '__main__':

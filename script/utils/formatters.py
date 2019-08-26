@@ -48,7 +48,7 @@ def format_jcn(old_jcn):
 def format_transactions_jcn(transactions):
 	
 	transactions['jcn'] = transactions[['CH-033' not in x for x in transactions['jcn']]]['jcn'].apply(lambda x: 'CH-033' + x[2:])
-	transactions['jcn'] = transactions['jcn'].apply(utils.format_jcn)
+	transactions['jcn'] = transactions['jcn'].apply(format_jcn)
 	
 	return(transactions)
 	
@@ -57,7 +57,7 @@ def format_camp_jcn(df_field):
 		
 	df_field['jcn'] = df_field['jcn'].fillna('').apply(lambda x: x.replace('--', '-'))
 	df_field['jcn'] = df_field[['CH-033' not in x for x in df_field['jcn']]]['jcn'].apply(lambda x: 'CH-033' + x[2:] if x != '' else '')
-	df_field['jcn'] = df_field['jcn'].apply(utils.format_jcn)
+	df_field['jcn'] = df_field['jcn'].apply(format_jcn)
 	
 	return(df_field)
 	
@@ -65,8 +65,9 @@ def format_camp_jcn(df_field):
 def format_static_df(df):
 
 	df.rename(columns={'credit_amt_actual':'amount'}, inplace = True)
+	df['rejection_reason'] = ''
 	df['transact_date'] = ''
-	df['amount'] = 
+	df['amount'] = ''
 	
 	return(df)
 
