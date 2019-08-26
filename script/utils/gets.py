@@ -10,69 +10,86 @@ from script import utils
 from sqlalchemy import *
 
 
-def format_jcn(old_jcn):
+def get_camp_data(pilot):
 	
-	if not old_jcn: return ''
-	old_jcn.replace(" ", "")
-	new_jcn = ''
+	engine = helpers.db_engine()
+	conn = engine.connect()
 	
-	for index, char in enumerate(old_jcn):
+	get_field_data = '''SELECT id, phone, jcn, time_pref, time_pref_label FROM enrolment_record WHERE pilot = {};'''.format(pilot)
+	
+	try: 
 		
-		if char.isalpha() or char.isdigit(): 
-			new_jcn += char
+		gens_field = pd.read_sql(get_field_data, con = conn, chunksize = 1000)
+		df_field = pd.concat([gen for gen in gens_field])
+		conn.close()
 		
-		elif char == '/': 
-			new_jcn += old_jcn[index:]
-			break
+	except Exception as e:
 		
-		elif char == '-':
-			
-			new_jcn += char
-			next_dash_index = old_jcn.find('-', index + 1)
-			index_difference = next_dash_index - index
-			
-			if next_dash_index == -1: 
-				index_dash_difference = old_jcn.find('/') - index
-				
-				if index_dash_difference != 4: 
-					for iter in range(4 - index_dash_difference): 
-						new_jcn += '0'
-			
-			elif index_difference != 4:
-				for iter in range(4 - index_difference): 
-					new_jcn += '0'
-	
-	return(new_jcn)
-
-
-def format_transactions_jcn(transactions):
-	
-	transactions['jcn'] = transactions[['CH-033' not in x for x in transactions['jcn']]]['jcn'].apply(lambda x: 'CH-033' + x[2:])
-	transactions['jcn'] = transactions['jcn'].apply(utils.format_jcn)
-	
-	return(transactions)
-	
-
-def format_camp_jcn(df_field):
+		er.handle_error(error_code ='26', data = {})
+		sys.exit()
+		conn.close()
 		
-	df_field['jcn'] = df_field['jcn'].fillna('').apply(lambda x: x.replace('--', '-'))
-	df_field['jcn'] = df_field[['CH-033' not in x for x in df_field['jcn']]]['jcn'].apply(lambda x: 'CH-033' + x[2:] if x != '' else '')
-	df_field['jcn'] = df_field['jcn'].apply(utils.format_jcn)
-	
 	return(df_field)
-	
 
-def format_df(df, static):
+
+def get_transactions(start_date, end_date):
 	
-	if static == 1: 
-		df.rename(columns={'credit_amt_actual':'amount'}, inplace = True)
-		df['transact_date'] = ''
-		df['amount'] = ''
 	
-	df = df[['id', 'phone', 'time_pref', 'time_pref_label', 'amount', 'transact_date', 'rejection_reason', 'day1']] 
-	df.drop_duplicates(['id'], inplace = True)
-	df.reset_index(inplace = True)
-	df = df.sample(frac = 1)
-	df.drop(['index'], axis = 1, inplace = True)
+	engine = helpers.db_engine()
+	conn = engine.connect()
 	
+	get_joined_tables = '''SELECT a.jcn, a.transact_ref_no, a.transact_date, a.processed_date, a.credit_amt_due, 
+						   a.credit_amt_actual, a.status, a.rejection_reason, a.fto_no, b.stage 
+						   FROM transactions a INNER JOIN fto_queue b ON a.fto_no = b.fto_no 
+						   WHERE a.transact_date BETWEEN '{}' and '{}';'''.format(start_date, end_date)
+
+	try: 
+		
+		gens_transactions = pd.read_sql(get_joined_tables, con = conn, chunksize = 1000)
+		transactions = pd.concat([gen for gen in gens_transactions])	
+		conn.close()
+
+	except Exception as e:
+		
+		er.handle_error(error_code ='27', data = {})
+		sys.exit()
+		conn.close()
+
+	return(transactions)
+
+
+def get_alternate_transactions(local = 1, filepath = './output/transactions_alt.csv'):
+	
+	transactions_alt = pd.read_csv(filepath)
+	transactions_alt = transactions_alt[['transact_ref_no', 'status', 'processed_date', 'rejection_reason']]
+			
+	return(transactions_alt)
+
+
+def get_static_script_look_backs(df):
+	
+	# Look-back for welcome script
+	df = utils.check_welcome_script(df)
+	# Look back for static NREGA introduction
+	df = utils.check_static_nrega_script(df)
+	# Look back for formatting indicators
+	df = utils.format_indicators(df)
+	# Return statement
+	return(df)
+
+
+def get_static_call_script(df):
+	
+	# Initialize script
+	df['amount'] = ''
+	df['day1'] = ''
+	df['transact_date'] = ''
+	df['rejection_reason'] = ''
+	# Allocate static scripts
+	df = utils.set_static_scripts(df)
+	# Keep only columns that are relevant to BTT in static data
+	df = utils.format_df(df, 1)
+	# Add test calls to static script
+	df = utils.add_test_calls(df)
+		
 	return(df)
