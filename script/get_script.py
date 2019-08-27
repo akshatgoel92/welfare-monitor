@@ -27,34 +27,28 @@ def get_static_call_script(local_output_path, s3_output_path, pilot = 0):
 
 	# Prepare camp data
 	camp = gets.get_camp_data(pilot)
-	# Format JCNs
 	df = formatters.format_camp_jcn(camp)
 	
 	# Check welcome script
 	df = checks.check_welcome_script(df)
-	# Get welcome script indicator
 	df = checks.get_welcome_script_indicator(df)
 	
 	# Check static NREGA script for A 
 	df = checks.check_static_nrega_script(df, "P0 P1 P2 P3 Q A P0 Z1 Z2", "got_static_nrega")
-	# Get static NREGA script indicator for A 
 	df = checks.get_static_nrega_script_indicator(df, "got_static_nrega")
 	
 	# Check static NREGA script for B
-	df = checks.check_static_nrega_script(df, "P0 P1 P2 P3 Q B P0 Z1 Z2", "got_second_static_nrega")
 	# Get static NREGA script indicator for B
+	df = checks.check_static_nrega_script(df, "P0 P1 P2 P3 Q B P0 Z1 Z2", "got_second_static_nrega")
 	df = checks.get_static_nrega_script_indicator(df, "got_second_static_nrega")
 	
-	# Initialize script
+	# Allocate scripts
 	df['day1'] = ''
-	# Allocate static scripts
 	df = sets.set_static_scripts(df)
 	
-	# Format final df
+	# Final cleaning
 	df = formatters.format_static_df(df)
-	# Keep only columns that are relevant to BTT in static data
 	df = formatters.format_final_df(df)
-	# Add test calls to static script
 	df = sets.set_static_test_calls(df)
 	  
 	df.to_csv(local_output_path, index = False)
