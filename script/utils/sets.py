@@ -24,10 +24,12 @@ def set_static_scripts(df):
 	df.loc[(df['got_second_static_nrega'] == 0) & (df['got_static_nrega'] == 1) & (df['got_welcome'] == 1), 'day1'] = 'P0 P1 P2 P3 Q B P0 Z1 Z2'
 	
 	# New JCN 
-	df.loc[(df['jc_status'] == 1) & (df['got_second_static_nrega'] == 1) & (df['got_static_nrega'] == 1) & (df['got_welcome'] == 1), 'day1'] = 'P0 P1 P2 P3 Q H P0 Z1 Z2'
+	df.loc[(df['jc_status'] == 1) & (df['got_second_static_nrega'] == 1) & (df['got_static_nrega'] == 1) & (df['got_welcome'] == 1), 'day1'] = 'P0 P1 P2 P3 Q G P0 Z1 Z2'
+	df.loc[(df['jc_status'] == 1) & (df['got_second_static_nrega'] == 1) & (df['got_static_nrega'] == 1) & (df['got_welcome'] == 0), 'day1'] = 'P0 P1 P2 P3 Q G P0 Z1 Z2'
 	
 	# JCN renewal
-	df.loc[(df['jc_status'] == 2) & (df['got_second_static_nrega'] == 1) & (df['got_static_nrega'] == 1) & (df['got_welcome'] == 1), 'day1'] = 'P0 P1 P2 P3 Q G P0 Z1 Z2'
+	df.loc[(df['jc_status'] != 1) & (df['got_second_static_nrega'] == 1) & (df['got_static_nrega'] == 1) & (df['got_welcome'] == 1), 'day1'] = 'P0 P1 P2 P3 Q H P0 Z1 Z2'
+	df.loc[(df['jc_status'] != 1) & (df['got_second_static_nrega'] == 1) & (df['got_static_nrega'] == 1) & (df['got_welcome'] == 0), 'day1'] = 'P0 P1 P2 P3 Q H P0 Z1 Z2'
 	
 	return(df)
 
@@ -76,14 +78,11 @@ def set_nrega_rejection_reason(df):
 	return(df)
 
 
-# Change to JSON	
 def set_static_test_calls(df, filepath = './script/test_calls.json'):
 	
 	with open(filepath, 'r') as f:
-		test_calls = json.load(f)
+		test_calls = pd.DataFrame.from_dict(json.load(f), orient = 'index')
 		
-	test_calls = pd.DataFrame.from_dict(test_calls, orient = 'index')
-	
 	test_calls['amount'].fillna('', inplace = True)
 	test_calls['transact_date'].fillna('', inplace = True)
 	test_calls['rejection_reason'].fillna('', inplace = True)

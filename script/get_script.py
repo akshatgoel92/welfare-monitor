@@ -55,10 +55,10 @@ def get_static_call_script(local_output_path, s3_output_path, pilot = 0):
 	# Keep only columns that are relevant to BTT in static data
 	df = formatters.format_final_df(df)
 	# Add test calls to static script
-	df = sets.set_test_calls(df)
+	df = sets.set_static_test_calls(df)
 	  
 	df.to_csv(local_output_path, index = False)
-	helpers.s3_upload(local_output_path, s3_output_path)
+	helpers.upload_s3(local_output_path, s3_output_path)
 
 
 def get_dynamic_call_script(local_output_path, s3_output_path, pilot = 0, local = 1):
@@ -103,7 +103,7 @@ def get_dynamic_call_script(local_output_path, s3_output_path, pilot = 0, local 
 	# Output
 	df_dynamic.to_csv(local_output_path, index = False)
 	# S3 upload
-	helpers.s3_upload(local_output_path, s3_output_path)
+	helpers.upload_s3(local_output_path, s3_output_path)
 	
 	return(df)
 
@@ -112,12 +112,12 @@ def main():
 
 	# Create parser for command line arguments
 	parser = argparse.ArgumentParser(description = 'Parse the data for script generation')
-	parser.add_argument('window_length', type = int, help ='Time window in days from today for NREGA lookback', default = 7)
-	parser.add_argument('pilot', type = int, help = 'Whether to make script for pilot data or production data', default = 0)
-	parser.add_argument('dynamic', type = int, help ='Whether to make dynamic script', default = 1)
-	parser.add_argument('join', type = int, help ='Whether to join the two or not...', default = 0)
-	parser.add_argument('static', type = int, help ='Whether to make static script', default = 0)
-	parser.add_argument('local', type = int, help ='Get transactions from local', default = 1)
+	parser.add_argument('--window_length', type = int, help ='Time window in days from today for NREGA lookback', default = 7)
+	parser.add_argument('--pilot', type = int, help = 'Whether to make script for pilot data or production data', default = 0)
+	parser.add_argument('--dynamic', type = int, help ='Whether to make dynamic script', default = 0)
+	parser.add_argument('--join', type = int, help ='Whether to join the two or not...', default = 0)
+	parser.add_argument('--static', type = int, help ='Whether to make static script', default = 1)
+	parser.add_argument('--local', type = int, help ='Get transactions from local', default = 1)
 	
 	args = parser.parse_args()
 	
@@ -140,7 +140,7 @@ def main():
 	if dynamic == 1: get_dynamic_call_script(local_output_path, s3_output_path, pilot, local)
 	if join == 1: df = joins.join_dynamic_static(local_output_path, s3_output_path, pilot, local)
 	
-	helpers.send_mail('GMA Update: The script was successfully created and uploaded ...take a break. Relaaaaax. See you tomorrow!')
+	helpers.send_email('GMA Update: The script was successfully created and uploaded ...take a break. Relaaaaax. See you tomorrow!', '')
 		
 
 if __name__ == '__main__':
