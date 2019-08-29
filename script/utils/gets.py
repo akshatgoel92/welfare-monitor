@@ -85,11 +85,22 @@ def get_static_call_script(df):
 	df['day1'] = ''
 	df['transact_date'] = ''
 	df['rejection_reason'] = ''
+	
 	# Allocate static scripts
-	df = utils.set_static_scripts(df)
 	# Keep only columns that are relevant to BTT in static data
-	df = utils.format_df(df, 1)
 	# Add test calls to static script
+	df = utils.set_static_scripts(df)
+	df = utils.format_df(df, 1)
 	df = utils.add_test_calls(df)
 		
+	return(df)
+
+
+def get_rejection_reasons(filepath = './script/rejection_reasons.json'):
+	
+	with open(filepath) as f:
+		
+		rejection_reasons = json.load(f)
+		rejection_reasons = pd.DataFrame(from_dict(rejection_reasons, orient = 'index')
+	
 	return(df)

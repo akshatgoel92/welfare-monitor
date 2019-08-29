@@ -1,0 +1,53 @@
+[
+	{
+		"Inactive Aadhaar": "P0 P1 P2 P3 R FF1 FF2 FA4 FB FB4 FC P0 Z1 Z2"
+	},
+	{
+		"No Such Account": "P0 P1 P2 P3 R FF1 FF2 FA1 FB FB1 FC P0 Z1 Z2"
+	},
+	{
+		"A/C Blocked Or Frozen": "P0 P1 P2 P3 R FF1 FF2 FA3 FB FB3 FC P0 Z1 Z2"
+	},
+	{
+		"Account Closed Or Transferred": "P0 P1 P2 P3 R FF1 FF2 FA6 FB FB6 FC P0 Z1 Z2"
+	},
+	{
+		"Kyc Documents Pending": "P0 P1 P2 P3 R FF1 FF2 FA5 FB FB5 FC P0 Z1 Z2"
+	},
+	{
+		"Aadhaar Number Not Mapped To Account Number": "P0 P1 P2 P3 R FF1 FF2 FA10 FB FB10 FC P0 Z1 Z2"
+	},
+	{
+		"Amount Exceeds Limit Set On Account By Bank For Cr": "P0 P1 P2 P3 R FF1 FF2 FA7 FB FB7 FC P0 Z1 Z2"
+	},
+	{
+		"Customer To Refer To The Branch": "P0 P1 P2 P3 R FF1 FF2 FA5 FB FB5 FC P0 Z1 Z2"
+	},
+	{
+		"Account Holder Expired": "P0 P1 P2 P3 R FF1 FF2 FA5 FB FB5 FC P0 Z1 Z2"
+	},
+	{
+		"Invalid Account(Nre/Ppf/Cc/Loan/Fd)": "P0 P1 P2 P3 R FF1 FF2 FA8 FB FB8 FC P0 Z1 Z2"
+	},
+	{
+		"A/C Inactive (No Transactions For Last 3 Months)": "P0 P1 P2 P3 R FF1 FF2 FA2 FB FB2 FC P0 Z1 Z2"
+	},
+	{
+		"Account Reached Maximum Credit Limit Set On Accoun": "P0 P1 P2 P3 R FF1 FF2 FA7 FB FB7 FC P0 Z1 Z2"
+	},
+	{
+		"Dormant A/C (No Transactions For Last 6 Months)": "P0 P1 P2 P3 R FF1 FF2 FA2 FB FB2 FC P0 Z1 Z2"
+	},
+	{
+		"Network Failure (Cbs)": "P0 P1 P2 P3 R FF1 FF2 FA9 FB FB9 FC P0 Z1 Z2"
+	},
+	{
+		"Account Description Does Not Tally": "P0 P1 P2 P3 R FF1 FF2 FA5 FB FB5 FC P0 Z1 Z2"
+	},
+	{
+		"Participant Not Mapped To The Product": "P0 P1 P2 P3 R FF1 FF2 FA5 FB FB5 FC P0 Z1 Z2"
+	},
+	{
+		"A/C In Zero Balance/No Transactions Have Happened": "P0 P1 P2 P3 R FF1 FF2 FA7 FB FB7 FC P0 Z1 Z2"
+	}
+]

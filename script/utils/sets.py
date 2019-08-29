@@ -72,14 +72,16 @@ def set_nrega_hh_dates(df):
 
 
 # Still need to complete
-def set_nrega_rejection_reason(df):
+# Add in fallback rejection option
+def set_nrega_rejection_reason(df, rejection_reasons):
 	
-	pass
-	
+	df = pd.merge(df, rejection_reasons, how = 'left', on = 'rejection_reason', indicator = 'rejection_reason_merge')
+	df.drop(['rejection_reason_merge'], inplace = True)
+
 	return(df)
 
 
-def set_static_test_calls(df, filepath = './script/test_calls.json'):
+def set_static_test_calls(df, filepath = './script/test_static_calls.json'):
 	
 	with open(filepath, 'r') as f:
 		test_calls = pd.DataFrame.from_dict(json.load(f), orient = 'index')

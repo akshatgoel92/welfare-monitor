@@ -92,7 +92,7 @@ def get_dynamic_call_script(local_output_path, s3_output_path, pilot = 0, local 
 	# Keep only columns that are relevant to BTT in dynamic data
 	df = utils.formatters.format_final_df(df)
 	# Add test calls to dynamic script
-	df = utils.sets.set_test_calls(df)
+	df = utils.sets.set_dynamic_test_calls(df)
 	
 	# Output
 	df_dynamic.to_csv(local_output_path, index = False)
@@ -126,15 +126,18 @@ def main():
 	today = str(datetime.today().date())
 	start_date = helpers.get_time_window(today, window_length)
 	
-	local_output_path = './output/callsequence_{}.csv'.format(today)
-	merge_output_path = './output/nregamerge_{}.csv'.format(today)
-	s3_output_path = 'scripts/callsequence_{}.csv'.format(today)
+	file_name_today = datetime.strptime(today, '%Y-%m-%d').strftime('%d%m%Y')
+	local_output_path = './output/callsequence_{}.csv'.format(file_name_today)
+	merge_output_path = './output/nregamerge_{}.csv'.format(file_name_today)
+	s3_output_path = 'tests/callsequence_{}.csv'.format(file_name_today)
 	
 	if static == 1: get_static_call_script(local_output_path, s3_output_path, pilot)
 	if dynamic == 1: get_dynamic_call_script(local_output_path, s3_output_path, pilot, local)
 	if join == 1: df = joins.join_dynamic_static(local_output_path, s3_output_path, pilot, local)
 	
-	helpers.send_email('GMA Update: The script was successfully created and uploaded ...take a break. Relaaaaax. See you tomorrow!', '')
+	subject = 'GMA Update: The script was successfully created and uploaded ...take a break. Relaaaaax. See you tomorrow!'
+	message = 'The file name is {}'.format(s3_output_path)
+	helpers.send_email(subject, message)
 		
 
 if __name__ == '__main__':
