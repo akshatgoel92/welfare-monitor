@@ -96,11 +96,12 @@ def get_static_call_script(df):
 	return(df)
 
 
-def get_rejection_reasons(filepath = './script/rejection_reasons.json'):
+def get_rejection_reasons(filepath = './script/rejection_reason.json'):
 	
-	with open(filepath) as f:
-		
-		rejection_reasons = json.load(f)
-		rejection_reasons = pd.DataFrame(from_dict(rejection_reasons, orient = 'index')
+	with open(filepath) as f: rejection_reasons = json.load(f)
 	
-	return(df)
+	rejection_reasons = pd.DataFrame.from_dict(rejection_reasons, orient = 'index')
+	rejection_reasons.reset_index(inplace = True)
+	rejection_reasons.columns = ['rejection_reason', 'day1'] 
+	
+	return(rejection_reasons)

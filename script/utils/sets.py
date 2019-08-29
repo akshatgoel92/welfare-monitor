@@ -71,13 +71,17 @@ def set_nrega_hh_dates(df):
 	return(df)
 
 
-# Still need to complete
-# Add in fallback rejection option
+# Test
 def set_nrega_rejection_reason(df, rejection_reasons):
 	
 	df = pd.merge(df, rejection_reasons, how = 'left', on = 'rejection_reason', indicator = 'rejection_reason_merge')
-	df.drop(['rejection_reason_merge'], inplace = True)
-
+	
+	df['day1'] = ''
+	df.apply(lambda row: row['day1'] = row['day1_y'] if row['rejection_reason'] !='' else row['day1'] = row['day1_x'])
+	
+	df.apply(lambda row: row['day1'] = 'P0 P1 P2 P3 R FF1 FF2 FA5 FB FB5 FC P0 Z1 Z2' if row['rejection_reason'] != '' and row['day1'] == '')
+	df.drop(['rejection_reason_merge', 'day1_x', 'day1_y'], inplace = True)
+	
 	return(df)
 
 
