@@ -120,7 +120,7 @@ class FTOContentPipeline(object):
 			
 			title_fields = ['block_name', 'app_name', 'status', 'rejection_reason']
 			tables = ['banks_alt', 'transactions_alt', 'wage_lists_alt']
-			unique_tables = ['banks'_alt, 'wage_lists_alt']
+			unique_tables = ['banks_alt', 'wage_lists_alt']
 			
 			if item['block_name'] is None:
 				raise(DropItem("Block name missing"))
