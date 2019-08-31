@@ -56,13 +56,15 @@ def main():
 
 	# Create parser for command line arguments
 	parser = argparse.ArgumentParser(description = 'Parse the data for script generation')
-	parser.add_argument('--window_length', type = int, help ='Time window in days from today for NREGA lookback', default = 7)
 	parser.add_argument('--pilot', type = int, help = 'Whether to make script for pilot data or production data', default = 0)
-	args = parser.parse_args()
+	parser.add_argument('--window_length', type = int, help ='Time window in days from today for NREGA lookback', default = 7)
 	
 	# Parse arguments
+	args = parser.parse_args()
+	
 	window_length = args.window_length
 	pilot = args.pilot
+	
 	today = str(datetime.today().date())
 	start_date = helpers.get_time_window(today, window_length)
 	
@@ -86,6 +88,6 @@ if __name__ == '__main__':
 	main()		
 
 # Pending
-# Fix date issue issue
-# Change file name convention to call date
+# Fix date issue
+# Change file name convention to call date and finish other related things
 # Do Alembic migrations
