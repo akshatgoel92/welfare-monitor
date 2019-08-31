@@ -135,6 +135,40 @@ class FTOContentPipeline(object):
 				try: self.dbpool.runOperation(sql, data)
 				except Exception as e: self.logger.error('Error in the data-base upload: %s', str(e))
 		
+		if isinstance(item, FTOItem) and spider.name == 'fto_branch':
+			
+			title_fields = ['block_name', 'app_name', 'status', 'rejection_reason']
+			tables = ['banks_alt', 'transactions_alt', 'wage_lists_alt']
+			unique_tables = ['banks_alt', 'wage_lists_alt']
+			
+			if item['block_name'] is None:
+				raise(DropItem("Block name missing"))
+		
+			if item['ifsc_code'] == "Total":
+				raise(DropItem("IFSC code missing"))
+		
+			if item['wage_list_no'] is None:
+				raise(DropItem("Wage list no. missing"))
+		
+			if item['wage_list_no'] == '':
+				raise(DropItem("Wage list no. missing"))
+			
+			if re.search('\d{10}NRG\d{17}', item['transact_ref_no']) is None:
+				raise(DropItem("Transaction ref no does not fit format"))
+				
+			item = clean_item(item, title_fields)	
+			
+			for table in tables:
+				
+				unique = 1 if table in unique_tables else 0
+				keys = get_keys(table)
+				sql, data = insert_data(item, keys, table, unique)
+				
+				try:
+					self.dbpool.runOperation(sql, data)
+				except Exception as e:
+					self.logger.error('Error in the data-base upload: %s', str(e))
+					
 		return(item)
 	
 	
