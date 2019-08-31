@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import random
+import json
 import sys
 
 from common import errors as er
@@ -75,24 +76,6 @@ def get_static_script_look_backs(df):
 	# Look back for formatting indicators
 	df = utils.format_indicators(df)
 	# Return statement
-	return(df)
-
-
-def get_static_call_script(df):
-	
-	# Initialize script
-	df['amount'] = ''
-	df['day1'] = ''
-	df['transact_date'] = ''
-	df['rejection_reason'] = ''
-	
-	# Allocate static scripts
-	# Keep only columns that are relevant to BTT in static data
-	# Add test calls to static script
-	df = utils.set_static_scripts(df)
-	df = utils.format_df(df, 1)
-	df = utils.add_test_calls(df)
-		
 	return(df)
 
 
