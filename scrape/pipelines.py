@@ -119,8 +119,8 @@ class FTOContentPipeline(object):
 		if isinstance(item, FTOItem) and spider.name == 'fto_branch':
 			
 			title_fields = ['block_name', 'app_name', 'status', 'rejection_reason']
-			tables = ['banks', 'transactions', 'wage_lists']
-			unique_tables = ['banks', 'wage_lists']
+			tables = ['banks_alt', 'transactions_alt', 'wage_lists_alt']
+			unique_tables = ['banks'_alt, 'wage_lists_alt']
 			
 			if item['block_name'] is None:
 				raise(DropItem("Block name missing"))
