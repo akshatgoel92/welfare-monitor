@@ -23,6 +23,17 @@ def check_table_empty(conn, table):
 	return(is_empty)
 
 
+def check_table_exists(engine, db_name, table):
+	
+	check = '''SELECT count(TABLE_NAME) 
+			   FROM information_schema.TABLES
+			   WHERE TABLE_SCHEMA = '{}' AND TABLE_NAME = '{}'; '''.format(db_name, table)
+	
+	result = pd.read_sql(check, con = engine).values.tolist()[0][0]
+	
+	return(result)
+
+
 # Return only those entries in df_1 not in df_2
 def anti_join(df_1, df_2, on):
 	
@@ -41,7 +52,6 @@ def select_data(engine, table, cols = ['*']):
 	result = pd.read_sql(query, con = engine)
 
 	return(result)
-
 
 # Insert a new item into the SQL database
 # First get fields which are both in the item and tha table
@@ -96,7 +106,7 @@ def upsert_data(table, update_keys):
 
 def check_primary_key(engine, table):
 	
-	check_primary_key = "SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = {} and column_key = 'PRI');" 
+	check_primary_key = "SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = '{}' and column_key = 'PRI');" 
 	has_primary_key = engine.execute(check_primary_key.format(table))
 	
 	return(has_primary_key)
@@ -104,11 +114,10 @@ def check_primary_key(engine, table):
 
 def create_primary_key(engine, table, key, is_string = 0, key_length = 50):
 
-	if is_string == 0:
+	if is_string == 0: 
 		engine.execute('ALTER TABLE ' + table + ' ADD PRIMARY KEY(' + key + ')')
 
 	elif is_string == 1:
-
 		key_length = '(' + str(key_length) + ')'
 		engine.execute('ALTER TABLE ' + table + ' ADD PRIMARY KEY(' + key + key_length + ')')
 
