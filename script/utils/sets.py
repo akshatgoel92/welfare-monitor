@@ -63,7 +63,7 @@ def set_nrega_hh_amounts(df):
 def set_nrega_hh_dates(df):
 	
 	# Replace transact_date with processed_date if transaction has been processed and then format
-	df['transact_date'] = np.where(~df['processed_date'].isna(), df['processed_date'], df['transact_date'])
+	df['transact_date'] = df.apply(lambda row: row['transact_date'] if row['status'] == '' else row['processed_date'], axis = 1)
 	df['transact_date'] = pd.to_datetime(df['transact_date'], format = '%Y/%m/%d', dayfirst = True)
 	df['transact_date'] = df.groupby('id')['transact_date'].transform('max')
 	
@@ -75,15 +75,16 @@ def set_nrega_rejection_reason(df, rejection_reasons):
 	df = pd.merge(df, rejection_reasons, how = 'left', on = 'rejection_reason', indicator = 'rejection_reason_merge')
 	
 	df['day1'] = ''
-	df['day1'] = df.apply(lambda row: row['day1_y'] if row['rejection_reason'] !='' else row['day1_x'], axis = 1)
+	df['day1'] = df.apply(lambda row: row['day1_y'] if row['rejection_reason'] !='' else row['day1'], axis = 1)
+	df['day1'] = df.apply(lambda row: 'P0 P1 P2 P3 R FF1 FF2 FA5 FB FB5 FC P0 Z1 Z2' if row['rejection_reason'] != '' and row['day1'] == '' else row['day1'], axis = 1)
 	
-	df['day1'] = df.apply(lambda row: 'P0 P1 P2 P3 R FF1 FF2 FA5 FB FB5 FC P0 Z1 Z2' if row['rejection_reason'] != '' and row['day1'] == '' else row['day1_x'], axis = 1)
+	df['day1'] = df.apply(lambda row: row['day1_x'] if row['day1'] == '' else row['day1'], axis = 1)
 	df.drop(['rejection_reason_merge', 'day1_x', 'day1_y'], inplace = True, axis = 1)
 	
 	return(df)
 
 
-def set_static_test_calls(df, filepath = './script/test_static_calls.json'):
+def set_static_test_calls(df, filepath = './script/data/test_static_calls.json'):
 	
 	with open(filepath, 'r') as f:
 		test_calls = pd.DataFrame.from_dict(json.load(f), orient = 'index')

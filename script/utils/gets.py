@@ -33,7 +33,7 @@ def get_camp_data(pilot):
 	return(df_field)
 
 
-def get_transactions(start_date, end_date):
+def get_transactions(start_date, end_date, table_name = 'transactions_alt'):
 	
 	
 	engine = helpers.db_engine()
@@ -41,8 +41,8 @@ def get_transactions(start_date, end_date):
 	
 	get_joined_tables = '''SELECT a.jcn, a.transact_ref_no, a.transact_date, a.processed_date, a.credit_amt_due, 
 						   a.credit_amt_actual, a.status, a.rejection_reason, a.fto_no, b.stage 
-						   FROM transactions a INNER JOIN fto_queue b ON a.fto_no = b.fto_no 
-						   WHERE a.transact_date BETWEEN '{}' and '{}';'''.format(start_date, end_date)
+						   FROM {} a INNER JOIN fto_queue b ON a.fto_no = b.fto_no 
+						   WHERE a.transact_date BETWEEN '{}' and '{}';'''.format(table_name, start_date, end_date)
 
 	try: 
 		
@@ -59,27 +59,17 @@ def get_transactions(start_date, end_date):
 	return(transactions)
 
 
-def get_alternate_transactions(local = 1, filepath = './output/transactions_alt.csv'):
-	
-	transactions_alt = pd.read_csv(filepath)
-	transactions_alt = transactions_alt[['transact_ref_no', 'status', 'processed_date', 'rejection_reason']]
-			
-	return(transactions_alt)
-
-
 def get_static_script_look_backs(df):
 	
-	# Look-back for welcome script
 	df = utils.check_welcome_script(df)
-	# Look back for static NREGA introduction
 	df = utils.check_static_nrega_script(df)
-	# Look back for formatting indicators
+	
 	df = utils.format_indicators(df)
-	# Return statement
+	
 	return(df)
 
 
-def get_rejection_reasons(filepath = './script/rejection_reason.json'):
+def get_rejection_reasons(filepath = './script/data/rejection_reason.json'):
 	
 	with open(filepath) as f: rejection_reasons = json.load(f)
 	

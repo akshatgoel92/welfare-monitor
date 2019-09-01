@@ -10,8 +10,6 @@ from script import utils
 from sqlalchemy import *
 
 
-
-
 def join_alternate_transactions(transactions, transactions_alt):
 	
 	cols = transactions.columns.tolist()

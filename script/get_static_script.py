@@ -52,33 +52,28 @@ def get_static_call_script(local_output_path, s3_output_path, pilot = 0):
 	df.to_csv(local_output_path, index = False)
 	helpers.upload_s3(local_output_path, s3_output_path)
 	
+	return(df)
+	
 def main():
 
 	# Create parser for command line arguments
 	parser = argparse.ArgumentParser(description = 'Parse the data for script generation')
 	parser.add_argument('--pilot', type = int, help = 'Whether to make script for pilot data or production data', default = 0)
-	parser.add_argument('--window_length', type = int, help ='Time window in days from today for NREGA lookback', default = 7)
 	
 	# Parse arguments
 	args = parser.parse_args()
-	
-	window_length = args.window_length
 	pilot = args.pilot
 	
 	today = str(datetime.today().date())
-	start_date = helpers.get_time_window(today, window_length)
-	
 	file_name_today = datetime.strptime(today, '%Y-%m-%d').strftime('%d%m%Y')
 	local_output_path = './output/callsequence_{}.csv'.format(file_name_today)
 	
 	merge_output_path = './output/nregamerge_{}.csv'.format(file_name_today)
 	s3_output_path = 'tests/callsequence_{}.csv'.format(file_name_today)
 	
-	if static == 1: get_static_call_script(local_output_path, s3_output_path, pilot)
-	if dynamic == 1: get_dynamic_call_script(local_output_path, s3_output_path, pilot, local)
-	if join == 1: df = joins.join_dynamic_static(local_output_path, s3_output_path, pilot, local)
+	df = get_static_call_script(local_output_path, s3_output_path, pilot = 0)
 	
-	subject = 'GMA Update: The script was successfully created and uploaded ...take a break. Relaaaaax. See you tomorrow!'
+	subject = 'GMA Update: The static script was successfully created and uploaded ...take a break. Relaaaaax. See you tomorrow!'
 	message = 'The file name is {}'.format(s3_output_path)
 	helpers.send_email(subject, message)
 		
@@ -88,6 +83,5 @@ if __name__ == '__main__':
 	main()		
 
 # Pending
-# Fix date issue
 # Change file name convention to call date and finish other related things
 # Do Alembic migrations

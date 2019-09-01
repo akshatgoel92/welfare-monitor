@@ -1,9 +1,18 @@
-# Export PYTHONPATH=. 
+# Make sure we're using the correct Python
+export PATH=/home/ec2-user/anaconda3/bin:$PATH
+
+# Make sure that the Python path contains the current folder
 export PYTHONPATH=.
 
-# Get the script from the database
-python script/get_script.py window_length=30 0 0 1 1
+# Switch to the working directory
+cd /home/ec2-user/fto-scrape/
 
-# Put the script in the database
+# Get the static script
+python ./script/get_static_script.py --pilot=0
+
+# Get the dynamic script
+python ./script/get_dynamic_script.py --pilot=0 --window_length=7
+
+# Put production scripts in the scripts table  in the database
 python script/put_script.py 
 
