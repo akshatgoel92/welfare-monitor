@@ -22,13 +22,13 @@ pymysql.install_as_MySQLdb()
 
 def sql_connect():
 
-	with open('./gma_secrets.json') as secrets: 
+	with open('../gma_secrets.json') as secrets: 
 		sql_access = json.load(secrets)['mysql']
 	
 	return(sql_access)
 
 
-def db_conn(test = 0):
+def db_conn():
 	
 	with open('./gma_secrets.json') as secrets:
 		sql_access = json.load(secrets)['mysql']
@@ -37,19 +37,18 @@ def db_conn(test = 0):
 	password = sql_access['password']
 	host = sql_access['host']
 	db = sql_access['db']
-	
-	conn = pymysql.connect(host, user, password, db, charset="utf8", use_unicode=True) 
+		
+	conn = pymysql.connect(host, user, password, db, charset="utf8", use_unicode=True)
 	cursor = conn.cursor()
 	
 	return(conn, cursor)
 
 
-def db_engine(test = 0):
+def db_engine():
 	
 	user, password, host, db = sql_connect().values()
-	
 	engine = create_engine("mysql+pymysql://" + user + ":" + password + "@" + host + "/" + db)
-	
+
 	return(engine)
 
 	
@@ -67,22 +66,6 @@ def upload_dropbox(file_from = './output/gma_test.xlsx', file_to = 'tests/gma_te
 
 	with open(file_from, 'rb') as f:
 		dbx.files_upload(f.read(), file_to, mode = dropbox.files.WriteMode.overwrite)
-
-
-def get_object_s3(key):
-
-	with open('./gma_secrets.json') as secrets:
-		s3_access = json.load(secrets)['s3']
-
-	access_key_id = s3_access['access_key_id']
-	secret_access_key = s3_access['secret_access_key']
-	bucket_name = s3_access['default_bucket']
-	
-	s3 = boto3.client('s3', aws_access_key_id = access_key_id, aws_secret_access_key = secret_access_key)
-	response = s3.get_object(Bucket= bucket_name, Key = key)
-	file = response["Body"]
-	
-	return(file)
 
 
 def upload_s3(file_from, file_to):
@@ -126,10 +109,10 @@ def delete_files(path = './output/', extension = '.csv'):
 
 def send_email(subject, msg):
 
-	with open('./recipients.json') as r:
+	with open('../recipients.json') as r:
 		recipients = json.load(r)
 
-	with open('./gma_secrets.json') as secrets:
+	with open('../gma_secrets.json') as secrets:
 		credentials = json.load(secrets)['smtp']
 	 
 	user = credentials['user']
@@ -180,72 +163,3 @@ def get_time_window(end_date, window_length):
 	start_date = str(datetime.datetime.strptime(end_date, '%Y-%m-%d').date() - time_window)
 
 	return(start_date)
-
-
-# Input: String format date as found on scraped pages
-# Output: String format date as we want to place in data-base
-def format_date(date_string):
-
-	date_object = datetime.datetime.strptime(date_string, '%d/%m/%Y')
-	string_object = datetime.datetime.strftime(date_object, '%Y-%m-%d')
-
-	return(string_object)
-
-
-def get_matching_s3_objects(prefix="", suffix=""):
-	"""
-	Generate objects in an S3 bucket.
-	:param prefix: Only fetch objects whose key starts with this prefix (optional).
-	:param suffix: Only fetch objects whose keys end with this suffix (optional).
-	Taken from: https://alexwlchan.net/2019/07/listing-s3-keys/
-	Copyright © 2012–19 Alex Chan. Prose is CC-BY licensed, code is MIT.
-    """
-	
-	with open('./gma_secrets.json') as secrets:
-		s3_access = json.load(secrets)['s3']
-
-	access_key_id = s3_access['access_key_id']
-	secret_access_key = s3_access['secret_access_key']
-	bucket_name = s3_access['default_bucket']
-	
-	s3 = boto3.client("s3", aws_access_key_id = access_key_id, aws_secret_access_key = secret_access_key)
-	paginator = s3.get_paginator("list_objects_v2")
-	kwargs = {'Bucket': bucket_name}
-	
-	# We can pass the prefix directly to the S3 API.  If the user has passed
-	# a tuple or list of prefixes, we go through them one by one.
-	if isinstance(prefix, str): prefixes = (prefix, )
-	else: prefixes = prefix
-	
-	for key_prefix in prefixes: 
-		kwargs["Prefix"] = key_prefix
-	
-		for page in paginator.paginate(**kwargs):
-			
-			try: contents = page["Contents"]
-			except Exception as e: print(e) 
-			
-			for obj in contents:
-				key = obj["Key"]
-				if key.endswith(suffix): yield obj
-
-
-def get_matching_s3_keys(prefix="", suffix=""):
-	"""
-	Generate the keys in an S3 bucket.
-	:param bucket: Name of the S3 bucket.
-	:param prefix: Only fetch keys that start with this prefix (optional).
-	:param suffix: Only fetch keys that end with this suffix (optional).
-	Taken from: https://alexwlchan.net/2019/07/listing-s3-keys/
-	Copyright © 2012–19 Alex Chan. Prose is CC-BY licensed, code is MIT.
-	"""
-	for obj in get_matching_s3_objects(prefix, suffix): yield obj["Key"]
-
-
-def format_date(date_string):
-  
-	if type(date_string) != str: date_string = ''
-	date_string = date_string.strip()
-	if date_string != '': date_string = str(datetime.datetime.strptime(date_string, '%d/%m/%Y').date())
-   	
-	return(date_string)
