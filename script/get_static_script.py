@@ -69,7 +69,7 @@ def main():
 	local_output_path = './output/callsequence_{}.csv'.format(file_name_today)
 	
 	merge_output_path = './output/nregamerge_{}.csv'.format(file_name_today)
-	s3_output_path = 'tests/callsequence_{}.csv'.format(file_name_today)
+	s3_output_path = 'tests/static_callsequence_{}.csv'.format(file_name_today)
 	
 	df = get_static_call_script(local_output_path, s3_output_path, pilot = 0)
 	

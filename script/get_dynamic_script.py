@@ -74,7 +74,7 @@ def main():
 	local_output_path = './output/callsequence_{}.csv'.format(file_name_today)
 	
 	merge_output_path = './output/nregamerge_{}.csv'.format(file_name_today)
-	s3_output_path = 'tests/callsequence_{}.csv'.format(file_name_today)
+	s3_output_path = 'tests/dynamic_callsequence_{}.csv'.format(file_name_today)
 	
 	df = get_dynamic_call_script(local_output_path, s3_output_path, start_date, today, pilot, table_name = 'transactions_alt')
 	
