@@ -136,7 +136,7 @@ def get_keys(table):
 	return(keys)
 
 # Delete data 
-def delete_data(engine, table, key): 
+def delete_data(engine, table): 
 	
 	engine.execute('DELETE FROM {};'.format(table))
 	
