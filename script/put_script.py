@@ -6,6 +6,7 @@ from db import update
 import pandas as pd
 import argparse
 import datetime
+import sys
 import re
 
 
@@ -61,6 +62,9 @@ def add_script_data_columns(df, script_data_list):
 	
 	df['insert_date'] = str(datetime.datetime.today())
 	
+	# Drop staff members
+	df = df.loc[df['id'] > 1000]
+	 
 	return(df)
 
 

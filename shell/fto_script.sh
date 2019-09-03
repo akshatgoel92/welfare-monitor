@@ -14,5 +14,5 @@ python ./script/get_static_script.py --pilot=0
 python ./script/get_dynamic_script.py --pilot=0 --window_length=7
 
 # Put production scripts in the scripts table  in the database
-python script/put_script.py 
+python ./script/put_script.py 
 
