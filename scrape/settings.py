@@ -72,8 +72,7 @@ ITEM_PIPELINES = {
 	
     'scrape.pipelines.FTOContentPipeline': 2000, 
     'scrape.pipelines.FTOMaterialPipeline': 1000,
-    'scrape.pipelines.FTONoPipeline': 3000, 
-    'scrape.pipelines.FTOBranchPipeline': 4000
+    'scrape.pipelines.FTONoPipeline': 3000
 
 }
 
