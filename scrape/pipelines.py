@@ -13,7 +13,9 @@ from scrape.items import FTOOverviewItem
 from scrape.items import FTOMaterialItem
 from common.helpers import sql_connect
 from common.helpers import clean_item
+from common.helpers import  db_engine
 from db.update import insert_data
+from db.update import delete_data
 from db.update import update_fto_type
 from db.update import get_keys 
 from twisted.enterprise import adbapi
@@ -104,10 +106,19 @@ class FTOContentPipeline(object):
 											user = user, passwd = password, 
 											cursorclass = pymysql.cursors.DictCursor, 
 											charset = 'utf8', use_unicode = True, cp_max = 16)
+	
+	def open_spider(selif, spider):
 		
+		if spider.name == 'fto_branch': 
+			
+			engine = db_engine()
+			tables = ['transactions_alt', 'wage_lists_alt', 'banks_alt']
+			for table in tables: delete_data(engine, table)
+		
+		return	
 	
 	def process_item(self, item, spider):
-
+		
 		
 		if isinstance(item, FTOOverviewItem) and spider.name == 'fto_content':
 			
@@ -141,21 +152,13 @@ class FTOContentPipeline(object):
 			tables = ['banks_alt', 'transactions_alt', 'wage_lists_alt']
 			unique_tables = ['banks_alt', 'wage_lists_alt']
 			
-			if item['block_name'] is None:
-				raise(DropItem("Block name missing"))
-		
-			if item['ifsc_code'] == "Total":
-				raise(DropItem("IFSC code missing"))
-		
-			if item['wage_list_no'] is None:
-				raise(DropItem("Wage list no. missing"))
-		
-			if item['wage_list_no'] == '':
-				raise(DropItem("Wage list no. missing"))
+			if item['block_name'] is None: raise(DropItem("Block name missing"))
+			if item['ifsc_code'] == "Total": raise(DropItem("IFSC code missing"))
 			
-			if re.search('\d{10}NRG\d{17}', item['transact_ref_no']) is None:
-				raise(DropItem("Transaction ref no does not fit format"))
-				
+			if item['wage_list_no'] is None: raise(DropItem("Wage list no. missing"))
+			if item['wage_list_no'] == '': raise(DropItem("Wage list no. missing"))
+			
+			if re.search('\d{10}NRG\d{17}', item['transact_ref_no']) is None: raise(DropItem("Transaction ref no does not fit format"))
 			item = clean_item(item, title_fields)	
 			
 			for table in tables:
@@ -163,11 +166,8 @@ class FTOContentPipeline(object):
 				unique = 1 if table in unique_tables else 0
 				keys = get_keys(table)
 				sql, data = insert_data(item, keys, table, unique)
-				
-				try:
-					self.dbpool.runOperation(sql, data)
-				except Exception as e:
-					self.logger.error('Error in the data-base upload: %s', str(e))
+				try: self.dbpool.runOperation(sql, data)
+				except Exception as e: self.logger.error('Error in the data-base upload: %s', str(e))
 					
 		return(item)
 	

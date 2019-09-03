@@ -134,3 +134,10 @@ def get_keys(table):
 		keys = tables[table]
 	
 	return(keys)
+
+# Delete data 
+def delete_data(engine, table): 
+	
+	engine.execute('DELETE FROM {};'.format(table))
+	
+	return
