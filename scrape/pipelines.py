@@ -112,7 +112,7 @@ class FTOContentPipeline(object):
 		if spider.name == 'fto_branch': 
 			
 			engine = db_engine()
-			tables = ['transactions_alt', 'wage_lists_alt', 'banks_alt']:
+			tables = ['transactions_alt', 'wage_lists_alt', 'banks_alt']
 			for table in tables: delete_data(engine, table)
 		
 		return	
