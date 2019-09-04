@@ -98,7 +98,7 @@ def make_script_primary_key():
 	conn = engine.connect()
 		
 	try: 
-		add_primary_key = "ALTER TABLE scripts ADD PRIMARY KEY(id, file_upload_to_s3_date(50));"
+		add_primary_key = "ALTER TABLE scripts ADD PRIMARY KEY(id, file_name_s3(50), file_upload_to_s3_date(50));"
 		engine.execute(add_primary_key)
 	
 	except Exception as e: 

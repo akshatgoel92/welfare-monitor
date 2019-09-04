@@ -53,7 +53,7 @@ class FtoBranchSpider(CrawlSpider):
 	meta = '&typ=sb&mode=b&source=national&Digest=LATR5TYVuC5MyCxjMfESBw'
 	
 	# start_urls = [basic + state + district + block + fin_year + meta]
-	with open('./common/ftos.json', 'r') as f: start_urls = json.load(f)
+	with open('./scrape/data/ftos.json', 'r') as f: start_urls = json.load(f)
 	
 	urls = []
 	
