@@ -24,7 +24,7 @@
   "phone": 9650057796,
   "time_pref": 4,
   "time_pref_label": "6 PM - 9 PM",
-  "amount": NaN,
+  "amount": 506,
   "transact_date": NaN,
   "rejection_reason": NaN,
   "day1": "P0 P1 P2 00 P0"
@@ -34,7 +34,7 @@
   "phone": 7297869046,
   "time_pref": 4,
   "time_pref_label": "6 PM - 9 PM",
-  "amount": NaN,
+  "amount": 1240,
   "transact_date": NaN,
   "rejection_reason": NaN,
   "day1": "P0 P1 P2 00 P0"
@@ -44,7 +44,7 @@
   "phone": 8989973795,
   "time_pref": 3,
   "time_pref_label": "3 PM - 6 PM",
-  "amount": NaN,
+  "amount": 3343,
   "transact_date": NaN,
   "rejection_reason": NaN,
   "day1": "P0 P1 P2 P3 Q B P0 Z1 Z2"
@@ -54,7 +54,7 @@
   "phone": 9958581681,
   "time_pref": 2,
   "time_pref_label": "12 PM - 3 PM",
-  "amount": NaN,
+  "amount": 2343,
   "transact_date": NaN,
   "rejection_reason": NaN,
   "day1": "P0 P1 P2 00 P0"
@@ -64,7 +64,7 @@
   "phone": 8291520739,
   "time_pref": 2,
   "time_pref_label": "12 PM - 3 PM",
-  "amount": NaN,
+  "amount": 3343,
   "transact_date": NaN,
   "rejection_reason": NaN,
   "day1": "P0 P1 P2 P3 Q A P0 Z1 Z2"
