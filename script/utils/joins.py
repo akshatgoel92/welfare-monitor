@@ -45,6 +45,13 @@ def join_camp_data(transactions, df_field_data):
 	
 	return(df)
 
+	
+def join_health_data(df, health_data):
+	
+	df = pd.merge(df, health_df, how = 'left', on = ['health_category'], indicator = 'health')
+	
+	return(df)
+
 
 def join_static_dynamic(df_dynamic, df_static):
 

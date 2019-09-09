@@ -78,3 +78,10 @@ def get_rejection_reasons(filepath = './script/data/rejection_reason.json'):
 	rejection_reasons.columns = ['rejection_reason', 'day1'] 
 	
 	return(rejection_reasons)
+
+
+def get_health_data_file(camp_data_file = 'health/health_schedule_090919.csv'):
+	
+	df = pd.read_csv(helpers.get_object_s3(camp_data_file))
+	
+	return(df)
