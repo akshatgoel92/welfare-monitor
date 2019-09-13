@@ -46,9 +46,13 @@ def join_camp_data(transactions, df_field_data):
 	return(df)
 
 	
-def join_health_data(df, health_data):
+def join_health_data(df, df_health):
 	
-	df = pd.merge(df, health_df, how = 'left', on = ['health_category'], indicator = 'health')
+	df['health_category'] = df['health_category'].astype(int)
+	df_health['health_category'] = df_health['health_category'].astype(int)
+	
+	df = pd.merge(df, df_health, how = 'left', on = ['health_category'], indicator = 'health')
+	df.rename(columns={'day1': 'day1_x'}, inplace = True)
 	
 	return(df)
 
