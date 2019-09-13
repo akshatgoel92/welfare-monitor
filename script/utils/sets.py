@@ -14,7 +14,7 @@ from sqlalchemy import *
 	
 def set_static_scripts(df):
 			
-	df['day1'] = df.apply(lambda row: row['health'] if row['got_static_nrega'] == 1 or row['got_second_static_nrega'] == 1 or row['got_welcome'] == 1 else "P0 P1 P2 00 P0", axis = 1)
+	df['day1'] = df.apply(lambda row: row['day1_x'] if row['got_static_nrega'] == 1 or row['got_second_static_nrega'] == 1 or row['got_welcome'] == 1 else "P0 P1 P2 00 P0", axis = 1)
 	
 	return(df)
 
