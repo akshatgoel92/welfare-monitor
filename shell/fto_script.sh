@@ -7,6 +7,9 @@ export PYTHONPATH=.
 # Switch to the working directory
 cd /home/ec2-user/fto-scrape/
 
+# Update the camp table
+python ./script/put_camp.py
+
 # Get the static script
 python ./script/get_static_script.py --pilot=0
 

@@ -16,7 +16,7 @@ def get_camp_data(pilot):
 	engine = helpers.db_engine()
 	conn = engine.connect()
 	
-	get_field_data = '''SELECT id, phone, jcn, jc_status, time_pref, time_pref_label FROM enrolment_record WHERE pilot = {};'''.format(pilot)
+	get_field_data = '''SELECT id, phone, jcn, jc_status, health_category, time_pref, time_pref_label FROM enrolment_record WHERE pilot = {};'''.format(pilot)
 	
 	try: 
 		
@@ -78,3 +78,11 @@ def get_rejection_reasons(filepath = './script/data/rejection_reason.json'):
 	rejection_reasons.columns = ['rejection_reason', 'day1'] 
 	
 	return(rejection_reasons)
+
+
+def get_health_data_file(camp_data_file = 'health/health_schedule_090919.csv'):
+	
+	df = pd.read_csv(helpers.get_object_s3(camp_data_file))
+	df.dropna(inplace = True)
+	
+	return(df)

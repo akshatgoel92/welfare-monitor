@@ -89,6 +89,61 @@ def get_new_trainees(df, df_db):
 	return(new_df)
 
 
+def get_health_category(df): 
+	 
+	        
+	df['health_category'] = 0
+	
+	# Children under 6: U
+	df.loc[(df['breastfeeding'] == 0) & (df['pregnant'] == 0) & (df['children_under6'] == 1) & (df['teenage_girls'] == 0) & (df['nocategory'] == 0), 'health_category'] = 1
+	
+	# Daughters aged 10 - 18: D
+	df.loc[(df['breastfeeding'] == 0) & (df['pregnant'] == 0) & (df['children_under6'] == 0) & (df['teenage_girls'] == 1) & (df['nocategory'] == 0), 'health_category'] = 2
+	
+	# Breastfeeding: B
+	df.loc[(df['breastfeeding'] == 1) & (df['pregnant'] == 0) & (df['children_under6'] == 0) & (df['teenage_girls'] == 0) & (df['nocategory'] == 0), 'health_category'] = 3
+	
+	# Currently pregnant: P
+	df.loc[(df['breastfeeding'] == 0) & (df['pregnant'] == 1) & (df['children_under6'] == 0) & (df['teenage_girls'] == 0) & (df['nocategory'] == 0), 'health_category'] = 4
+	
+	# None of the above
+	df.loc[(df['breastfeeding'] == 0) & (df['pregnant'] == 0) & (df['children_under6'] == 0) & (df['teenage_girls'] == 0) & (df['nocategory'] == 1), 'health_category'] = 5
+	
+	# U D
+	df.loc[(df['breastfeeding'] == 0) & (df['pregnant'] == 0) & (df['children_under6'] == 1) & (df['teenage_girls'] == 1) & (df['nocategory'] == 0), 'health_category'] = 6
+	
+	# U B
+	df.loc[(df['breastfeeding'] == 1) & (df['pregnant'] == 0) & (df['children_under6'] == 1) & (df['teenage_girls'] == 0) & (df['nocategory'] == 0), 'health_category'] = 7
+	
+	# U P
+	df.loc[(df['breastfeeding'] == 0) & (df['pregnant'] == 1) & (df['children_under6'] == 1) & (df['teenage_girls'] == 0) & (df['nocategory'] == 0), 'health_category'] = 8
+	
+	# D B
+	df.loc[(df['breastfeeding'] == 1) & (df['pregnant'] == 0) & (df['children_under6'] == 0) & (df['teenage_girls'] == 1) & (df['nocategory'] == 0), 'health_category'] = 9
+	
+	# D P
+	df.loc[(df['breastfeeding'] == 0) & (df['pregnant'] == 1) & (df['children_under6'] == 0) & (df['teenage_girls'] == 1) & (df['nocategory'] == 0), 'health_category'] = 10
+	
+	# B P 
+	df.loc[(df['breastfeeding'] == 1) & (df['pregnant'] == 1) & (df['children_under6'] == 0) & (df['teenage_girls'] == 0) & (df['nocategory'] == 0), 'health_category'] = 11
+	
+	# U B P
+	df.loc[(df['breastfeeding'] == 1) & (df['pregnant'] == 1) & (df['children_under6'] == 1) & (df['teenage_girls'] == 0) & (df['nocategory'] == 0), 'health_category'] = 12
+	
+	# U B D 
+	df.loc[(df['breastfeeding'] == 1) & (df['pregnant'] == 0) & (df['children_under6'] == 1) & (df['teenage_girls'] == 1) & (df['nocategory'] == 0), 'health_category'] = 13
+	
+	# U P D
+	df.loc[(df['breastfeeding'] == 0) & (df['pregnant'] == 1) & (df['children_under6'] == 1) & (df['teenage_girls'] == 1) & (df['nocategory'] == 0), 'health_category'] = 14
+	
+	# B P D 
+	df.loc[(df['breastfeeding'] == 1) & (df['pregnant'] == 1) & (df['children_under6'] == 0) & (df['teenage_girls'] == 1) & (df['nocategory'] == 0), 'health_category'] = 15
+	
+	# U B P D
+	df.loc[(df['breastfeeding'] == 1) & (df['pregnant'] == 1) & (df['children_under6'] == 1) & (df['teenage_girls'] == 1) & (df['nocategory'] == 0), 'health_category'] = 16
+	
+	return(df)
+	
 def put_new_trainees(new_df):
 
 	engine = helpers.db_engine()

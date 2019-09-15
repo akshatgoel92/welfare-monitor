@@ -75,10 +75,6 @@ def format_queue_for_insert(fto_stages, stages, missing_stages):
 	fto_stages['done'] = '0'
 	fto_stages = fto_stages[['fto_no', 'done', 'stage']]
 	
-	msg = ""
-	subject = "GMA Update 1: Ready to insert new FTOs"
-	helpers.send_email(subject, msg)
-	
 	return(fto_stages)
 
 
@@ -121,9 +117,6 @@ def insert_ftos(fto_stages, test):
 		if test == 0: 
 			
 			trans.commit()
-			msg = ""
-			subject = "GMA Update 2: Finished inserting new FTOs"
-			helpers.send_email(subject, msg)
 
 	except Exception as e:
         
@@ -156,13 +149,9 @@ def insert_ftos_history(fto_stages, test):
 		if test == 0: 
 			
 			trans.commit()
-			msg = ""
-			subject = "GMA Update 3: Finished inserting new FTOs into history table"
-			helpers.send_email(subject, msg)
 
 	except Exception as e:
-        
-		print(e)
+        	
 		er.handle_error(error_code ='3', data = {})
 		trans.rollback()
 		sys.exit()
@@ -177,6 +166,8 @@ def main(test = 0):
 	fto_stages = add_fto_type(fto_stages)
 	insert_ftos(fto_stages, test)
 	insert_ftos_history(fto_stages, test)
+	subject = "GMA Update: Finished inserting new FTOs"
+	helpers.send_email(subject, msg)
 	
 
 if __name__ == "__main__": 

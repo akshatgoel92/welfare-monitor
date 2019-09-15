@@ -40,6 +40,10 @@ def get_static_call_script(local_output_path, s3_output_path, pilot = 0):
 	df = checks.check_static_nrega_script(df, "P0 P1 P2 P3 Q B P0 Z1 Z2", "got_second_static_nrega")
 	df = checks.get_static_nrega_script_indicator(df, "got_second_static_nrega")
 	
+	# Get health data file
+	df_health = gets.get_health_data_file()
+	df = joins.join_health_data(df, df_health)
+	
 	# Allocate scripts
 	df['day1'] = ''
 	df = sets.set_static_scripts(df)
