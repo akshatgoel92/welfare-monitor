@@ -116,7 +116,11 @@ def main():
 		
 	put_scripts(df)
 	make_script_primary_key()
-	
+
+	subject = 'GMA Update: The scripts table data has been refreshed...'
+	message = ''
+	helpers.send_email(subject, message)
+
 	
 if __name__ == '__main__':
 	
