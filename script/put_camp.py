@@ -1,5 +1,5 @@
-from sqlalchemy.types import Integer, String
 from sqlalchemy.dialects.mysql import TINYINT
+from sqlalchemy.types import Integer, String
 from common import errors as er
 from common import helpers
 from db import update
@@ -113,24 +113,25 @@ def run_data_check_from_s3(camp_data_list):
 			
 			except Exception as e:
 				subject = 'GMA Error: There are inconsistent columns in the camp data...!'
-				message = 'We are comparing {} with {}'.format(source, target)
+				message = 'We are comparing {} with {}. Raipur team, help!'.format(source, target)
 				helpers.send_email(subject, message)
 				sys.exit() 
 	
 	df_result = pd.concat(df_result)
 	
-	if len(df_result) >= 0:
+	if len(df_result) > 0:
 		
-		today = str(datetime.today().date())
-		file_name_today = datetime.strptime(today, '%Y-%m-%d').strftime('%d%m%Y')
+		today = str(datetime.datetime.today().date())
+		file_name_today = datetime.datetime.strptime(today, '%Y-%m-%d').strftime('%d%m%Y')
 		
 		df_result.to_csv('./output/camp_checks.csv', index = False)
-		helpers.upload_s3('./output/camp_checks.csv', '/tests/camp_checks_{}.csv'.format(today))
+		helpers.upload_s3('./output/camp_checks.csv', '/tests/camp_checks_{}.csv'.format(file_name_today))
 		
 		subject = 'GMA Error: There are inconsistent rows in the camp data...!'
-		message = 'We are comparing {} with {}. Check /tests/camp_checks_{}.csv'.format(source, target, today)
+		message = 'We are comparing {} with {}. Check /tests/camp_checks_{}.csv. Raipur team, help!'.format(source, target, file_name_today)
 		helpers.send_email(subject, message)
-		
+		sys.exit()
+			
 	return(df_result)
 
 
@@ -254,7 +255,7 @@ def make_camp_primary_key():
 def main():
 	
 	# Create parser for command line arguments
-	parser = argparse.ArgumentParser(description = 'Parse the data for script generation')
+	parser = argparse.ArgumentParser(description ='Parse the data for script generation')
 	parser.add_argument('--prefix', type = str, help ='Prefix for file names to be searched on S3', default = 'camps/camp')
 	parser.add_argument('--suffix', type = str, help ='Suffix for file names to be searched on S3', default = '.csv')
 	args = parser.parse_args()
@@ -264,6 +265,8 @@ def main():
 	suffix = args.suffix	
 	
 	camp_data_list = get_camp_data_list(prefix = prefix, suffix = suffix)
+	run_data_check_from_s3(camp_data_list)
+	
 	df = get_camp_data(camp_data_list)
 	df = add_camp_data_columns(df, camp_data_list)
 	df = remove_epod_staff(df)

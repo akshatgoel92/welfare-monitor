@@ -80,9 +80,13 @@ def get_rejection_reasons(filepath = './script/data/rejection_reason.json'):
 	return(rejection_reasons)
 
 
-def get_health_data_file(camp_data_file = 'health/health_schedule_090919.csv'):
+def get_health_data_file():
 	
-	df = pd.read_csv(helpers.get_object_s3(camp_data_file))
+	with open('./gma_secrets.json') as secrets:
+		health_name = json.load(secrets)['health_schedule']
+		health_name = health_name['name']
+		
+	df = pd.read_csv(helpers.get_object_s3(health_name))
 	df.dropna(inplace = True)
 	
 	return(df)

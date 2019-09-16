@@ -47,7 +47,7 @@ def get_dynamic_call_script(local_output_path, s3_output_path, start_date, today
 	
 	# Keep only columns that are relevant to BTT in dynamic data and add test calls
 	df = formatters.format_final_df(df)
-	# df = sets.set_dynamic_test_calls(df)
+	df = sets.set_dynamic_test_calls(df)
 	
 	# Output and upload
 	df.to_csv(local_output_path, index = False)
@@ -85,5 +85,3 @@ def main():
 if __name__ == '__main__':
 	
 	main()
-
-# Need to add test calls	
