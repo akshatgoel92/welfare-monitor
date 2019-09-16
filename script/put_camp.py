@@ -131,12 +131,7 @@ def run_data_check_from_s3(camp_data_list):
 		message = 'We are comparing {} with {}. Check /tests/camp_checks_{}.csv. Raipur team, help!'.format(source, target, file_name_today)
 		helpers.send_email(subject, message)
 		sys.exit()
-	
-	else:
-		subject = 'GMA Update: There are no inconsistencies with the camp data. Great job!'
-		message = ''
-		helpers.send_email(subject, message)
-		
+			
 	return(df_result)
 
 
@@ -260,7 +255,7 @@ def make_camp_primary_key():
 def main():
 	
 	# Create parser for command line arguments
-	parser = argparse.ArgumentParser(description = 'Parse the data for script generation')
+	parser = argparse.ArgumentParser(description ='Parse the data for script generation')
 	parser.add_argument('--prefix', type = str, help ='Prefix for file names to be searched on S3', default = 'camps/camp')
 	parser.add_argument('--suffix', type = str, help ='Suffix for file names to be searched on S3', default = '.csv')
 	args = parser.parse_args()
