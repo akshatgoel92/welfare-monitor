@@ -80,3 +80,17 @@ def set_static_test_calls(df, filepath = './script/data/test_static_calls.json')
 	df = pd.concat([df, test_calls])
 	
 	return(df)
+
+
+def set_dynamic_test_calls(df, filepath = './script/data/test_dynamic_calls.json'):
+	
+	with open(filepath, 'r') as f:
+		test_calls = pd.DataFrame.from_dict(json.load(f), orient = 'index')
+		
+	test_calls['amount'].fillna('', inplace = True)
+	test_calls['transact_date'].fillna('', inplace = True)
+	test_calls['rejection_reason'].fillna('', inplace = True)
+	
+	df = pd.concat([df, test_calls])
+	
+	return(df)
