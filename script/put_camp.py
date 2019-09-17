@@ -130,7 +130,6 @@ def run_data_check_from_s3(camp_data_list):
 		subject = 'GMA Error: There are inconsistent rows in the camp data...!'
 		message = 'We are comparing {} with {}. Check /tests/camp_checks_{}.csv. Raipur team, help!'.format(source, target, file_name_today)
 		helpers.send_email(subject, message)
-		sys.exit()
 			
 	return(df_result)
 
