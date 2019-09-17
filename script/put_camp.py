@@ -125,7 +125,7 @@ def run_data_check_from_s3(camp_data_list):
 		file_name_today = datetime.datetime.strptime(today, '%Y-%m-%d').strftime('%d%m%Y')
 		
 		df_result.to_csv('./output/camp_checks.csv', index = False)
-		helpers.upload_s3('./output/camp_checks.csv', '/tests/camp_checks_{}.csv'.format(file_name_today))
+		helpers.upload_s3('./output/camp_checks.csv', 'tests/camp_checks_{}.csv'.format(file_name_today))
 		
 		subject = 'GMA Error: There are inconsistent rows in the camp data...!'
 		message = 'We are comparing {} with {}. Check /tests/camp_checks_{}.csv. Raipur team, help!'.format(source, target, file_name_today)
