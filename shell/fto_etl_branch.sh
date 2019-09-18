@@ -14,4 +14,4 @@ export PYTHONPATH=.
 scrapy crawl fto_branch
 
 # Then update and upload the log
-python ./logs/process.py './logs/log.csv' 'logs/log' 0
+python ./scrape/logs/process.py './logs/log.csv' 'logs/log' 0
