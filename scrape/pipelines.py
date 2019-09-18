@@ -14,6 +14,7 @@ from scrape.items import FTOMaterialItem
 from common.helpers import sql_connect
 from common.helpers import clean_item
 from common.helpers import  db_engine
+from common.helpers import send_email
 from db.update import insert_data
 from db.update import delete_data
 from db.update import update_fto_type
@@ -86,9 +87,10 @@ class FTOBranchPipeline(object):
 		return(item)
 
 
-	def close_spider(self, spider):	
-
+	def close_spider(self, spider):
+		
 		if spider.name == 'fto_branch':
+			
 			self.exporter.finish_exporting()
 			self.file.close()
 
@@ -110,6 +112,10 @@ class FTOContentPipeline(object):
 	def open_spider(selif, spider):
 		
 		if spider.name == 'fto_branch': 
+			
+			subject = 'GMA Update: The alternate transactions scrape is starting...'
+			message = ''
+			send_email(subject, message)
 			
 			engine = db_engine()
 			tables = ['transactions_alt', 'wage_lists_alt', 'banks_alt']
@@ -173,6 +179,12 @@ class FTOContentPipeline(object):
 	
 	
 	def close_spider(self, spider):
+		
+		if spider.name == 'fto_branch':
+			subject = 'GMA Update: The alternate transactions scrape is ending...'
+			message = ''
+			send_email(subject, message)
+		
 		self.dbpool.close()
 
 
