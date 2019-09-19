@@ -11,13 +11,7 @@ cd /home/ec2-user/fto-scrape/
 export PYTHONPATH=.
 
 # Then execute the content spider
-scrapy crawl fto_content
-
-# Then update the queue in the SQL database 
-python ./tracker/update.py
+scrapy crawl fto_branch
 
 # Then update and upload the log
-python ./logs/process.py './logs/log.csv' 'logs/log' 0
-
-# Then download the data
-python ./tracker/download.py 0 1 30 './output/transactions.csv' 'nrega/transactions'
+python ./scrape/logs/process.py './logs/log.csv' 'logs/log' 0

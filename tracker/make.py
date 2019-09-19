@@ -167,6 +167,7 @@ def main(test = 0):
 	insert_ftos(fto_stages, test)
 	insert_ftos_history(fto_stages, test)
 	subject = "GMA Update: Finished inserting new FTOs"
+	msg = ''
 	helpers.send_email(subject, msg)
 	
 
