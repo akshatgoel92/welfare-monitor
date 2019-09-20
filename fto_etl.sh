@@ -17,7 +17,7 @@ scrapy crawl fto_content
 python ./tracker/update.py
 
 # Then update and upload the log
-python ./scrape/logs/process.py './logs/log.csv' 'logs/log' 0
+python ./scrape/logs/process.py './scrape/logs/log.csv' 'logs/log' 0
 
 # Then download the data
 python ./tracker/download.py 0 1 30 './output/transactions.csv' 'nrega/transactions'
