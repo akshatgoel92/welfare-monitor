@@ -4,6 +4,7 @@ import random
 import json
 import sys
 
+from common import helpers
 from common import errors as er
 from datetime import datetime
 from common import helpers
@@ -90,6 +91,8 @@ def set_dynamic_test_calls(df, filepath = './script/data/test_dynamic_calls.json
 	test_calls['amount'].fillna('', inplace = True)
 	test_calls['transact_date'].fillna('', inplace = True)
 	test_calls['rejection_reason'].fillna('', inplace = True)
+	
+	test_calls.loc[(~test_calls.amount.isna()), 'transact_date'] = str(datetime.now().date())
 	
 	df = pd.concat([df, test_calls])
 	
