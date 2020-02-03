@@ -187,7 +187,7 @@ Thie file's main purpose is to generate the static script. It gets the updated c
 
 
 #### get-dynamic-script.py
-Thie file's main purpose is to pull field data, merge it with transaction/FTO data from the database, and output a csv in the appropriate format for BTT. It reformats necessary data in order to be able to match the job card numbers. A message is emailed to the team if there are no matches. It then uploads the dynamic script to S3/Cyberduck to the tests folder for the team to use.
+This file's main purpose is to pull field data, merge it with transaction/FTO data from the database, and output a csv in the appropriate format for BTT. It reformats necessary data in order to be able to match the job card numbers. A message is emailed to the team if there are no matches. It then uploads the dynamic script to S3/Cyberduck to the tests folder for the team to use.
 
 #### put-script.py
 This puts the script into the scripts table in the database.
