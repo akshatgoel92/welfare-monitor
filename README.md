@@ -10,21 +10,35 @@ The NREGA payments process captures these variables on documents called __Fund T
 
 The SKY programme is a Chattisgarh Government initiative to **expand women's access to mobile phones** in the state. Under this programme, **50,00,000 women are going to receive free mobile phones** from MicroMax and phone connectivity from Reliance Jio. The beneficiaries will recieve phones at distribution camps run by government officials. 
 
-For this project, the **survey team sampled 7200 women** from among these beneficiaries in Raipur district, Chattisgarh. As part of the intevention, our survey team is carrying out supplementary enrollment camps which train women to use the phones they have recieved and explain what to expect in the push calls.
+For this project, the **survey team sampled women** from among these beneficiaries in Raipur district, Chattisgarh. As part of the intervention, our survey team is carrying out supplementary enrollment camps which train women to use the phones they have recieved and explain what to expect in the push calls.
 
 ## Main scripts 
 
-The scrape is based on a collection of scrapy spiders which visit the web-pages on NREGASoft that have the data we need. The shell scripts in the shell folder deploy the spiders on an AWS EC2 instance. The data is stored by the scrape in an AWS MySQL database instance and on AWS S3. The main scripts in the repository are described below in order of priority. 
+The scrape is based on a collection of scrapy spiders which visit the web-pages on the NREGA MIS that have the data we need. The shell scripts in the shell folder deploy the spiders on an AWS EC2 instance. The data is stored by the scrape in an AWS MySQL database instance and on AWS S3. The main scripts in the repository are described below in order of priority. 
 
 ## NREGA FTO Tracking System
 
-The NREGA payments process **tracks each transaction** that has to be made under NREGA. This **information is digitized** and stored in the **FTO status tracking system.** On the **topmost page** relevant to us, the **total no. of FTOs at each stage** of the NREGA payments process is given. Each total has **hyperlinks to the list of FTO nos.** that were added to make up that total. These are themselves **hyperlinked to the payments and transaction information on each FTO.** The **scrape follows these hyperlinks** from the top totals to the bottom transactions to get the information we need.
+The NREGA payments process **tracks each transaction** that has to be made under NREGA. This **information is digitized** and stored in the **FTO status tracking system.** On the **topmost page** relevant to us, the **total no. of FTOs at each stage** of the NREGA payments process is given. Each total has **hyperlinks to the list of FTO nos.** that were added to make up that total. These are themselves **hyperlinked to the payments and transaction information on each FTO.** The **scrape follows these hyperlinks** from the top totals to the bottom transactions.
 
 ### scrape
 
+#### fto_branch.py
+
+This script is run from **fto_etl_branch.sh**. It starts at 1231 am every morning. This spider visits Table 8.1.1 directly and scrapes the transactions data from there. It is the main scrape which populates the transactions-alt and other associated tables. The information from this scrape goes into the dynamic script. The reason for this is that we needed to get updated information on the status of an FTO every cycle. This just gets all the transactions for the fiscal year every single day. It has the following steps:
+
+* Construct the **FTO URLs** that need to be scraped
+* Open an instance of **headless Chrome**
+* Load the target URLs from the ./scrape/data/ftos.json file
+* The ftos.json file has target URLS for all FTOs which have received the first sign
+* This makes sense because the first sign is the first step where the FTO appears on Table 8.1.1
+* Then scrape every single hyperlink in these target URL - each URL corresponds to one FTO
+* Wait for **response to appear** and scrape **the response**
+* Write scraped data to MySQL DB **via the pipeline** 
+
+
 #### fto_content.py 
 
-This script is run from **fto_etl.sh**. It has the following steps:
+There are multiple places on the MIS where FTOs are tracked.  Table 8.1.1 does not display the last two digits of a worker's bank account number but the FTO tracking system which is visited by this scrape does. Apart from this, the fto-content.py scrape gets all the fields which are scraped by fto-brancg. This script is run from **fto_etl.sh**. It has the following steps:
 
 * Take a list of FTO nos from the **fto_queue table** as input 
 * Construct the **FTO URLs** that need to be scraped
@@ -41,17 +55,15 @@ This script is run from **fto_etl.sh**. It has the following steps:
 * Scrape **the response**
 * Write scraped data to MySQL DB **via the pipeline**
 
-#### fto_branch.py
 
-There are multiple places on the MIS where FTOs are tracked. This corresponds to different parts of the Stage 2 NREGA payments process. This spider visits Table 8.1.1 directly and scrapes the transactions data from there. Table 8.1.1 does not display the last two digits of a worker's bank account number. Apart from that, the fto_branch.py scrape gets all the fields which are scraped by fto_content. Right now, this is not being run. However, we can eventually use this for data quality checks.
 
 #### fto_material.py
 
-NREGA payments to work materials vendors are also tracked by the FTO tracking system. This scrapes materials FTOs from Table 8.1.1. This creates .csv output right now but we eventually want to create the database tables for this and make .csv output.
+NREGA payments to work materials vendors are also tracked by the FTO tracking system. This scrapes materials FTOs from Table 8.1.1. The pattern of this scrape is identical to the fto-branch.py scrape except that it does not write to the database. This can be easily changed in the future by making the relevant backend changes by creating the tables in the database.
 
 #### fto_urls.py
 
-This visits Table 8.1.1 and scrapes the URLs for the list of FTOs at each stage. It is used by the fto_stage.sh shell script described below.
+This visits Table 8.1.1 and scrapes the URLs for the list of FTOs at each stage. It then parses this list and creates a .csv list of FTOs at each stage. These .csvs are then written to the tracking table fto-queue in the database by the code described below. It is used by the fto_stage.sh shell script described below.
 
 #### settings.py
 
@@ -81,11 +93,7 @@ This script contains the **scrapy pipeline objects** which process each **item**
 
 #### make.py
 
-This is executed by **fto_stage.sh** which is described below. It processes the scraped list of FTO nos. at each stage returned by **fto_urls.py** and creates a pandas data-frame containing a queue of FTOs along with information about them. This is then inserted into the FTO queue table in the database. 
-
-#### add.py
-
-This script allows the field team to add FTO nos. manually to the FTO queue in case the fto_urls spider or the make.py script does not work on any given day. 
+This is executed by **fto-stage.sh** which is described below. It processes the scraped list of FTO nos. at each stage returned by **fto_urls.py** and creates a pandas data-frame containing a queue of FTOs along with information about them. This is then inserted into the FTO queue table in the database. 
 
 #### update.py
 
@@ -93,12 +101,12 @@ This script updates the FTO queue tracker every day with the progress of the scr
 
 #### download.py
 
-This script is run at the end of each day to download data onto S3 and Dropbox where it can be accessed by the team.
+This script is run at the end of each day to download transactions and other data onto S3/Cyberduck where it can be accessed by the team.
 
 
 ### shell
 
-#### fto_stage.sh 
+#### fto-stage.sh 
 
 * This script is located in the shell folder. 
 * It is triggered by a cron job on the EC2 instance at 930 pm every evening. 
@@ -106,13 +114,13 @@ This script is run at the end of each day to download data onto S3 and Dropbox w
 * This spider stores the list of FTOs at each stage as a set of .csvs in the output folder on the EC2 instance. 
 * fto_stage.sh then calls .queue/make.py to process these .csvs into the format of the MySQL database fto_queue table and insert them there.
 
-#### fto_etl.sh 
+#### fto-etl.sh 
 
 * Every morning at 6:01 am, the ETL shell script nrega_etl.sh is triggered by a cron job on an __Amazon EC2 instance__. 
 * This script can be seen in the __shell__ folder. 
 * This shell script triggers the following scripts in the order given below.  
 
-#### fto_match_field.sh
+#### fto-match-field.sh
 
 * This script is found in the shell directory.
 * Its main purpose is to pull field data, merge it with transaction/fto data from the database, 
@@ -171,8 +179,18 @@ This file is called as the last step in the ETL. It processes the log file that 
 
 ### script
 
-#### scrape_info_to_btt_csv.py
+#### .utils/
+This folder contains helper scripts that format and clean the camp and scraped data before creating scripts.
 
-Thie file's main purpose is to pull field data, merge it with transaction/fto data from the database, and output a csv in the appropriate format for BTT. It reformats necessary data in order to be able to match the job card numbers. A message is emailed to the team if there are no matches.
+#### get-static-script.py
+Thie file's main purpose is to generate the static script. It gets the updated camp data from the camps table, merges it with the health-schedule.csv for that week and then creates the static script. The script is then uploaded to S3/Cyberduck to the tests folder for the team to use.
 
-  
+
+#### get-dynamic-script.py
+Thie file's main purpose is to pull field data, merge it with transaction/FTO data from the database, and output a csv in the appropriate format for BTT. It reformats necessary data in order to be able to match the job card numbers. A message is emailed to the team if there are no matches. It then uploads the dynamic script to S3/Cyberduck to the tests folder for the team to use.
+
+#### put-script.py
+This puts the script into the scripts table in the database.
+
+#### put-camp.py
+This goes to S3/Cyberduck and merges all the camp files there every day and writes them to the enrolment-record table in the database. It is a running record of enrolment that was especially useful when we were doing a rolling start during the camp implementation.
