@@ -50,7 +50,7 @@ class FTOUrls(CrawlSpider):
 	state_code = '33'
 	district_name = 'RAIPUR'
 	district_code = '3316'
-	fin_year = '2018-2019'
+	fin_year = '2020-2021'
 	stage = 'sec_sig'
 	
 	# Store whether to parse the URLS from a block level page or not
@@ -62,14 +62,14 @@ class FTOUrls(CrawlSpider):
 	if block == 0: 
 		start_urls = [("http://mnregaweb4.nic.in/netnrega/FTO/FTOReport.aspx?"
 				   	   "page=s&mode=B&flg=W&state_name=CHHATTISGARH&state_code" 
-				       "=33&fin_year=2018-2019&dstyp=B&source=national&"
-				       "Digest=UdEewHqde6mcn4hhpT93Qg")]
+				       "=33&fin_year=2020-2021&dstyp=B&source=national&"
+				       "Digest=w9Vw2XzL67dMsTArm3LI2g")]
 	
 	if block == 1:
 		start_urls = [("http://mnregaweb4.nic.in/netnrega/FTO/FTOReport.aspx?page=d"
 					   "&mode=B&lflag=&flg=W&state_name=CHHATTISGARH&state_code=33&" 
-					   "district_name=RAIPUR&district_code=3316&fin_year=2019-2020&dstyp=B"
-					   "&source=national&Digest=8EcA8mQek9YptIB2JguAaQ")] 
+					   "district_name=RAIPUR&district_code=3316&fin_year=2020-2021&dstyp=B"
+					   "&source=national&Digest=t2P0bbrwl6SaTsgfah4d6A")] 
 
 
 	# Parse the block page
