@@ -41,7 +41,7 @@ class FtoBranchSpider(CrawlSpider):
 	district_code = '3316'
 	block_name = 'TILDA'
 	block_code = district_code + '007'
-	fin_year = '2019-2020'
+	fin_year = '2020-2021'
 	
 	# Construct the URL
 	basic_fto = 'http://mnregaweb4.nic.in/netnrega/FTO/'
@@ -49,8 +49,8 @@ class FtoBranchSpider(CrawlSpider):
 	state = '&state_name=' + state_name + '&state_code=' + state_code
 	district = '&district_name=' + district_name + '&district_code=' + district_code
 	block = '&block_name=' + block_name + '&block_code=' + block_code 
-	fin_year = '&fin_year=' + fin_year 
-	meta = '&typ=sb&mode=b&source=national&Digest=LATR5TYVuC5MyCxjMfESBw'
+	fin_year = '&fin_year=' + fin_year
+	meta = '&typ=sb&mode=b&source=national&Digest=fOIpKCYejoQPJP3qs/PiCw'
 	
 	# start_urls = [basic + state + district + block + fin_year + meta]
 	with open('./scrape/data/ftos.json', 'r') as f: start_urls = json.load(f)
